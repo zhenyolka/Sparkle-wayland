@@ -3,6 +3,7 @@ project(were)
 
 file(GLOB EVERYTHING
     "*.cpp"
+    "*.h"
 )
 
 add_library(were STATIC

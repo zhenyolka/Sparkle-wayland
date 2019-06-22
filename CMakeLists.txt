@@ -5,6 +5,9 @@ add_subdirectory(were)
 
 file(GLOB EVERYTHING
     "*.cpp"
+    "*.h"
+    "generated/*.cpp"
+    "generated/*.h"
 )
 
 add_executable(sparkle
@@ -12,7 +15,9 @@ add_executable(sparkle
 )
 
 target_include_directories(sparkle PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/were
+    ${CMAKE_CURRENT_SOURCE_DIR}/generated
 )
 
 set_target_properties(sparkle PROPERTIES COMPILE_FLAGS "-Wall -Wextra -Wno-unused-parameter -std=c++11 -O2")

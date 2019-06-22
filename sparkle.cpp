@@ -1,7 +1,14 @@
 #include "sparkle.h"
+#include "sparkle_global.h"
 #include <wayland-server.h>
 
+#include "sparkle_wl_output.h"
+#include "sparkle_wl_compositor.h"
+#include "sparkle_wl_surface.h"
+#include "sparkle_wl_region.h"
+
 #include <cstdio>
+
 
 sparkle::~sparkle()
 {
@@ -18,6 +25,46 @@ sparkle::sparkle()
 
     wl_display_init_shm(display_);
     wl_display_add_socket_auto(display_);
+
+    output_ = were_object_pointer<sparkle_global<sparkle_wl_output>>(new sparkle_global<sparkle_wl_output>(display_, &wl_output_interface, 3));
+    were::connect(output_, &sparkle_global<sparkle_wl_output>::instance, output_, [](were_object_pointer<sparkle_wl_output> output)
+    {
+        fprintf(stdout, "output\n");
+
+        int width = 800;
+        int height = 600;
+        int mm_width = width * 254 / 960;
+        int mm_height = height * 254 / 960;
+
+        output->send_geometry(0, 0, mm_width, mm_height, 0, "Barely working solutions", "Sparkle", 0);
+
+        if (output->version() >= WL_OUTPUT_SCALE_SINCE_VERSION)
+            output->send_scale(1);
+
+        output->send_mode(WL_OUTPUT_MODE_CURRENT | WL_OUTPUT_MODE_PREFERRED, width, height, 60000);
+
+        if (output->version() >= WL_OUTPUT_DONE_SINCE_VERSION)
+            output->send_done();
+    });
+
+    compositor_ = were_object_pointer<sparkle_global<sparkle_wl_compositor>>(new sparkle_global<sparkle_wl_compositor>(display_, &wl_compositor_interface, 4));
+    were::connect(compositor_, &sparkle_global<sparkle_wl_compositor>::instance, compositor_, [](were_object_pointer<sparkle_wl_compositor> compositor)
+    {
+        fprintf(stdout, "compositor\n");
+
+        were::connect(compositor, &sparkle_wl_compositor::create_surface, compositor, [compositor](uint32_t id)
+        {
+            were_object_pointer<sparkle_wl_surface> surface(new sparkle_wl_surface(compositor->client(), compositor->version(), id));
+            fprintf(stdout, "surface\n");
+        });
+
+        were::connect(compositor, &sparkle_wl_compositor::create_region, compositor, [compositor](uint32_t id)
+        {
+            were_object_pointer<sparkle_wl_region> region(new sparkle_wl_region(compositor->client(), compositor->version(), id));
+            fprintf(stdout, "region\n");
+        });
+
+    });
 }
 
 void sparkle::event(uint32_t events)
