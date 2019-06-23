@@ -8,7 +8,7 @@ template <typename T>
 class sparkle_global;
 
 class sparkle_wl_output;
-class sparkle_wl_compositor;
+class sparkle_compositor;
 
 class sparkle : public were_object_2, public were_thread_fd_listener
 {
@@ -17,7 +17,7 @@ public:
     sparkle();
 
     were_object_pointer<sparkle_global<sparkle_wl_output>> output() const {return output_;}
-    were_object_pointer<sparkle_global<sparkle_wl_compositor>> compositor() const {return compositor_;}
+    were_object_pointer<sparkle_global<sparkle_compositor>> compositor() const {return compositor_;}
 
 private:
     void event(uint32_t events);
@@ -25,7 +25,7 @@ private:
 private:
     struct wl_display *display_;
     were_object_pointer<sparkle_global<sparkle_wl_output>> output_;
-    were_object_pointer<sparkle_global<sparkle_wl_compositor>> compositor_;
+    were_object_pointer<sparkle_global<sparkle_compositor>> compositor_;
 };
 
 #endif // SPARKLE_H

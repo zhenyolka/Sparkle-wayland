@@ -1,6 +1,7 @@
 #include "sparkle_resource.h"
 #include "were_exception.h"
 
+#include <cstdio>
 
 sparkle_resource::~sparkle_resource()
 {
@@ -25,6 +26,10 @@ void sparkle_resource::destroy_(struct wl_listener *listener, void *data)
 {
     sparkle_resource *instance;
     instance = wl_container_of(listener, instance, listener_); // XXX
+
+    instance->resource_ = nullptr;
+    were_object_pointer<sparkle_resource> instance__(instance);
+    instance__.collapse(); // XXX Signal?
 }
 
 struct wl_resource *sparkle_resource::resource() const

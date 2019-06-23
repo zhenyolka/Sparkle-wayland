@@ -4,6 +4,8 @@
 #include "were_object_2.h"
 #include <wayland-server.h>
 
+#include <cstdio>
+
 /*
 template<class T, class Method, Method m, class ...Params>
 static auto bounce(void *priv, Params... params) ->
@@ -33,16 +35,15 @@ public:
         T *object__ = reinterpret_cast<T *>(wl_resource_get_user_data(resource));
         were_object_pointer<T> object___(object__);
         were::emit(object___, method__, args...);
-        //((*object__).*method__)(args...);
     }
 
     template<class T, class Method, Method method__, class ...Args>
     static void bouncer_2_d(struct wl_client *client, struct wl_resource *resource, Args... args)
     {
+        fprintf(stdout, "B2D\n");
         T *object__ = reinterpret_cast<T *>(wl_resource_get_user_data(resource));
         were_object_pointer<T> object___(object__);
         were::emit(object___, method__, args...);
-        //((*object__).*method__)(args...);
         //wl_resource_destroy(resource); // XXX
     }
 };

@@ -1,12 +1,24 @@
 #ifndef WERE_OBJECT_H
 #define WERE_OBJECT_H
 
+class were_object;
+
+void were_debug_add_object(were_object *object__);
+void were_debug_remove_object(were_object *object__);
+void were_debug_print_objects();
+
 class were_object
 {
 public:
-    virtual ~were_object() {}
+    virtual ~were_object()
+    {
+        were_debug_remove_object(this);
+    }
 
-    were_object() : reference_count_(0), collapsed_(false) {}
+    were_object() : reference_count_(0), collapsed_(false)
+    {
+        were_debug_add_object(this);
+    }
 
     void increment_reference_count()
     {

@@ -3,7 +3,7 @@
 #include <wayland-server.h>
 
 #include "sparkle_wl_output.h"
-#include "sparkle_wl_compositor.h"
+#include "sparkle_compositor.h"
 #include "sparkle_wl_surface.h"
 #include "sparkle_wl_region.h"
 
@@ -12,6 +12,9 @@
 
 sparkle::~sparkle()
 {
+    compositor_.collapse(); // FIXME Sparkle users
+    output_.collapse();
+
     wl_display_destroy(display_);
 }
 
@@ -47,24 +50,7 @@ sparkle::sparkle()
             output->send_done();
     });
 
-    compositor_ = were_object_pointer<sparkle_global<sparkle_wl_compositor>>(new sparkle_global<sparkle_wl_compositor>(display_, &wl_compositor_interface, 4));
-    were::connect(compositor_, &sparkle_global<sparkle_wl_compositor>::instance, compositor_, [](were_object_pointer<sparkle_wl_compositor> compositor)
-    {
-        fprintf(stdout, "compositor\n");
-
-        were::connect(compositor, &sparkle_wl_compositor::create_surface, compositor, [compositor](uint32_t id)
-        {
-            were_object_pointer<sparkle_wl_surface> surface(new sparkle_wl_surface(compositor->client(), compositor->version(), id));
-            fprintf(stdout, "surface\n");
-        });
-
-        were::connect(compositor, &sparkle_wl_compositor::create_region, compositor, [compositor](uint32_t id)
-        {
-            were_object_pointer<sparkle_wl_region> region(new sparkle_wl_region(compositor->client(), compositor->version(), id));
-            fprintf(stdout, "region\n");
-        });
-
-    });
+    compositor_ = were_object_pointer<sparkle_global<sparkle_compositor>>(new sparkle_global<sparkle_compositor>(display_, &wl_compositor_interface, 4));
 }
 
 void sparkle::event(uint32_t events)
