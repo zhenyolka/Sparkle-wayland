@@ -2,7 +2,7 @@
 #include "were_timer.h"
 #include <cstdio>
 
-const int PERIOD = 5000;
+const int PERIOD = 2000;
 
 were_debug::~were_debug()
 {

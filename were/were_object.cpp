@@ -9,6 +9,7 @@ std::mutex object_set_mutex_;
 
 const char *state_normal = "NORMAL";
 const char *state_collapsed = "COLLAPSED";
+const char *state_lost = "LOST";
 
 void were_debug_add_object(were_object *object__)
 {
@@ -37,6 +38,8 @@ void were_debug_print_objects()
 
         if (object__->collapsed())
             state = state_collapsed;
+        else if (object__->reference_count() == 0)
+            state = state_lost;
         else
             state = state_normal;
 

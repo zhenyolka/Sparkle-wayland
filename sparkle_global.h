@@ -1,8 +1,10 @@
 #ifndef SPARKLE_GLOBAL_H
 #define SPARKLE_GLOBAL_H
 
+#include "sparkle.h"
 #include "were_object_2.h"
 #include "wayland-server.h"
+#include "were_object_wrapper.h"
 
 
 template <typename T>
@@ -15,9 +17,10 @@ public:
         wl_global_destroy(global_);
     }
 
-    sparkle_global(struct wl_display *display, const struct wl_interface *interface, int version)
+    sparkle_global(were_object_pointer<sparkle_display> display, const struct wl_interface *interface, int version) :
+        display_(display)
     {
-        global_ = wl_global_create(display, interface, version, this, sparkle_global::bind_);
+        global_ = wl_global_create(display_->get(), interface, version, this, sparkle_global::bind_);
         if (global_ == nullptr)
             throw were_exception(WE_SIMPLE);
     }
@@ -37,6 +40,7 @@ private:
     }
 
 private:
+    were_object_pointer<sparkle_display> display_;
     struct wl_global *global_;
 };
 

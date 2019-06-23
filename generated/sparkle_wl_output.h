@@ -20,3 +20,12 @@ signals:
 };
 
 #endif // SPARKLE_WL_OUTPUT_H
+#ifndef SPARKLE_OUTPUT_H
+#define SPARKLE_OUTPUT_H
+
+class sparkle_output
+{
+public:
+};
+
+#endif // SPARKLE_OUTPUT_H
