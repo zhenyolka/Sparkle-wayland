@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 #else
     for (int i = 0; ; ++i)
     {
-        fprintf(stdout, "Processing... (%d)\n", i);
+        //fprintf(stdout, "Processing... (%d)\n", i);
 
 #if 0
         if (i == 10)

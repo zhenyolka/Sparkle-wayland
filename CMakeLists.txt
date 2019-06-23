@@ -24,4 +24,5 @@ set_target_properties(sparkle PROPERTIES COMPILE_FLAGS "-Wall -Wextra -Wno-unuse
 target_link_libraries(sparkle LINK_PUBLIC
     were
     wayland-server
+    X11
 )

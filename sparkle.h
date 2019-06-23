@@ -3,15 +3,10 @@
 
 #include "were_object_2.h"
 #include "were_thread.h" // XXX
+#include "were_object_wrapper.h" // XXX
 
-template <typename T>
-class were_object_wrapper_primitive;
-
-template <typename T>
-class were_object_wrapper; // XXX
 
 typedef were_object_wrapper<were_object_wrapper_primitive<struct wl_display *>> sparkle_display;
-
 
 template <typename T>
 class sparkle_global;

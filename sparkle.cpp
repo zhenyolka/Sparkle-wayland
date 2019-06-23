@@ -1,13 +1,9 @@
 #include "sparkle.h"
 #include "sparkle_global.h"
-#include <wayland-server.h>
-
 #include "sparkle_output.h"
 #include "sparkle_compositor.h"
-
-
+#include <wayland-server.h>
 #include <cstdio>
-
 
 
 sparkle::~sparkle()
