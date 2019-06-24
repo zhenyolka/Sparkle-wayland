@@ -1,5 +1,7 @@
 #include "sparkle_x11_surface.h"
 #include "sparkle_x11.h"
+#include "sparkle_surface.h"
+#include <X11/Xutil.h> // XImage
 
 #include <cstdio>
 
@@ -8,7 +10,8 @@ sparkle_x11_surface::~sparkle_x11_surface()
     XDestroyWindow(display_->get(), window_);
 }
 
-sparkle_x11_surface::sparkle_x11_surface(were_object_pointer<sparkle_x11> x11)
+sparkle_x11_surface::sparkle_x11_surface(were_object_pointer<sparkle_x11> x11, were_object_pointer<sparkle_surface> surface) :
+    surface_(surface)
 {
     MAKE_THIS_WOP
 
@@ -30,14 +33,95 @@ sparkle_x11_surface::sparkle_x11_surface(were_object_pointer<sparkle_x11> x11)
     else
         XUnmapWindow(display_->get(), window_);
 
-    //compositor_->event.connect(this, &SparkleCompositorSurfaceX11::process)->link(this, true);
-    were::connect(x11, &sparkle_x11::event, this_wop, [this_wop](XEvent event)
+    were::connect(x11, &sparkle_x11::event, this_wop, [this_wop](XEvent event){this_wop->process(event);});
+
+    were::connect(surface, &sparkle_surface::attach, this_wop, [this_wop](struct wl_resource *buffer, int32_t x, int32_t y)
     {
-        this_wop->process(event);
+        // XXX
+
+        if (this_wop->buffer_ != nullptr)
+            wl_buffer_send_release(this_wop->buffer_);
+
+        this_wop->buffer_ = buffer;
     });
+
+    were::connect(surface, &sparkle_surface::commit, this_wop, [this_wop]()
+    {
+        this_wop->commit();
+    });
+
+    buffer_ = nullptr;
 }
 
 void sparkle_x11_surface::process(XEvent event)
 {
-    fprintf(stdout, "proc\n");
+    MAKE_THIS_WOP
+
+    if (event.xany.window != window_)
+        return;
+
+    switch(event.type)
+    {
+        case Expose:
+            //commit();
+            break;
+        case ButtonPress:
+            //if (event.xbutton.type == ButtonPress)
+                //mouseButtonPress(button_map[event.xbutton.button]);
+            break;
+        case ButtonRelease:
+            //if (event.xbutton.type == ButtonRelease)
+                //mouseButtonRelease(button_map[event.xbutton.button]);
+            break;
+        case MotionNotify:
+            //mousePointerMotion(event.xbutton.x, event.xbutton.y);
+            break;
+        case KeyPress:
+            were::emit(this_wop, &sparkle_x11_surface::key_press, event.xkey.keycode);
+            break;
+        case KeyRelease:
+            were::emit(this_wop, &sparkle_x11_surface::key_release, event.xkey.keycode);
+            break;
+        case EnterNotify:
+            //mousePointerEnter();
+            break;
+        case LeaveNotify:
+            //mousePointerLeave();
+            break;
+        default:
+            break;
+    }
+}
+
+void sparkle_x11_surface::commit()
+{
+    if (buffer_ == nullptr)
+        return;
+
+    struct wl_shm_buffer *shm_buffer = wl_shm_buffer_get(buffer_);
+
+    if (shm_buffer != nullptr)
+    {
+        uint32_t width = wl_shm_buffer_get_width(shm_buffer);
+        uint32_t height = wl_shm_buffer_get_height(shm_buffer);
+        int format = wl_shm_buffer_get_format(shm_buffer);
+        uint32_t stride = wl_shm_buffer_get_stride(shm_buffer);
+        void *data = wl_shm_buffer_get_data(shm_buffer);
+
+        if ((format == WL_SHM_FORMAT_ARGB8888 || format == WL_SHM_FORMAT_XRGB8888) && stride == width * 4)
+        {
+            XImage *image = XCreateImage(display_->get(), DefaultVisual(display_->get(), 0), 24, ZPixmap, 0, (char *)data, width, height, 32, 0);
+            XPutImage(display_->get(), window_, DefaultGC(display_->get(), 0), image, 0, 0, 0, 0, image->width, image->height);
+            image->data = nullptr;
+            XDestroyImage(image);
+        }
+        else
+        {
+            // Error
+        }
+    }
+    else
+    {
+            // Error
+    }
 }

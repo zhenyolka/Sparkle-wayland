@@ -1,6 +1,7 @@
 #ifndef WERE_SIGNAL_H
 #define WERE_SIGNAL_H
 
+#include "were_exception.h"
 #include <functional>
 #include <cstdint>
 #include <list>
@@ -20,10 +21,13 @@ class were_signal<void (Args...)>
 {
     typedef were_signal_connection<void (Args...)> connection_type;
 public:
-    were_signal() : next_id_(0), single_shot_(false) {}
+    were_signal() : next_id_(0), single_shot_(false), emit_(false) {}
 
     uint64_t add_connection(const std::function<void (Args...)> &call)
     {
+        if (emit_)
+            throw were_exception(WE_SIMPLE);
+
         connection_type connection;
         connection.call_ = call;
         connection.id_ = next_id_++;
@@ -35,6 +39,9 @@ public:
 
     void remove_connection(uint64_t id)
     {
+        if (emit_)
+            throw were_exception(WE_SIMPLE);
+
         for (auto it = connections_.begin(); it != connections_.end(); ++it)
         {
             if ((*it).id_ == id)
@@ -47,6 +54,8 @@ public:
 
     void emit(Args... args)
     {
+        emit_ = true;
+
         for (auto it = connections_.begin(); it != connections_.end(); ++it)
         {
             (*it).call_(args...);
@@ -54,6 +63,8 @@ public:
 
         if (single_shot_)
             connections_.clear();
+
+        emit_ = false;
     }
 
     void set_single_shot(bool single_shot)
@@ -65,6 +76,7 @@ private:
     std::list<connection_type> connections_;
     uint64_t next_id_;
     bool single_shot_;
+    bool emit_; // XXX
 };
 
 #define signals public

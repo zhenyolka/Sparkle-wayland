@@ -1,9 +1,13 @@
 #include "sparkle_x11.h"
 #include "sparkle.h"
 #include "sparkle_global.h"
+
 #include "sparkle_output.h"
 #include "sparkle_compositor.h"
 #include "sparkle_surface.h"
+#include "sparkle_seat.h"
+#include "sparkle_keyboard.h"
+
 #include "sparkle_x11_surface.h"
 #include <wayland-server.h>
 
@@ -55,8 +59,30 @@ sparkle_x11::sparkle_x11(were_object_pointer<sparkle> sparkle)
 
         were::connect(compositor, &sparkle_compositor::surface_created, this_wop, [this_wop](were_object_pointer<sparkle_surface> surface)
         {
-            were_object_pointer<sparkle_x11_surface> x11_surface(new sparkle_x11_surface(this_wop));
-            x11_surface->add_dependency(surface);
+            were_object_pointer<sparkle_x11_surface> x11_surface(new sparkle_x11_surface(this_wop, surface));
+            x11_surface->add_dependency(surface); // XXX
+
+            were::connect(this_wop, &sparkle_x11::keyboard_created, x11_surface, [x11_surface](were_object_pointer<sparkle_keyboard> keyboard)
+            {
+                connect_keyboard(x11_surface, keyboard);
+            });
+
+            were::emit(this_wop, &sparkle_x11::x11_surface_created, x11_surface);
+        });
+    });
+
+    were::connect(sparkle->seat(), &sparkle_global<sparkle_seat>::instance, this_wop, [this_wop](were_object_pointer<sparkle_seat> seat)
+    {
+        fprintf(stdout, "seat\n");
+
+        were::connect(seat, &sparkle_seat::keyboard_created, this_wop, [this_wop](were_object_pointer<sparkle_keyboard> keyboard)
+        {
+            were::connect(this_wop, &sparkle_x11::x11_surface_created, keyboard, [keyboard](were_object_pointer<sparkle_x11_surface> x11_surface)
+            {
+                connect_keyboard(x11_surface, keyboard);
+            });
+
+            were::emit(this_wop, &sparkle_x11::keyboard_created, keyboard);
         });
     });
 }
@@ -72,4 +98,21 @@ void sparkle_x11::timeout()
         XNextEvent(display_->get(), &event__);
         were::emit(this_wop, &sparkle_x11::event, event__);
     }
+}
+
+void sparkle_x11::connect_keyboard(were_object_pointer<sparkle_x11_surface> x11_surface, were_object_pointer<sparkle_keyboard> keyboard)
+{
+    //if (wl_resource_get_client(keyboard->resource()) != wl_resource_get_client(surface_->resource()))
+    //    return; // XXX
+
+    were::connect(x11_surface, &sparkle_x11_surface::key_press, keyboard, [keyboard, x11_surface](int code)
+    {
+        keyboard->enter(x11_surface->surface());
+        keyboard->key_press(code);
+    });
+
+    were::connect(x11_surface, &sparkle_x11_surface::key_release, keyboard, [keyboard](int code)
+    {
+        keyboard->key_release(code);
+    });
 }

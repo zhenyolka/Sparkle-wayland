@@ -4,10 +4,6 @@
 #include "were_object.h"
 #include "were_object_pointer.h"
 #include <cstdint>
-#include <functional>
-#include <queue>
-#include <mutex>
-
 #include <sys/epoll.h> // XXX
 
 class were_thread_fd_listener
@@ -17,7 +13,7 @@ private:
     virtual void event(uint32_t events) = 0;
 };
 
-class were_thread : public were_object, public were_thread_fd_listener
+class were_thread : public were_object
 {
 public:
     ~were_thread();
@@ -34,17 +30,9 @@ public:
     void process(int timeout = -1);
     void run();
 
-    void post(const std::function<void ()> &call);
-
-private:
-    void event(uint32_t events);
-
 private:
     static thread_local were_object_pointer<were_thread> current_thread_;
     int epoll_fd_;
-    int event_fd_;
-    std::queue< std::function<void ()> > call_queue_;
-    std::mutex call_queue_mutex_;
 };
 
 #endif // WERE_THREAD_H

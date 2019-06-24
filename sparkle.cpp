@@ -1,10 +1,14 @@
 #include "sparkle.h"
 #include "sparkle_global.h"
+
 #include "sparkle_output.h"
 #include "sparkle_compositor.h"
+#include "sparkle_seat.h"
+
 #include <wayland-server.h>
 #include <cstdio>
 
+#include "were_timer.h"
 
 sparkle::~sparkle()
 {
@@ -15,6 +19,8 @@ sparkle::~sparkle()
 
 sparkle::sparkle()
 {
+    MAKE_THIS_WOP
+
     display_ = were_object_pointer<sparkle_display>(new sparkle_display(wl_display_create()));
     display_->set_destructor([](struct wl_display *&display)
     {
@@ -30,6 +36,12 @@ sparkle::sparkle()
 
     output_ = were_object_pointer<sparkle_global<sparkle_output>>(new sparkle_global<sparkle_output>(display_, &wl_output_interface, 3));
     compositor_ = were_object_pointer<sparkle_global<sparkle_compositor>>(new sparkle_global<sparkle_compositor>(display_, &wl_compositor_interface, 4));
+    seat_ = were_object_pointer<sparkle_global<sparkle_seat>>(new sparkle_global<sparkle_seat>(display_, &wl_seat_interface, 5));
+
+    were_object_pointer<were_timer> timer(new were_timer(1000 / 60));
+    were::connect(timer, &were_timer::timeout, this_wop, [this_wop](){this_wop->event(EPOLLIN);});
+    timer->start();
+
 }
 
 void sparkle::event(uint32_t events)

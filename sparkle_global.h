@@ -34,7 +34,7 @@ private:
         sparkle_global *instance = reinterpret_cast<sparkle_global *>(data);
         were_object_pointer<sparkle_global> instance__(instance);
 
-        were_object_pointer<T> object__(new T(client, version, id));
+        were_object_pointer<T> object__(new T(client, version, id, instance__->display_));
 
         were::emit(instance__, &sparkle_global::instance, object__);
     }

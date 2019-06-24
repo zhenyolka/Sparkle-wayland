@@ -1,7 +1,6 @@
 #ifndef WERE_CONNECT_H
 #define WERE_CONNECT_H
 
-//#include "were_object_pointer.h"
 #include <cstdint>
 
 template <typename T>
@@ -16,11 +15,10 @@ void disconnect(    were_object_pointer<SourceType> source,
                     uint64_t id
 )
 {
-    source->thread()->post([source, signal, id]()
-    {
-        auto signal__ = &((source.operator->())->*signal);
-        signal__->remove_connection(id);
-    });
+    // XXX Thread.
+
+    auto signal__ = &((source.operator->())->*signal);
+    signal__->remove_connection(id);
 };
 
 template <typename SourceType, typename SignalType, typename ContextType, typename Functor>
@@ -30,20 +28,18 @@ void connect(   were_object_pointer<SourceType> source,
                 Functor call
 )
 {
-    source->thread()->post([source, signal, context, call]()
-    {
-        auto signal__ = &((source.operator->())->*signal);
-        uint64_t id = signal__->add_connection(call); // XXX Direct.
+    // XXX Thread.
 
-        context->thread()->post([source, signal, context, id]() // XXX
-        {
-            auto signal__ = &((context.operator->())->destroyed);
-            signal__->add_connection([source, signal, id]()
-            {
-                disconnect(source, signal, id);
-            });
-        });
+    auto signal__ = &((source.operator->())->*signal);
+    uint64_t id = signal__->add_connection(call); // XXX Direct.
+
+#if 0
+    auto signal2__ = &((context.operator->())->destroyed);
+    signal2__->add_connection([source, signal, id]()
+    {
+            disconnect(source, signal, id);
     });
+#endif
 };
 
 template <typename SourceType, typename SignalType, typename ...Args>
