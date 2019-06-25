@@ -5,7 +5,6 @@
 #include "generated/sparkle_wl_keyboard.h"
 #include "sparkle_surface.h"
 
-#include <cstdio>
 
 class sparkle_keyboard : public sparkle_wl_keyboard
 {

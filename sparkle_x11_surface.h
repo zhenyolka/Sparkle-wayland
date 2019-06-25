@@ -23,6 +23,12 @@ signals:
     were_signal<void (int code)> key_press;
     were_signal<void (int code)> key_release;
 
+    were_signal<void (int button)> pointer_button_press;
+    were_signal<void (int button)> pointer_button_release;
+    were_signal<void (int x, int y)> pointer_motion;
+    were_signal<void ()> pointer_enter;
+    were_signal<void ()> pointer_leave;
+
 private:
     void process(XEvent event);
     void commit();

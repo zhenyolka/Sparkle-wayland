@@ -78,15 +78,15 @@ void sparkle_x11_surface::process(XEvent event)
             commit();
             break;
         case ButtonPress:
-            //if (event.xbutton.type == ButtonPress)
-                //mouseButtonPress(button_map[event.xbutton.button]);
+            if (event.xbutton.type == ButtonPress)
+                were::emit(this_wop, &sparkle_x11_surface::pointer_button_press, event.xbutton.button);
             break;
         case ButtonRelease:
-            //if (event.xbutton.type == ButtonRelease)
-                //mouseButtonRelease(button_map[event.xbutton.button]);
+            if (event.xbutton.type == ButtonRelease)
+                were::emit(this_wop, &sparkle_x11_surface::pointer_button_release, event.xbutton.button);
             break;
         case MotionNotify:
-            //mousePointerMotion(event.xbutton.x, event.xbutton.y);
+            were::emit(this_wop, &sparkle_x11_surface::pointer_motion, event.xbutton.x, event.xbutton.y);
             break;
         case KeyPress:
             were::emit(this_wop, &sparkle_x11_surface::key_press, event.xkey.keycode);
@@ -95,10 +95,10 @@ void sparkle_x11_surface::process(XEvent event)
             were::emit(this_wop, &sparkle_x11_surface::key_release, event.xkey.keycode);
             break;
         case EnterNotify:
-            //mousePointerEnter();
+            were::emit(this_wop, &sparkle_x11_surface::pointer_enter);
             break;
         case LeaveNotify:
-            //mousePointerLeave();
+            were::emit(this_wop, &sparkle_x11_surface::pointer_leave);
             break;
         default:
             break;
