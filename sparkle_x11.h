@@ -5,6 +5,9 @@
 #include "were_timer.h"
 #include <X11/Xlib.h>
 
+const int window_width = 1280;
+const int window_height = 720;
+
 class sparkle_x11_surface;
 class sparkle_keyboard;
 

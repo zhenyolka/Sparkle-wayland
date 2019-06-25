@@ -16,6 +16,7 @@ class sparkle_global;
 class sparkle_output;
 class sparkle_compositor;
 class sparkle_seat;
+class sparkle_shell;
 
 
 class sparkle : public were_object_2, public were_thread_fd_listener
@@ -27,6 +28,7 @@ public:
     were_object_pointer<sparkle_global<sparkle_output>> output() const {return output_;}
     were_object_pointer<sparkle_global<sparkle_compositor>> compositor() const {return compositor_;}
     were_object_pointer<sparkle_global<sparkle_seat>> seat() const {return seat_;}
+    were_object_pointer<sparkle_global<sparkle_shell>> shell() const {return shell_;}
 
     static uint32_t next_serial(were_object_pointer<sparkle_display> display)
     {
@@ -49,6 +51,7 @@ private:
     were_object_pointer<sparkle_global<sparkle_output>> output_;
     were_object_pointer<sparkle_global<sparkle_compositor>> compositor_;
     were_object_pointer<sparkle_global<sparkle_seat>> seat_;
+    were_object_pointer<sparkle_global<sparkle_shell>> shell_;
 };
 
 #endif // SPARKLE_H

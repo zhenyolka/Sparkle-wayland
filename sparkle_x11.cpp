@@ -39,8 +39,8 @@ sparkle_x11::sparkle_x11(were_object_pointer<sparkle> sparkle)
     {
         fprintf(stdout, "output\n");
 
-        int width = 800;
-        int height = 600;
+        int width = 1280;
+        int height = 720;
         int mm_width = width * 254 / 960;
         int mm_height = height * 254 / 960;
 

@@ -1,6 +1,7 @@
 #include "sparkle_x11_surface.h"
 #include "sparkle_x11.h"
 #include "sparkle_surface.h"
+#include "sparkle_callback.h"
 #include <X11/Xutil.h> // XImage
 
 #include <cstdio>
@@ -17,8 +18,8 @@ sparkle_x11_surface::sparkle_x11_surface(were_object_pointer<sparkle_x11> x11, w
 
     display_ = x11->display();
 
-    int width = 800;
-    int height = 600;
+    int width = 1280;
+    int height = 720;
 
     window_ = XCreateSimpleWindow(display_->get(), RootWindow(display_->get(), 0), 0, 0, width, height, 1, 0, 0);
     if (!window_)
@@ -50,6 +51,17 @@ sparkle_x11_surface::sparkle_x11_surface(were_object_pointer<sparkle_x11> x11, w
         this_wop->commit();
     });
 
+    were::connect(surface, &sparkle_surface::frame, this_wop, [this_wop](uint32_t callback)
+    {
+        were_object_pointer<sparkle_callback> callback__(new sparkle_callback(this_wop->surface_->client(), 1, callback));
+
+        were::connect(this_wop->surface_, &sparkle_surface::commit, callback__, [callback__]()
+        {
+            callback__->send_done(sparkle::current_msecs());
+            wl_resource_destroy(callback__->resource()); // FIXME
+        });
+    });
+
     buffer_ = nullptr;
 }
 
@@ -63,7 +75,7 @@ void sparkle_x11_surface::process(XEvent event)
     switch(event.type)
     {
         case Expose:
-            //commit();
+            commit();
             break;
         case ButtonPress:
             //if (event.xbutton.type == ButtonPress)
