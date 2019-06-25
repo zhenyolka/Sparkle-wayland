@@ -16,10 +16,7 @@ public:
     ~sparkle_x11();
     sparkle_x11(were_object_pointer<sparkle> sparkle);
 
-    were_object_pointer<x11_display> display() const
-    {
-        return display_;
-    }
+    were_object_pointer<x11_display> display() const {return display_;}
 
 signals:
     were_signal<void (XEvent event)> event; // XXX

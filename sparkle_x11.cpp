@@ -15,6 +15,8 @@
 
 sparkle_x11::~sparkle_x11()
 {
+    timer_.collapse();
+    display_.collapse();
 }
 
 sparkle_x11::sparkle_x11(were_object_pointer<sparkle> sparkle)
@@ -104,6 +106,8 @@ void sparkle_x11::connect_keyboard(were_object_pointer<sparkle_x11_surface> x11_
 {
     //if (wl_resource_get_client(keyboard->resource()) != wl_resource_get_client(surface_->resource()))
     //    return; // XXX
+
+    fprintf(stdout, "KEYBOARD CONNECTED\n");
 
     were::connect(x11_surface, &sparkle_x11_surface::key_press, keyboard, [keyboard, x11_surface](int code)
     {

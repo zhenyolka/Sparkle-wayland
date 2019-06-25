@@ -2,24 +2,32 @@
 #define WERE_CONNECT_H
 
 #include <cstdint>
+#include <cstdio>
 
 template <typename T>
 class were_object_pointer;
 
+
 namespace were
 {
 
-template <typename SourceType, typename SignalType>
-void disconnect(    were_object_pointer<SourceType> source,
-                    SignalType signal,
-                    uint64_t id
-)
+uint64_t next_id();
+
+template <typename SourceType, typename SignalType, typename ContextType>
+void break_(SourceType source, SignalType signal, ContextType context, uint64_t pc_id, uint64_t sb_id, uint64_t cb_id)
 {
-    // XXX Thread.
+    //fprintf(stdout, "DISCONNECT %p %p\n", source.operator->(), context.operator->());
 
     auto signal__ = &((source.operator->())->*signal);
-    signal__->remove_connection(id);
-};
+    signal__->remove_connection(pc_id);
+
+    auto signal1__ = &((source.operator->())->destroyed);
+    signal1__->remove_connection(sb_id);
+
+    auto signal2__ = &((context.operator->())->destroyed);
+    signal2__->remove_connection(cb_id);
+}
+
 
 template <typename SourceType, typename SignalType, typename ContextType, typename Functor>
 void connect(   were_object_pointer<SourceType> source,
@@ -30,16 +38,26 @@ void connect(   were_object_pointer<SourceType> source,
 {
     // XXX Thread.
 
-    auto signal__ = &((source.operator->())->*signal);
-    uint64_t id = signal__->add_connection(call); // XXX Direct.
+    //fprintf(stdout, "CONNECT %p %p\n", source.operator->(), context.operator->());
 
-#if 0
-    auto signal2__ = &((context.operator->())->destroyed);
-    signal2__->add_connection([source, signal, id]()
+    uint64_t pc_id = next_id();
+    uint64_t sb_id = next_id();
+    uint64_t cb_id = next_id();
+
+    auto signal__ = &((source.operator->())->*signal);
+    signal__->add_connection(call, pc_id); // XXX Direct.
+
+    auto signal1__ = &((source.operator->())->destroyed);
+    signal1__->add_connection([source, signal, context, pc_id, sb_id, cb_id]()
     {
-            disconnect(source, signal, id);
-    });
-#endif
+        break_(source, signal, context, pc_id, sb_id, cb_id);
+    }, sb_id);
+
+    auto signal2__ = &((context.operator->())->destroyed);
+    signal2__->add_connection([source, signal, context, pc_id, sb_id, cb_id]()
+    {
+        break_(source, signal, context, pc_id, sb_id, cb_id);
+    }, cb_id);
 };
 
 template <typename SourceType, typename SignalType, typename ...Args>
