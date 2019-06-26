@@ -6,7 +6,6 @@
 #include "sparkle_compositor.h"
 #include "sparkle_surface.h"
 #include "sparkle_seat.h"
-//#include "sparkle_keyboard.h"
 #include "sparkle_shell.h"
 
 #include "sparkle_x11_surface.h"

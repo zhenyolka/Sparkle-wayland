@@ -6,6 +6,7 @@ const int PERIOD = 2000;
 
 were_debug::~were_debug()
 {
+    timer_->collapse();
 }
 
 were_debug::were_debug()

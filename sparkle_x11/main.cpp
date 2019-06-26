@@ -15,6 +15,10 @@ int main(int argc, char *argv[])
     were_object_pointer<sparkle> sparkle__(new sparkle());
     were_object_pointer<sparkle_x11> sparkle_x11__(new sparkle_x11(sparkle__));
     were_object_pointer<were_debug> debug(new were_debug());
+
+
+#if 0
+
     were_object_pointer<were_signal_handler> sig(new were_signal_handler());
 
     were::connect(sig, &were_signal_handler::signal, sig, [&sparkle__, &sparkle_x11__](uint32_t number) mutable
@@ -31,9 +35,32 @@ int main(int argc, char *argv[])
                 exit(-1);
         }
     });
+#endif
 
 
+#if 0
     thread->run();
+#else
+    for (int i = 0; ; ++i)
+    {
+        thread->process(2000);
+
+        if (thread->reference_count() <= 2)
+            break;
+
+        if (i > 2000)
+        {
+            fprintf(stdout, "Shutting down... %d\n", thread->reference_count());
+
+            debug.collapse();
+            sparkle_x11__.collapse();
+            sparkle__.collapse();
+        }
+
+    }
+#endif
+
+    thread.collapse();
 
     return 0;
 }
