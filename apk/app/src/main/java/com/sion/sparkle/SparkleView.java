@@ -1,9 +1,9 @@
 package com.sion.sparkle;
 
 import android.view.SurfaceView;
-//import android.content.Context;
+
 import android.view.SurfaceHolder;
-//import android.view.Surface;
+import android.view.Surface;
 
 import android.view.WindowManager;
 import android.view.Gravity;
@@ -17,12 +17,16 @@ import android.view.KeyEvent;
 // Check input source
 import android.view.InputDevice;
 
+import android.util.Log;
+
 
 public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
 {
     SparkleView(SparkleService sparkle, long user)
     {
         super(sparkle);
+
+        Log.i("Sparkle", "Constructing view...");
 
         this.sparkle_ = sparkle;
         this.user = user;
@@ -44,6 +48,11 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
         setVisibility(INVISIBLE);
         setFocusableInTouchMode(true);
         getHolder().addCallback(this);
+
+
+        sparkle_.window_manager_.addView(this, this.params);
+
+        setVisibility(VISIBLE);
     }
 
     public void setVisible(boolean visible)
@@ -64,22 +73,25 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height)
     {
+        Log.i("Sparkle", "Surface changed");
         if (user == 0) {return;}
-        //surface_changed(user, holder.getSurface());
+        surface_changed(user, holder.getSurface());
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder)
     {
+        Log.i("Sparkle", "Surface created");
         if (user == 0) {return;}
-        //surface_changed(user, holder.getSurface());
+        surface_changed(user, holder.getSurface());
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder)
     {
+        Log.i("Sparkle", "Surface destroyed");
         if (user == 0) {return;}
-        //surface_changed(user, holder.getSurface());
+        surface_changed(user, holder.getSurface());
     }
 
     public static boolean hasSource(int sources, int source)
@@ -182,7 +194,7 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
     }
 
 
-    //public native void surface_changed(long user, Surface surface);
+    public native void surface_changed(long user, Surface surface);
 
     //public native void touch_down(long user, int id, float x, float y);
     //public native void touch_up(long user, int id, float x, float y);
