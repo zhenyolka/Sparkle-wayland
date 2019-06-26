@@ -21,6 +21,8 @@ import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import java.io.FileDescriptor;
 
+// Window manager
+import android.view.WindowManager;
 
 import android.util.Log;
 
@@ -45,6 +47,7 @@ public class SparkleService extends Service
         queue_ = Looper.myQueue();
 
         notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+        window_manager_ = (WindowManager)getSystemService(Context.WINDOW_SERVICE);
 
         notification = new Notification.Builder(this)
             //.setContentTitle("Title")
@@ -90,6 +93,7 @@ public class SparkleService extends Service
     NotificationManager notificationManager;
     Notification notification;
     long native_;
+    WindowManager window_manager_;
 
 
     static

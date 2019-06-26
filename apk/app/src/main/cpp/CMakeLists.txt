@@ -13,11 +13,7 @@ file(GLOB EVERYTHING
 )
 
 add_library(sparkle SHARED
-    sparkle_java_object.cpp
-    sparkle_java_object.h
-    sparkle_service.cpp
-    sparkle_service.h
-    #${EVERYTHING}
+    ${EVERYTHING}
 )
 
 

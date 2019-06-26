@@ -1,7 +1,11 @@
 #include "sparkle_service.h"
 
+#include "sparkle_android_logger.h"
 #include "were_thread.h"
 #include "sparkle.h"
+#include "sparkle_android.h"
+#include "were_debug.h"
+
 
 #include <android/log.h>
 
@@ -45,6 +49,8 @@ public:
         service_ = were_object_pointer<sparkle_service>(new sparkle_service(env, instance));
 
         sparkle_ = were_object_pointer<sparkle>(new sparkle());
+        sparkle_android_ = were_object_pointer<sparkle_android>(new sparkle_android(sparkle_));
+        debug_ = were_object_pointer<were_debug>(new were_debug());
 
         service_->add_fd_listener(thread_->fd(), this);
     }
@@ -55,9 +61,12 @@ public:
     };
 
 private:
+    sparkle_android_logger logger_;
     were_object_pointer<were_thread> thread_;
     were_object_pointer<sparkle_service> service_;
     were_object_pointer<sparkle> sparkle_;
+    were_object_pointer<sparkle_android> sparkle_android_;
+    were_object_pointer<were_debug> debug_;
 };
 
 
