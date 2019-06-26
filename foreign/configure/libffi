@@ -1,0 +1,38 @@
+package_source()
+{
+    git clone --depth 1 -b "v3.3-rc0" https://github.com/libffi/libffi.git
+    rm -rf ./libffi/.git
+}
+
+package_configure()
+{
+    cd ./libffi
+
+    ./autogen.sh \
+    --prefix=${MOGRYPH_PREFIX} \
+    --build=${MOGRYPH_BUILD} \
+    --host=${MOGRYPH_HOST} \
+	--disable-shared \
+	--enable-static
+
+    ./configure \
+    --prefix=${MOGRYPH_PREFIX} \
+    --build=${MOGRYPH_BUILD} \
+    --host=${MOGRYPH_HOST} \
+	--disable-shared \
+	--enable-static
+}
+
+package_make()
+{
+    cd ./libffi
+    make
+}
+
+package_install()
+{
+    cd ./libffi
+    make DESTDIR="${MOGRYPH_TOOLCHAIN}/sysroot/" install
+    make DESTDIR="${MOGRYPH_INSTALL_DIR}" install
+    make maintainer-clean
+}

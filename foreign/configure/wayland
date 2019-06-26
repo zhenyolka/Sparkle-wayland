@@ -1,0 +1,36 @@
+package_source()
+{
+    git clone --depth 1 -b "1.15" https://gitlab.freedesktop.org/wayland/wayland.git
+    rm -rf ./wayland/.git
+
+	echo "Remove -lrt"
+}
+
+package_configure()
+{
+    cd ./wayland
+
+    ./autogen.sh \
+    --prefix=${MOGRYPH_PREFIX} \
+    --build=${MOGRYPH_BUILD} \
+    --host=${MOGRYPH_HOST} \
+    --disable-documentation \
+	--disable-dtd-validation \
+	--with-host-scanner \
+	--disable-shared \
+	--enable-static
+}
+
+package_make()
+{
+    cd ./wayland
+    make
+}
+
+package_install()
+{
+    cd ./wayland
+    make DESTDIR="${MOGRYPH_TOOLCHAIN}/sysroot/" install
+    make DESTDIR="${MOGRYPH_INSTALL_DIR}" install
+    make maintainer-clean
+}

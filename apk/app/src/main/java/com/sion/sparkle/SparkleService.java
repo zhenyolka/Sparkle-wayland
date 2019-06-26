@@ -1,27 +1,25 @@
 package com.sion.sparkle;
 
+// Basic
 import androidx.annotation.Keep;
 import android.app.Service;
 import android.os.IBinder;
 import android.content.Intent;
 
-import android.os.Handler;
-import android.os.MessageQueue;
-import android.os.Looper;
-import java.io.FileDescriptor;
-import android.os.ParcelFileDescriptor;
-
+// System services
 import android.content.Context;
-import android.view.WindowManager;
-import android.view.Display;
-import android.util.DisplayMetrics;
 
+// Notification
 import android.app.NotificationManager;
 import android.app.Notification;
-import android.app.PendingIntent;
 
-import android.content.BroadcastReceiver;
-import android.content.IntentFilter;
+// Queue
+import android.os.MessageQueue;
+import android.os.Looper;
+
+// FD listener
+import android.os.ParcelFileDescriptor;
+import java.io.FileDescriptor;
 
 
 import android.util.Log;
@@ -29,121 +27,35 @@ import android.util.Log;
 
 public class SparkleService extends Service
 {
-    Handler handler;
-    MessageQueue queue;
-    long user;
-    ParcelFileDescriptor pfd;
-    FileDescriptor fd;
-    MyOnFileDescriptorEventListener fdListener;
-
-    WindowManager windowManager;
-    NotificationManager notificationManager;
-
-    public static final String ACTION_HIDE = "com.sion.sparkle.ACTION_HIDE";
-    public static final String ACTION_SHOW = "com.sion.sparkle.ACTION_SHOW";
-    public static final String ACTION_STOP = "com.sion.sparkle.ACTION_STOP";
-
-    Notification notification;
-
-
-    private final BroadcastReceiver receiver = new BroadcastReceiver()
-    {
-        @Override
-        public void onReceive(Context context, Intent intent)
-        {
-            String action = intent.getAction();
-
-            if (action.equals(ACTION_HIDE))
-            {
-                Log.i("Sparkle", "Hide all");
-                //hide_all(user);
-            }
-            else if (action.equals(ACTION_SHOW))
-            {
-                Log.i("Sparkle", "Show all");
-                //show_all(user);
-            }
-            else if (action.equals(ACTION_STOP))
-            {
-                Log.i("Sparkle", "Stop");
-                stopSelf();
-            }
-        }
-    };
-
     @Override
     public void onDestroy()
     {
-        notificationManager.cancel(0);
-        unregisterReceiver(receiver);
+        Log.i("Sparkle", "Stopping service...");
 
-        //native_destroy(user);
+        notificationManager.cancel(0);
+
+        native_destroy(native_);
     }
 
     @Override
     public void onCreate()
     {
-        handler = new Handler();
+        Log.i("Sparkle", "Starting service...");
 
-        queue = Looper.myQueue();
+        queue_ = Looper.myQueue();
 
-        fdListener = new MyOnFileDescriptorEventListener();
-
-        windowManager = (WindowManager)getSystemService(Context.WINDOW_SERVICE);
         notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(ACTION_HIDE);
-        filter.addAction(ACTION_SHOW);
-        filter.addAction(ACTION_STOP);
-        registerReceiver(receiver, filter);
-
-        Intent intent1 = new Intent();
-        intent1.setAction(ACTION_HIDE);
-        PendingIntent pendingIntent1 = PendingIntent.getBroadcast(this, 0, intent1, 0);
-
-        Intent intent2 = new Intent();
-        intent2.setAction(ACTION_SHOW);
-        PendingIntent pendingIntent2 = PendingIntent.getBroadcast(this, 0, intent2, 0);
-
-        Intent intent3 = new Intent();
-        intent3.setAction(ACTION_STOP);
-        PendingIntent pendingIntent3 = PendingIntent.getBroadcast(this, 0, intent3, 0);
 
         notification = new Notification.Builder(this)
             //.setContentTitle("Title")
             .setContentText("Sparkle")
             .setSmallIcon(R.drawable.notification_icon)
             .setOngoing(true)
-            .addAction(R.drawable.notification_icon, "Hide", pendingIntent1)
-            .addAction(R.drawable.notification_icon, "Show", pendingIntent2)
-            .addAction(R.drawable.notification_icon, "Stop", pendingIntent3)
-            .setContentIntent(pendingIntent2)
             .build();
 
         notificationManager.notify(0, notification);
 
-        //user = native_create();
-
-/*
-        handler.postDelayed(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                native_event(user);
-                handler.postDelayed(this, 1000 / 60);
-            }
-        }, 1000);
-*/
-
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        windowManager.getDefaultDisplay().getMetrics(displayMetrics);
-        int height = displayMetrics.heightPixels;
-        int width = displayMetrics.widthPixels;
-
-        //display_size(user, width, height);
-
+        native_ = native_create();
     }
 
     @Override
@@ -152,58 +64,53 @@ public class SparkleService extends Service
         return null;
     }
 
-    /*
     @Keep
-    private SparkleView createView()
+    public void add_fd_listener(int fd, long listener)
     {
-        SparkleView view = new SparkleView(this);
-        windowManager.addView(view, view.params);
-        Log.i("Sparkle", "View added");
-
-        return view;
+        ParcelFileDescriptor pfd = ParcelFileDescriptor.adoptFd(fd);
+        FileDescriptor fd__ = pfd.getFileDescriptor();
+        queue_.addOnFileDescriptorEventListener(fd__, MessageQueue.OnFileDescriptorEventListener.EVENT_INPUT, new MyOnFileDescriptorEventListener(listener));
+        Log.i("Sparkle", "fd listener added");
     }
 
     @Keep
-    private void destroyView(SparkleView view)
+    public void remove_fd_listener(int fd)
     {
-        windowManager.removeView(view);
-        Log.i("Sparkle", "View removed");
-    }
-    */
-
-    @Keep
-    public void setNativeFd(int fd)
-    {
-        this.pfd = ParcelFileDescriptor.adoptFd(fd);
-        this.fd = pfd.getFileDescriptor();
-        queue.addOnFileDescriptorEventListener(this.fd, MessageQueue.OnFileDescriptorEventListener.EVENT_INPUT, fdListener);
+        ParcelFileDescriptor pfd = ParcelFileDescriptor.adoptFd(fd);
+        FileDescriptor fd__ = pfd.getFileDescriptor();
+        queue_.removeOnFileDescriptorEventListener(fd__);
+        Log.i("Sparkle", "fd listener removed");
     }
 
-    @Keep
-    public void unsetNativeFd()
-    {
-        queue.removeOnFileDescriptorEventListener(this.fd);
-    }
+    public native long native_create();
+    public native void native_destroy(long native__);
+    public native void fd_event(long listener);
+
+    MessageQueue queue_;
+    NotificationManager notificationManager;
+    Notification notification;
+    long native_;
+
 
     static
     {
         System.loadLibrary("sparkle");
     }
 
-    //public native long native_create();
-    //public native void native_destroy(long user);
-    //public native void native_event(long user);
-    //public native void display_size(long user, int width, int height);
-    //public native void show_all(long user);
-    //public native void hide_all(long user);
-    //public native void stop_server(long user);
-
     public class MyOnFileDescriptorEventListener implements MessageQueue.OnFileDescriptorEventListener
     {
+        MyOnFileDescriptorEventListener(long listener)
+        {
+            listener_ = listener;
+        }
+
+        @Override
         public int onFileDescriptorEvents(FileDescriptor fd, int events)
         {
-            //native_event(user);
+            fd_event(listener_);
             return EVENT_INPUT;
         }
+
+        long listener_;
     }
 }
