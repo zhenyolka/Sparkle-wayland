@@ -19,6 +19,9 @@ import android.view.InputDevice;
 
 import android.util.Log;
 
+// Software keyboard
+import android.view.inputmethod.InputMethodManager;
+
 
 public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
 {
@@ -187,6 +190,11 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
         {
             set_visible(false); // XXX
         }
+        else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP)
+        {
+            InputMethodManager imm = (InputMethodManager)sparkle_.getSystemService(sparkle_.INPUT_METHOD_SERVICE);
+            imm.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT); // XXX Move
+        }
         else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)
         {
         }
@@ -202,6 +210,9 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
         if (user == 0) {return false;}
 
         if (keyCode == KeyEvent.KEYCODE_BACK)
+        {
+        }
+        else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP)
         {
         }
         else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)

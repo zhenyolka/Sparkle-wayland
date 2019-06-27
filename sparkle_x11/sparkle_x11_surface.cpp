@@ -3,6 +3,7 @@
 #include "sparkle_surface.h"
 #include "sparkle_callback.h"
 #include <X11/Xutil.h> // XImage
+#include <linux/input-event-codes.h>
 
 #include <cstdio>
 

@@ -4,7 +4,6 @@
 #include "sparkle.h"
 #include "generated/sparkle_wl_pointer.h"
 #include "sparkle_surface.h"
-#include <linux/input-event-codes.h>
 
 
 class sparkle_pointer : public sparkle_wl_pointer
