@@ -18,8 +18,8 @@ sparkle_android::sparkle_android(were_object_pointer<sparkle> sparkle, were_obje
     {
         fprintf(stdout, "output\n");
 
-        int width = 720;
-        int height = 1280;
+        int width = 640;
+        int height = 480;
         int mm_width = width * 254 / 960;
         int mm_height = height * 254 / 960;
 

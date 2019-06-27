@@ -13,6 +13,11 @@ public:
     ~sparkle_view();
     sparkle_view(JNIEnv *env, were_object_pointer<sparkle_service> service);
 
+    void set_enabled(bool enabled);
+    void set_visible(bool visible);
+    void set_position(int x, int y);
+    void set_size(int width, int height);
+
 signals:
     were_signal<void (ANativeWindow *window)> surface_changed;
 };

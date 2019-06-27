@@ -9,6 +9,8 @@ const int WINDOW_FORMAT = 5;
 
 sparkle_android_surface::~sparkle_android_surface()
 {
+    view_->set_enabled(false);
+    view_->collapse();
 }
 
 sparkle_android_surface::sparkle_android_surface(were_object_pointer<sparkle_android> android, were_object_pointer<sparkle_surface> surface) :
@@ -17,6 +19,8 @@ sparkle_android_surface::sparkle_android_surface(were_object_pointer<sparkle_and
     MAKE_THIS_WOP
 
     view_ = were_object_pointer<sparkle_view>(new sparkle_view(android->service()->env(), android->service())); // XXX
+    view_->set_enabled(true);
+
     were::connect(view_, &sparkle_view::surface_changed, this_wop, [this_wop](ANativeWindow *window)
     {
         this_wop->window_ = window;
@@ -75,7 +79,7 @@ void sparkle_android_surface::commit()
             int w_width = ANativeWindow_getWidth(window_);
             int w_height = ANativeWindow_getHeight(window_);
             int w_format = ANativeWindow_getFormat(window_);
-            ANativeWindow_setBuffersGeometry(window_, w_width, w_height, WINDOW_FORMAT);
+            ANativeWindow_setBuffersGeometry(window_, w_width, w_height, WINDOW_FORMAT); // XXX
 
             ANativeWindow_Buffer buffer;
 

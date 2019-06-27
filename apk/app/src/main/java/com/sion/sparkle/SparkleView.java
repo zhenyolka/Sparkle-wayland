@@ -45,17 +45,25 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
         params.gravity = Gravity.CENTER;
         params.setTitle("Sparkle");
 
-        setVisibility(INVISIBLE);
+        //setVisibility(INVISIBLE);
         setFocusableInTouchMode(true);
         getHolder().addCallback(this);
 
 
-        sparkle_.window_manager_.addView(this, this.params);
+
 
         setVisibility(VISIBLE);
     }
 
-    public void setVisible(boolean visible)
+    public void set_enabled(boolean enabled)
+    {
+        if (enabled)
+            sparkle_.window_manager_.addView(this, this.params);
+        else
+            sparkle_.window_manager_.removeView(this);
+    }
+
+    public void set_visible(boolean visible)
     {
         if (visible)
             setVisibility(VISIBLE);
@@ -63,7 +71,14 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
             setVisibility(INVISIBLE);
     }
 
-    public void resize(int width, int height)
+    public void set_position(int x, int y)
+    {
+        params.x = x;
+        params.y = y;
+        sparkle_.window_manager_.updateViewLayout(this, params);
+    }
+
+    public void set_size(int width, int height)
     {
         params.width = width;
         params.height = height;
@@ -91,7 +106,7 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
     {
         Log.i("Sparkle", "Surface destroyed");
         if (user == 0) {return;}
-        surface_changed(user, holder.getSurface());
+        surface_changed(user, null);
     }
 
     public static boolean hasSource(int sources, int source)
@@ -167,7 +182,7 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
 
         if (keyCode == KeyEvent.KEYCODE_BACK)
         {
-            //sparkle.hide_all(sparkle.user);
+            set_visible(false); // XXX
         }
         else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)
         {

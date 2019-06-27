@@ -6,7 +6,7 @@
 #include "sparkle_android.h"
 #include "were_debug.h"
 
-
+#include <csignal>
 
 #include <android/log.h>
 
@@ -82,8 +82,10 @@ Java_com_sion_sparkle_SparkleService_native_1create(JNIEnv *env, jobject instanc
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleService_native_1destroy(JNIEnv *env, jobject instance, jlong native)
 {
-    sparkle_native *native__ = reinterpret_cast<sparkle_native *>(native);
-    delete native__;
+    raise(SIGINT); /* That is how we deal with program termination and proper resource deallocation! Yeah! */
+
+    //sparkle_native *native__ = reinterpret_cast<sparkle_native *>(native);
+    //delete native__;
 }
 
 extern "C" JNIEXPORT void JNICALL
