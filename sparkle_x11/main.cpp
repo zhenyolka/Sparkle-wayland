@@ -17,17 +17,20 @@ int main(int argc, char *argv[])
     were_object_pointer<were_debug> debug(new were_debug());
 
 
-#if 0
+#if 1
 
     were_object_pointer<were_signal_handler> sig(new were_signal_handler());
 
-    were::connect(sig, &were_signal_handler::signal, sig, [&sparkle__, &sparkle_x11__](uint32_t number) mutable
+    were::connect(sig, &were_signal_handler::signal, sig, [&sparkle__, &sparkle_x11__, &debug, &sig](uint32_t number) mutable
     {
         if (number == SIGINT)
         {
             if (first_)
             {
                 first_ = false;
+
+                sig.collapse();
+                debug.collapse();
                 sparkle_x11__.collapse();
                 sparkle__.collapse();
             }
@@ -47,20 +50,12 @@ int main(int argc, char *argv[])
 
         if (thread->reference_count() <= 2)
             break;
-
-        if (i > 2000)
-        {
-            fprintf(stdout, "Shutting down... %d\n", thread->reference_count());
-
-            debug.collapse();
-            sparkle_x11__.collapse();
-            sparkle__.collapse();
-        }
-
     }
 #endif
 
     thread.collapse();
+
+    fprintf(stdout, "Done.\n");
 
     return 0;
 }

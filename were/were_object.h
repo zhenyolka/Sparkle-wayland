@@ -5,6 +5,7 @@ class were_object;
 
 void were_debug_add_object(were_object *object__);
 void were_debug_remove_object(were_object *object__);
+int were_debug_object_count();
 void were_debug_print_objects();
 
 class were_object

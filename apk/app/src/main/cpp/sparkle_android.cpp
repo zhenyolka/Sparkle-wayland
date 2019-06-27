@@ -3,12 +3,14 @@
 #include "sparkle_compositor.h"
 #include "sparkle_shell.h"
 #include "sparkle_global.h" // XXX
+#include "sparkle_android_surface.h"
 
 sparkle_android::~sparkle_android()
 {
 }
 
-sparkle_android::sparkle_android(were_object_pointer<sparkle> sparkle)
+sparkle_android::sparkle_android(were_object_pointer<sparkle> sparkle, were_object_pointer<sparkle_service> service) :
+    service_(service)
 {
     MAKE_THIS_WOP
 
@@ -16,8 +18,8 @@ sparkle_android::sparkle_android(were_object_pointer<sparkle> sparkle)
     {
         fprintf(stdout, "output\n");
 
-        int width = 640;
-        int height = 480;
+        int width = 720;
+        int height = 1280;
         int mm_width = width * 254 / 960;
         int mm_height = height * 254 / 960;
 
@@ -40,9 +42,9 @@ sparkle_android::sparkle_android(were_object_pointer<sparkle> sparkle)
         {
             fprintf(stdout, "Surface req\n");
 
-            //were_object_pointer<sparkle_x11_surface> x11_surface(new sparkle_x11_surface(this_wop, surface));
-            //x11_surface->add_dependency(surface); // XXX
-            //were::emit(this_wop, &sparkle_x11::x11_surface_created, x11_surface);
+            were_object_pointer<sparkle_android_surface> android_surface(new sparkle_android_surface(this_wop, surface));
+            android_surface->add_dependency(surface); // XXX
+            //were::emit(this_wop, &sparkle_android::android_surface_created, android_surface);
         });
     });
 }

@@ -4,6 +4,8 @@
 #include <cstdio>
 #include <typeinfo>
 
+int object_count_ = 0;
+
 std::set<were_object *> object_set_;
 std::mutex object_set_mutex_;
 
@@ -16,6 +18,7 @@ void were_debug_add_object(were_object *object__)
     object_set_mutex_.lock();
     object_set_.insert(object__);
     object_set_mutex_.unlock();
+    object_count_ += 1;
 }
 
 void were_debug_remove_object(were_object *object__)
@@ -23,6 +26,12 @@ void were_debug_remove_object(were_object *object__)
     object_set_mutex_.lock();
     object_set_.erase(object__);
     object_set_mutex_.unlock();
+    object_count_ -= 1;
+}
+
+int were_debug_object_count()
+{
+    return object_count_;
 }
 
 void were_debug_print_objects()

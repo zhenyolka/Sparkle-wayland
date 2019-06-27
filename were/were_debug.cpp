@@ -43,6 +43,7 @@ void were_debug::timeout()
     printf("\033[0;0H"); // Move cursor
 
     fprintf(stdout, "CPU: %.1f%%\n", cpu_load);
+    fprintf(stdout, "Object count: %d%\n", were_debug_object_count());
     were_debug_print_objects();
     fprintf(stdout, "\n");
 }
