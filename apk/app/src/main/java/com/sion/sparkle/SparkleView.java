@@ -50,7 +50,10 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
         getHolder().addCallback(this);
 
 
-
+        params.x = 0;
+        params.y = 0;
+        params.width = 640;
+        params.height = 480;
 
         setVisibility(VISIBLE);
     }
@@ -125,13 +128,13 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
             switch (event.getAction())
             {
                 case MotionEvent.ACTION_DOWN:
-                    //touch_down(user, 0, event.getX(), event.getY());
+                    touch_down(user, 0, event.getX(), event.getY());
                     return true;
                 case MotionEvent.ACTION_UP:
-                    //touch_up(user, 0, event.getX(), event.getY());
+                    touch_up(user, 0, event.getX(), event.getY());
                     return true;
                 case MotionEvent.ACTION_MOVE:
-                    //touch_motion(user, 0, event.getX(), event.getY());
+                    touch_motion(user, 0, event.getX(), event.getY());
                     return true;
             }
         }
@@ -140,16 +143,16 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
             switch (event.getAction())
             {
                 case MotionEvent.ACTION_BUTTON_PRESS:
-                    //mouse_button_press(user, event.getActionButton());
+                    pointer_button_down(user, event.getActionButton());
                     return true;
                 case MotionEvent.ACTION_BUTTON_RELEASE:
-                    //mouse_button_release(user, event.getActionButton());
+                    pointer_button_up(user, event.getActionButton());
                     return true;
                 case MotionEvent.ACTION_HOVER_MOVE:
-                    //mouse_pointer_motion(user, event.getX(), event.getY());
+                    pointer_motion(user, event.getX(), event.getY());
                     return true;
                 case MotionEvent.ACTION_MOVE:
-                    //mouse_pointer_motion(user, event.getX(), event.getY());
+                    pointer_motion(user, event.getX(), event.getY());
                     return true;
             }
         }
@@ -188,7 +191,8 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
         {
         }
 
-        //key_press(user, keyCode);
+        key_down(user, keyCode);
+
         return true;
     }
 
@@ -204,25 +208,27 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
         {
         }
 
-        //key_release(user, keyCode);
+        key_up(user, keyCode);
+
         return true;
     }
 
 
     public native void surface_changed(long user, Surface surface);
 
-    //public native void touch_down(long user, int id, float x, float y);
-    //public native void touch_up(long user, int id, float x, float y);
-    //public native void touch_motion(long user, int id, float x, float y);
+    public native void key_down(long user, int code);
+    public native void key_up(long user, int code);
 
-    //public native void key_press(long user, int code);
-    //public native void key_release(long user, int code);
+    public native void pointer_button_down(long user, int button);
+    public native void pointer_button_up(long user, int button);
+    public native void pointer_motion(long user, float x, float y);
+    public native void pointer_enter(long user);
+    public native void pointer_leave(long user);
 
-    //public native void mouse_button_press(long user, int button);
-    //public native void mouse_button_release(long user, int button);
-    //public native void mouse_pointer_motion(long user, float x, float y);
-    //public native void mouse_pointer_enter(long user);
-    //public native void mouse_pointer_leave(long user);
+    public native void touch_down(long user, int id, float x, float y);
+    public native void touch_up(long user, int id, float x, float y);
+    public native void touch_motion(long user, int id, float x, float y);
+
 
     SparkleService sparkle_;
     long user = 0;

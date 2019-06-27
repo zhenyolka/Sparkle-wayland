@@ -6,7 +6,6 @@
 #include "sparkle_surface.h"
 #include <linux/input-event-codes.h>
 
-static const int button_map[4] = {0, BTN_LEFT, BTN_MIDDLE, BTN_RIGHT};
 
 class sparkle_pointer : public sparkle_wl_pointer
 {
@@ -18,12 +17,12 @@ public:
 
     void button_down(int button)
     {
-        send_button(sparkle::next_serial(display_), sparkle::current_msecs(), button_map[button], WL_POINTER_BUTTON_STATE_PRESSED);
+        send_button(sparkle::next_serial(display_), sparkle::current_msecs(), button, WL_POINTER_BUTTON_STATE_PRESSED);
     }
 
     void button_up(int button)
     {
-        send_button(sparkle::next_serial(display_), sparkle::current_msecs(), button_map[button], WL_POINTER_BUTTON_STATE_RELEASED);
+        send_button(sparkle::next_serial(display_), sparkle::current_msecs(), button, WL_POINTER_BUTTON_STATE_RELEASED);
     }
 
     void motion(int x, int y)

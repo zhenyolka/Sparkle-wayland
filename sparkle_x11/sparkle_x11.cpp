@@ -147,26 +147,25 @@ void sparkle_x11::connect_keyboard(were_object_pointer<sparkle_x11_surface> x11_
     //if (wl_resource_get_client(keyboard->resource()) != wl_resource_get_client(surface_->resource()))
     //    return; // XXX
 
-    fprintf(stdout, "KEYBOARD CONNECTED\n");
-
     were::connect(x11_surface, &sparkle_x11_surface::key_press, keyboard, [keyboard, x11_surface](int code)
     {
         keyboard->enter(x11_surface->surface());
         keyboard->key_press(code);
+        keyboard->leave(x11_surface->surface());
     });
 
     were::connect(x11_surface, &sparkle_x11_surface::key_release, keyboard, [keyboard](int code)
     {
         keyboard->key_release(code);
     });
+
+    fprintf(stdout, "keyboard connected\n");
 }
 
 void sparkle_x11::connect_pointer(were_object_pointer<sparkle_x11_surface> x11_surface, were_object_pointer<sparkle_pointer> pointer)
 {
     //if (wl_resource_get_client(keyboard->resource()) != wl_resource_get_client(surface_->resource()))
     //    return; // XXX
-
-    fprintf(stdout, "POINTER CONNECTED\n");
 
     were::connect(x11_surface, &sparkle_x11_surface::pointer_button_press, pointer, [pointer](int button)
     {
@@ -193,16 +192,5 @@ void sparkle_x11::connect_pointer(were_object_pointer<sparkle_x11_surface> x11_s
         pointer->leave(x11_surface->surface());
     });
 
-#if 0
-    were::connect(x11_surface, &sparkle_x11_surface::key_press, keyboard, [keyboard, x11_surface](int code)
-    {
-        keyboard->enter(x11_surface->surface());
-        keyboard->key_press(code);
-    });
-
-    were::connect(x11_surface, &sparkle_x11_surface::key_release, keyboard, [keyboard](int code)
-    {
-        keyboard->key_release(code);
-    });
-#endif
+    fprintf(stdout, "pointer connected\n");
 }

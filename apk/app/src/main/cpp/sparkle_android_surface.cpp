@@ -3,6 +3,11 @@
 #include "sparkle_callback.h"
 #include "sparkle_view.h"
 #include "sparkle_android.h"
+
+#include "sparkle_keyboard.h"
+#include "sparkle_pointer.h"
+#include "sparkle_touch.h"
+
 #include <android/native_window_jni.h>
 
 const int WINDOW_FORMAT = 5;
@@ -117,4 +122,92 @@ void sparkle_android_surface::commit()
     {
             // XXX Error
     }
+}
+
+void sparkle_android_surface::register_keyboard(were_object_pointer<sparkle_keyboard> keyboard)
+{
+    were_object_pointer<sparkle_surface> surface(surface_);
+
+    //if (wl_resource_get_client(keyboard->resource()) != wl_resource_get_client(surface_->resource()))
+    //    return; // XXX
+
+    were::connect(view_, &sparkle_view::key_down, keyboard, [keyboard, surface](int code)
+    {
+        keyboard->enter(surface);
+        keyboard->key_press(code);
+        keyboard->leave(surface);
+    });
+
+    were::connect(view_, &sparkle_view::key_up, keyboard, [keyboard, surface](int code)
+    {
+        keyboard->enter(surface);
+        keyboard->key_release(code);
+        keyboard->leave(surface);
+    });
+
+    fprintf(stdout, "keyboard registered\n");
+}
+
+void sparkle_android_surface::register_pointer(were_object_pointer<sparkle_pointer> pointer)
+{
+    were_object_pointer<sparkle_surface> surface(surface_);
+
+    //if (wl_resource_get_client(keyboard->resource()) != wl_resource_get_client(surface_->resource()))
+    //    return; // XXX
+
+    were::connect(view_, &sparkle_view::pointer_button_down, pointer, [pointer](int button)
+    {
+        pointer->button_down(button);
+    });
+
+    were::connect(view_, &sparkle_view::pointer_button_up, pointer, [pointer](int button)
+    {
+        pointer->button_up(button);
+    });
+
+    were::connect(view_, &sparkle_view::pointer_motion, pointer, [pointer](int x, int y)
+    {
+        pointer->motion(x, y);
+    });
+
+    were::connect(view_, &sparkle_view::pointer_enter, pointer, [pointer, surface]()
+    {
+        pointer->enter(surface);
+    });
+
+    were::connect(view_, &sparkle_view::pointer_leave, pointer, [pointer, surface]()
+    {
+        pointer->leave(surface);
+    });
+
+    // FIXME
+
+    were::connect(view_, &sparkle_view::touch_down, pointer, [pointer, surface](int id, int x, int y)
+    {
+        pointer->enter(surface);
+    });
+
+    fprintf(stdout, "pointer registered\n");
+}
+
+void sparkle_android_surface::register_touch(were_object_pointer<sparkle_touch> touch)
+{
+    were_object_pointer<sparkle_surface> surface(surface_);
+
+    were::connect(view_, &sparkle_view::touch_down, touch, [touch, surface](int id, int x, int y)
+    {
+        touch->down(surface, id, x, y);
+    });
+
+    were::connect(view_, &sparkle_view::touch_up, touch, [touch, surface](int id, int x, int y)
+    {
+        touch->up(surface, id, x, y);
+    });
+
+    were::connect(view_, &sparkle_view::touch_motion, touch, [touch, surface](int id, int x, int y)
+    {
+        touch->motion(surface, id, x, y);
+    });
+
+    fprintf(stdout, "touch registered\n");
 }

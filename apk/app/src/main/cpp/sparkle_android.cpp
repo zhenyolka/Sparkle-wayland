@@ -1,6 +1,7 @@
 #include "sparkle_android.h"
 #include "sparkle_output.h"
 #include "sparkle_compositor.h"
+#include "sparkle_seat.h"
 #include "sparkle_shell.h"
 #include "sparkle_global.h" // XXX
 #include "sparkle_android_surface.h"
@@ -40,11 +41,63 @@ sparkle_android::sparkle_android(were_object_pointer<sparkle> sparkle, were_obje
 
         were::connect(shell, &sparkle_shell::shell_surface_created, this_wop, [this_wop](were_object_pointer<sparkle_shell_surface> shell_surface, were_object_pointer<sparkle_surface> surface)
         {
-            fprintf(stdout, "Surface req\n");
+            fprintf(stdout, "surface req\n");
 
             were_object_pointer<sparkle_android_surface> android_surface(new sparkle_android_surface(this_wop, surface));
             android_surface->add_dependency(surface); // XXX
-            //were::emit(this_wop, &sparkle_android::android_surface_created, android_surface);
+
+            were::connect(this_wop, &sparkle_android::keyboard_created, android_surface, [android_surface](were_object_pointer<sparkle_keyboard> keyboard)
+            {
+                android_surface->register_keyboard(keyboard);
+            });
+
+            were::connect(this_wop, &sparkle_android::pointer_created, android_surface, [android_surface](were_object_pointer<sparkle_pointer> pointer)
+            {
+                android_surface->register_pointer(pointer);
+            });
+
+            were::connect(this_wop, &sparkle_android::touch_created, android_surface, [android_surface](were_object_pointer<sparkle_touch> touch)
+            {
+                android_surface->register_touch(touch);
+            });
+
+            were::emit(this_wop, &sparkle_android::android_surface_created, android_surface);
         });
+    });
+
+    were::connect(sparkle->seat(), &sparkle_global<sparkle_seat>::instance, this_wop, [this_wop](were_object_pointer<sparkle_seat> seat)
+    {
+        fprintf(stdout, "seat\n");
+
+        were::connect(seat, &sparkle_seat::keyboard_created, this_wop, [this_wop](were_object_pointer<sparkle_keyboard> keyboard)
+        {
+            were::connect(this_wop, &sparkle_android::android_surface_created, keyboard, [keyboard](were_object_pointer<sparkle_android_surface> android_surface)
+            {
+                android_surface->register_keyboard(keyboard);
+            });
+
+            were::emit(this_wop, &sparkle_android::keyboard_created, keyboard);
+        });
+
+        were::connect(seat, &sparkle_seat::pointer_created, this_wop, [this_wop](were_object_pointer<sparkle_pointer> pointer)
+        {
+            were::connect(this_wop, &sparkle_android::android_surface_created, pointer, [pointer](were_object_pointer<sparkle_android_surface> android_surface)
+            {
+                android_surface->register_pointer(pointer);
+            });
+
+            were::emit(this_wop, &sparkle_android::pointer_created, pointer);
+        });
+
+        were::connect(seat, &sparkle_seat::touch_created, this_wop, [this_wop](were_object_pointer<sparkle_touch> touch)
+        {
+            were::connect(this_wop, &sparkle_android::android_surface_created, touch, [touch](were_object_pointer<sparkle_android_surface> android_surface)
+            {
+                android_surface->register_touch(touch);
+            });
+
+            were::emit(this_wop, &sparkle_android::touch_created, touch);
+        });
+
     });
 }

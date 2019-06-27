@@ -19,6 +19,21 @@ public:
     void set_size(int width, int height);
 
 signals:
+
+    were_signal<void (int code)> key_down;
+    were_signal<void (int code)> key_up;
+
+    were_signal<void (int id, int x, int y)> touch_down;
+    were_signal<void (int id, int x, int y)> touch_up;
+    were_signal<void (int id, int x, int y)> touch_motion;
+
+    were_signal<void (int button)> pointer_button_down;
+    were_signal<void (int button)> pointer_button_up;
+    were_signal<void (int x, int y)> pointer_motion;
+    were_signal<void ()> pointer_enter;
+    were_signal<void ()> pointer_leave;
+
+signals:
     were_signal<void (ANativeWindow *window)> surface_changed;
 };
 

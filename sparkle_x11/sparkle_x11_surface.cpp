@@ -6,6 +6,8 @@
 
 #include <cstdio>
 
+static const int button_map[4] = {0, BTN_LEFT, BTN_MIDDLE, BTN_RIGHT};
+
 sparkle_x11_surface::~sparkle_x11_surface()
 {
     XDestroyWindow(display_->get(), window_);
@@ -79,11 +81,11 @@ void sparkle_x11_surface::process(XEvent event)
             break;
         case ButtonPress:
             if (event.xbutton.type == ButtonPress)
-                were::emit(this_wop, &sparkle_x11_surface::pointer_button_press, event.xbutton.button);
+                were::emit(this_wop, &sparkle_x11_surface::pointer_button_press, button_map[event.xbutton.button]);
             break;
         case ButtonRelease:
             if (event.xbutton.type == ButtonRelease)
-                were::emit(this_wop, &sparkle_x11_surface::pointer_button_release, event.xbutton.button);
+                were::emit(this_wop, &sparkle_x11_surface::pointer_button_release, button_map[event.xbutton.button]);
             break;
         case MotionNotify:
             were::emit(this_wop, &sparkle_x11_surface::pointer_motion, event.xbutton.x, event.xbutton.y);
