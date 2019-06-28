@@ -29,6 +29,18 @@ sparkle_android_surface::sparkle_android_surface(were_object_pointer<sparkle_and
     were::connect(view_, &sparkle_view::surface_changed, this_wop, [this_wop](ANativeWindow *window)
     {
         this_wop->window_ = window;
+
+        int w_width = ANativeWindow_getWidth(window);
+        int w_height = ANativeWindow_getHeight(window);
+        int w_format = ANativeWindow_getFormat(window);
+
+        fprintf(stdout, "surface changed %p %dx%d %p\n", window, w_width, w_height, w_format);
+
+        if (w_width != this_wop->view_->width() || w_height != this_wop->view_->height())
+            throw were_exception(WE_SIMPLE);
+
+        ANativeWindow_setBuffersGeometry(window, w_width, w_height, WINDOW_FORMAT);
+
         this_wop->commit();
     });
 
@@ -79,22 +91,28 @@ void sparkle_android_surface::commit()
         uint32_t stride = wl_shm_buffer_get_stride(shm_buffer);
         void *data = wl_shm_buffer_get_data(shm_buffer);
 
+        if (view_->width() != width || view_->height() != height)
+        {
+            fprintf(stdout, "resize view %dx%d -> %dx%d\n", view_->width(), view_->height(), width, height);
+            view_->set_size(width, height);
+            return;
+        }
+
         if ((format == WL_SHM_FORMAT_ARGB8888 || format == WL_SHM_FORMAT_XRGB8888))
         {
-            int w_width = ANativeWindow_getWidth(window_);
-            int w_height = ANativeWindow_getHeight(window_);
-            int w_format = ANativeWindow_getFormat(window_);
-            ANativeWindow_setBuffersGeometry(window_, w_width, w_height, WINDOW_FORMAT); // XXX
-
             ANativeWindow_Buffer buffer;
 
             ARect rect;
             rect.left = 0;
             rect.top = 0;
-            rect.right = w_width;
-            rect.bottom = w_height;
+            rect.right = width;
+            rect.bottom = height;
 
-            ANativeWindow_lock(window_, &buffer, &rect);
+            if (ANativeWindow_lock(window_, &buffer, &rect) != 0)
+                throw were_exception(WE_SIMPLE);
+
+            if (buffer.width != width || buffer.height != height)
+                throw were_exception(WE_SIMPLE);
 
             int rows = 0;
             if (height < buffer.height)
@@ -103,10 +121,10 @@ void sparkle_android_surface::commit()
                 rows = buffer.height;
 
             int line = 0;
-            if (stride < buffer.stride*4)
+            if (stride < buffer.stride * 4)
                 line = stride;
             else
-                line = buffer.stride*4;
+                line = buffer.stride * 4;
 
             for (int row = 0; row < rows; ++row)
                 std::memcpy((char *)buffer.bits + buffer.stride * 4 * row, (char *)data + stride * row, line);
@@ -133,17 +151,15 @@ void sparkle_android_surface::register_keyboard(were_object_pointer<sparkle_keyb
 
     were::connect(view_, &sparkle_view::key_down, keyboard, [keyboard, surface](int code)
     {
-        keyboard->enter(surface);
         keyboard->key_press(code);
-        keyboard->leave(surface);
     });
 
     were::connect(view_, &sparkle_view::key_up, keyboard, [keyboard, surface](int code)
     {
-        keyboard->enter(surface);
         keyboard->key_release(code);
-        keyboard->leave(surface);
     });
+
+    keyboard->enter(surface); // XXX
 
     fprintf(stdout, "keyboard registered\n");
 }
@@ -180,12 +196,7 @@ void sparkle_android_surface::register_pointer(were_object_pointer<sparkle_point
         pointer->leave(surface);
     });
 
-    // FIXME
-
-    were::connect(view_, &sparkle_view::touch_down, pointer, [pointer, surface](int id, int x, int y)
-    {
-        pointer->enter(surface);
-    });
+    pointer->enter(surface); // XXX
 
     fprintf(stdout, "pointer registered\n");
 }

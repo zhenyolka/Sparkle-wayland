@@ -12,6 +12,8 @@ sparkle_view::~sparkle_view()
 sparkle_view::sparkle_view(JNIEnv *env, were_object_pointer<sparkle_service> service) :
     sparkle_java_object(env, "com/sion/sparkle/SparkleView", "(Lcom/sion/sparkle/SparkleService;J)V", service->object1(), jlong(this))
 {
+    width_ = 100;
+    height_ = 100;
 }
 
 void sparkle_view::set_enabled(bool enabled)
@@ -34,8 +36,13 @@ void sparkle_view::set_position(int x, int y)
 
 void sparkle_view::set_size(int width, int height)
 {
-    jmethodID id = env()->GetMethodID(class1(), "set_size", "(II)V");
-    env()->CallVoidMethod(object1(), id, jint(width), jint(height));
+    if (width != width_ || height != height_)
+    {
+        jmethodID id = env()->GetMethodID(class1(), "set_size", "(II)V"); // XXX java_object
+        env()->CallVoidMethod(object1(), id, jint(width), jint(height));
+        width_ = width;
+        height_ = height;
+    }
 }
 
 extern "C" JNIEXPORT void JNICALL

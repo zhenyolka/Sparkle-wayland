@@ -18,6 +18,9 @@ public:
 
     void add_fd_listener(int fd, sparkle_service_fd_listener *listener);
     void remove_fd_listener(int fd);
+
+    int display_width();
+    int display_height();
 };
 
 #endif // SPARKLE_SERVICE_H

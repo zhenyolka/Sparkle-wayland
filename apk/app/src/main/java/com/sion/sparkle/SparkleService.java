@@ -24,6 +24,10 @@ import java.io.FileDescriptor;
 // Window manager
 import android.view.WindowManager;
 
+// Display size
+import android.util.DisplayMetrics;
+
+
 import android.util.Log;
 
 
@@ -83,6 +87,20 @@ public class SparkleService extends Service
         FileDescriptor fd__ = pfd.getFileDescriptor();
         queue_.removeOnFileDescriptorEventListener(fd__);
         Log.i("Sparkle", "fd listener removed");
+    }
+
+    public int display_width()
+    {
+        DisplayMetrics display_metrics = new DisplayMetrics();
+        window_manager_.getDefaultDisplay().getMetrics(display_metrics);
+        return display_metrics.widthPixels;
+    }
+
+    public int display_height()
+    {
+        DisplayMetrics display_metrics = new DisplayMetrics();
+        window_manager_.getDefaultDisplay().getMetrics(display_metrics);
+        return display_metrics.heightPixels;
     }
 
     public native long native_create();

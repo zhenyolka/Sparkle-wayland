@@ -55,18 +55,27 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
 
         params.x = 0;
         params.y = 0;
-        params.width = 640;
-        params.height = 480;
+        params.width = 100;
+        params.height = 100;
 
         setVisibility(VISIBLE);
+
+        enabled_ = false;
+        rmb_ = false;
     }
 
     public void set_enabled(boolean enabled)
     {
-        if (enabled)
+        if (enabled && !enabled_)
+        {
             sparkle_.window_manager_.addView(this, this.params);
-        else
+            enabled_ = true;
+        }
+        else if (!enabled && enabled_)
+        {
             sparkle_.window_manager_.removeView(this);
+            enabled_ = false;
+        }
     }
 
     public void set_visible(boolean visible)
@@ -81,14 +90,16 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
     {
         params.x = x;
         params.y = y;
-        sparkle_.window_manager_.updateViewLayout(this, params);
+        if (enabled_)
+            sparkle_.window_manager_.updateViewLayout(this, params);
     }
 
     public void set_size(int width, int height)
     {
         params.width = width;
         params.height = height;
-        sparkle_.window_manager_.updateViewLayout(this, params);
+        if (enabled_)
+            sparkle_.window_manager_.updateViewLayout(this, params);
     }
 
     @Override
@@ -131,10 +142,21 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
             switch (event.getAction())
             {
                 case MotionEvent.ACTION_DOWN:
-                    touch_down(user, 0, event.getX(), event.getY());
+                    if (!rmb_)
+                        touch_down(user, 0, event.getX(), event.getY());
+                    else
+                    {
+                        pointer_motion(user, event.getX(), event.getY());
+                        pointer_button_down(user, 2);
+                    }
                     return true;
                 case MotionEvent.ACTION_UP:
-                    touch_up(user, 0, event.getX(), event.getY());
+                    if (!rmb_)
+                        touch_up(user, 0, event.getX(), event.getY());
+                    else
+                    {
+                        pointer_button_up(user, 2);
+                    }
                     return true;
                 case MotionEvent.ACTION_MOVE:
                     touch_motion(user, 0, event.getX(), event.getY());
@@ -197,6 +219,7 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
         }
         else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)
         {
+            rmb_ = true;
         }
 
         key_down(user, keyCode);
@@ -217,6 +240,7 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
         }
         else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)
         {
+            rmb_ = false;
         }
 
         key_up(user, keyCode);
@@ -244,4 +268,6 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
     SparkleService sparkle_;
     long user = 0;
     WindowManager.LayoutParams params;
+    boolean enabled_;
+    boolean rmb_;
 }

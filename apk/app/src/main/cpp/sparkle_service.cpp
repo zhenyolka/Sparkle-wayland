@@ -8,19 +8,15 @@
 
 #include <csignal>
 
-#include <android/log.h>
-
 
 
 sparkle_service::~sparkle_service()
 {
-    __android_log_print(ANDROID_LOG_INFO, "Sparkle", "222");
 }
 
 sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
     sparkle_java_object(env, instance)
 {
-    __android_log_print(ANDROID_LOG_INFO, "Sparkle", "111");
 }
 
 void sparkle_service::add_fd_listener(int fd, sparkle_service_fd_listener *listener)
@@ -33,6 +29,20 @@ void sparkle_service::remove_fd_listener(int fd)
 {
     jmethodID id = env()->GetMethodID(class1(), "remove_fd_listener", "(I)V");
     env()->CallVoidMethod(object1(), id, jint(fd));
+}
+
+int sparkle_service::display_width()
+{
+    jmethodID id = env()->GetMethodID(class1(), "display_width", "()I");
+    int x = env()->CallIntMethod(object1(), id);
+    return x;
+}
+
+int sparkle_service::display_height()
+{
+    jmethodID id = env()->GetMethodID(class1(), "display_height", "()I");
+    int x = env()->CallIntMethod(object1(), id);
+    return x;
 }
 
 class sparkle_native : public sparkle_service_fd_listener
@@ -51,7 +61,7 @@ public:
 
         sparkle_ = were_object_pointer<sparkle>(new sparkle());
         sparkle_android_ = were_object_pointer<sparkle_android>(new sparkle_android(sparkle_, service_));
-        debug_ = were_object_pointer<were_debug>(new were_debug());
+        //debug_ = were_object_pointer<were_debug>(new were_debug());
 
         service_->add_fd_listener(thread_->fd(), this);
     }

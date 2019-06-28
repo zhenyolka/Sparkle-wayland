@@ -5,6 +5,8 @@
 #include "sparkle_shell.h"
 #include "sparkle_global.h" // XXX
 #include "sparkle_android_surface.h"
+#include "sparkle_service.h"
+
 
 sparkle_android::~sparkle_android()
 {
@@ -15,14 +17,16 @@ sparkle_android::sparkle_android(were_object_pointer<sparkle> sparkle, were_obje
 {
     MAKE_THIS_WOP
 
-    were::connect(sparkle->output(), &sparkle_global<sparkle_output>::instance, sparkle->output(), [](were_object_pointer<sparkle_output> output)
+    were::connect(sparkle->output(), &sparkle_global<sparkle_output>::instance, this_wop, [this_wop](were_object_pointer<sparkle_output> output)
     {
         fprintf(stdout, "output\n");
 
-        int width = 640;
-        int height = 480;
+        int width = this_wop->service_->display_width();
+        int height = this_wop->service_->display_height();
         int mm_width = width * 254 / 960;
         int mm_height = height * 254 / 960;
+
+        fprintf(stdout, "display size: %dx%d\n", width, height);
 
         output->send_geometry(0, 0, mm_width, mm_height, 0, "Barely working solutions", "Sparkle", 0);
 
@@ -41,8 +45,6 @@ sparkle_android::sparkle_android(were_object_pointer<sparkle> sparkle, were_obje
 
         were::connect(shell, &sparkle_shell::shell_surface_created, this_wop, [this_wop](were_object_pointer<sparkle_shell_surface> shell_surface, were_object_pointer<sparkle_surface> surface)
         {
-            fprintf(stdout, "surface req\n");
-
             were_object_pointer<sparkle_android_surface> android_surface(new sparkle_android_surface(this_wop, surface));
             android_surface->add_dependency(surface); // XXX
 

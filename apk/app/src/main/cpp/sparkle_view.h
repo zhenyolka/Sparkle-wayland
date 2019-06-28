@@ -13,6 +13,9 @@ public:
     ~sparkle_view();
     sparkle_view(JNIEnv *env, were_object_pointer<sparkle_service> service);
 
+    int width() const {return width_;}
+    int height() const {return height_;}
+
     void set_enabled(bool enabled);
     void set_visible(bool visible);
     void set_position(int x, int y);
@@ -35,6 +38,10 @@ signals:
 
 signals:
     were_signal<void (ANativeWindow *window)> surface_changed;
+
+private:
+    int width_;
+    int height_;
 };
 
 #endif // SPARKLE_VIEW_H
