@@ -35,6 +35,11 @@ import android.content.IntentFilter;
 import android.util.Log;
 
 
+// TMP
+import java.util.Timer;
+import java.util.TimerTask;
+
+
 public class SparkleService extends Service
 {
     public static final String ACTION_HIDE = "com.sion.sparkle.ACTION_HIDE";
@@ -121,6 +126,18 @@ public class SparkleService extends Service
         registerReceiver(receiver_, filter);
 
         native_ = native_create();
+
+
+        Timer myTimer = new Timer();
+        myTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Log.i("Sparkle", "TMR");
+            }
+
+        }, 0, 1000);
+
+
     }
 
     @Override
@@ -188,7 +205,6 @@ public class SparkleService extends Service
         @Override
         public int onFileDescriptorEvents(FileDescriptor fd, int events)
         {
-            Log.i("Sparkle", "Event");
             fd_event(listener_);
             return EVENT_INPUT;
         }

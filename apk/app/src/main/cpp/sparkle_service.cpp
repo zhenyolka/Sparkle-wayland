@@ -7,7 +7,12 @@
 #include "were_debug.h"
 
 #include <csignal>
+#include "were_timer.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 
 sparkle_service::~sparkle_service()
@@ -59,11 +64,17 @@ public:
         thread_ = were_object_pointer<were_thread>(new were_thread());
         service_ = were_object_pointer<sparkle_service>(new sparkle_service(env, instance));
 
+        //were_object_pointer<were_timer> timer(new were_timer(1000/60));
+        //timer->start();
+
         sparkle_ = were_object_pointer<sparkle>(new sparkle());
         sparkle_android_ = were_object_pointer<sparkle_android>(new sparkle_android(sparkle_, service_));
         debug_ = were_object_pointer<were_debug>(new were_debug());
 
-        service_->add_fd_listener(thread_->fd(), this);
+        service_->add_fd_listener(dup(thread_->fd()), this); // XXX Why we need dup() here?
+
+        //int fd = open("/dev/pipe", O_RDONLY);
+        //service_->add_fd_listener(dup(fd), this);
     }
 
     void event()
@@ -72,6 +83,7 @@ public:
     };
 
 private:
+    int fd;
     sparkle_android_logger logger_;
     were_object_pointer<were_thread> thread_;
     were_object_pointer<sparkle_service> service_;
