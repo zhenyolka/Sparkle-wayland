@@ -22,6 +22,12 @@ import android.util.Log;
 // Software keyboard
 import android.view.inputmethod.InputMethodManager;
 
+// Broadcast receiver
+import android.content.BroadcastReceiver;
+import android.content.IntentFilter;
+import android.content.Intent; // XXX Basic
+import android.content.Context; // XXX Basic
+
 
 public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
 {
@@ -62,6 +68,29 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
 
         enabled_ = false;
         rmb_ = false;
+
+
+
+        receiver_ = new BroadcastReceiver()
+        {
+            @Override
+            public void onReceive(Context context, Intent intent)
+            {
+                String action = intent.getAction();
+
+                if (action.equals(sparkle_.ACTION_HIDE))
+                {
+                    Log.i("Sparkle", "Hide all (service)");
+                    set_visible(false);
+                }
+                else if (action.equals(sparkle_.ACTION_SHOW))
+                {
+                    Log.i("Sparkle", "Show all (service)");
+                    set_visible(true);
+                }
+            }
+        };
+
     }
 
     public void set_enabled(boolean enabled)
@@ -69,11 +98,20 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
         if (enabled && !enabled_)
         {
             sparkle_.window_manager_.addView(this, this.params);
+
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(sparkle_.ACTION_HIDE);
+            filter.addAction(sparkle_.ACTION_SHOW);
+            sparkle_.registerReceiver(receiver_, filter);
+
             enabled_ = true;
         }
         else if (!enabled && enabled_)
         {
             sparkle_.window_manager_.removeView(this);
+
+            sparkle_.unregisterReceiver(receiver_);
+
             enabled_ = false;
         }
     }
@@ -270,4 +308,5 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
     WindowManager.LayoutParams params;
     boolean enabled_;
     boolean rmb_;
+    BroadcastReceiver receiver_;
 }

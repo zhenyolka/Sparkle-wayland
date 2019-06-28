@@ -30,18 +30,25 @@ sparkle_android_surface::sparkle_android_surface(were_object_pointer<sparkle_and
     {
         this_wop->window_ = window;
 
-        int w_width = ANativeWindow_getWidth(window);
-        int w_height = ANativeWindow_getHeight(window);
-        int w_format = ANativeWindow_getFormat(window);
+        if (window != nullptr)
+        {
+            int w_width = ANativeWindow_getWidth(window);
+            int w_height = ANativeWindow_getHeight(window);
+            int w_format = ANativeWindow_getFormat(window);
 
-        fprintf(stdout, "surface changed %p %dx%d %p\n", window, w_width, w_height, w_format);
+            fprintf(stdout, "surface changed %p %dx%d %p\n", window, w_width, w_height, w_format);
 
-        if (w_width != this_wop->view_->width() || w_height != this_wop->view_->height())
-            throw were_exception(WE_SIMPLE);
+            if (w_width != this_wop->view_->width() || w_height != this_wop->view_->height())
+                throw were_exception(WE_SIMPLE);
 
-        ANativeWindow_setBuffersGeometry(window, w_width, w_height, WINDOW_FORMAT);
+            ANativeWindow_setBuffersGeometry(window, w_width, w_height, WINDOW_FORMAT);
 
-        this_wop->commit();
+            this_wop->commit();
+        }
+        else
+        {
+            fprintf(stdout, "surface changed %p\n", window);
+        }
     });
 
     were::connect(surface, &sparkle_surface::attach, this_wop, [this_wop](struct wl_resource *buffer, int32_t x, int32_t y)

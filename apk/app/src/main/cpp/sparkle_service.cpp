@@ -61,7 +61,7 @@ public:
 
         sparkle_ = were_object_pointer<sparkle>(new sparkle());
         sparkle_android_ = were_object_pointer<sparkle_android>(new sparkle_android(sparkle_, service_));
-        //debug_ = were_object_pointer<were_debug>(new were_debug());
+        debug_ = were_object_pointer<were_debug>(new were_debug());
 
         service_->add_fd_listener(thread_->fd(), this);
     }

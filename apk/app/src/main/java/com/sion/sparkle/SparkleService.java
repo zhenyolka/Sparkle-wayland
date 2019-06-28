@@ -12,6 +12,7 @@ import android.content.Context;
 // Notification
 import android.app.NotificationManager;
 import android.app.Notification;
+import android.app.PendingIntent; // Actions
 
 // Queue
 import android.os.MessageQueue;
@@ -27,16 +28,25 @@ import android.view.WindowManager;
 // Display size
 import android.util.DisplayMetrics;
 
+// Broadcast receiver
+import android.content.BroadcastReceiver;
+import android.content.IntentFilter;
 
 import android.util.Log;
 
 
 public class SparkleService extends Service
 {
+    public static final String ACTION_HIDE = "com.sion.sparkle.ACTION_HIDE";
+    public static final String ACTION_SHOW = "com.sion.sparkle.ACTION_SHOW";
+    public static final String ACTION_STOP = "com.sion.sparkle.ACTION_STOP";
+
     @Override
     public void onDestroy()
     {
         Log.i("Sparkle", "Stopping service...");
+
+        unregisterReceiver(receiver_);
 
         notificationManager.cancel(0);
 
@@ -53,14 +63,62 @@ public class SparkleService extends Service
         notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
         window_manager_ = (WindowManager)getSystemService(Context.WINDOW_SERVICE);
 
+
+        Intent intent1 = new Intent();
+        intent1.setAction(ACTION_HIDE);
+        PendingIntent pendingIntent1 = PendingIntent.getBroadcast(this, 0, intent1, 0);
+
+        Intent intent2 = new Intent();
+        intent2.setAction(ACTION_SHOW);
+        PendingIntent pendingIntent2 = PendingIntent.getBroadcast(this, 0, intent2, 0);
+
+        Intent intent3 = new Intent();
+        intent3.setAction(ACTION_STOP);
+        PendingIntent pendingIntent3 = PendingIntent.getBroadcast(this, 0, intent3, 0);
+
+
         notification = new Notification.Builder(this)
             //.setContentTitle("Title")
             .setContentText("Sparkle")
             .setSmallIcon(R.drawable.notification_icon)
             .setOngoing(true)
+            .addAction(R.drawable.notification_icon, "Hide", pendingIntent1)
+            .addAction(R.drawable.notification_icon, "Show", pendingIntent2)
+            .addAction(R.drawable.notification_icon, "Stop", pendingIntent3)
             .build();
 
         notificationManager.notify(0, notification);
+
+        receiver_ = new BroadcastReceiver()
+        {
+            @Override
+            public void onReceive(Context context, Intent intent)
+            {
+                String action = intent.getAction();
+
+                if (action.equals(ACTION_HIDE))
+                {
+                    Log.i("Sparkle", "Hide all");
+                    //hide_all(user);
+                }
+                else if (action.equals(ACTION_SHOW))
+                {
+                    Log.i("Sparkle", "Show all");
+                    //show_all(user);
+                }
+                else if (action.equals(ACTION_STOP))
+                {
+                    Log.i("Sparkle", "Stop");
+                    stopSelf();
+                }
+            }
+        };
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ACTION_HIDE);
+        filter.addAction(ACTION_SHOW);
+        filter.addAction(ACTION_STOP);
+        registerReceiver(receiver_, filter);
 
         native_ = native_create();
     }
@@ -112,6 +170,7 @@ public class SparkleService extends Service
     Notification notification;
     long native_;
     WindowManager window_manager_;
+    BroadcastReceiver receiver_;
 
 
     static
@@ -129,6 +188,7 @@ public class SparkleService extends Service
         @Override
         public int onFileDescriptorEvents(FileDescriptor fd, int events)
         {
+            Log.i("Sparkle", "Event");
             fd_event(listener_);
             return EVENT_INPUT;
         }
