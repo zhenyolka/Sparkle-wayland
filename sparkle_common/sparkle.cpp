@@ -8,6 +8,7 @@
 
 #include <wayland-server.h>
 #include <sys/stat.h>
+#include "were_timer.h"
 
 #include <cstdio>
 
@@ -53,7 +54,12 @@ sparkle::sparkle()
     shell_ = were_object_pointer<sparkle_global<sparkle_shell>>(new sparkle_global<sparkle_shell>(display_, &wl_shell_interface, 1));
 
 
-    thread()->idle = [this](){flush();}; // FIXME
+    //thread()->idle = [this](){flush();}; // FIXME
+
+    were_object_pointer<were_timer> timer(new were_timer(1000 / 60));
+    timer->add_dependency(this_wop);
+    were::connect(timer, &were_timer::timeout, this_wop, [this_wop](){this_wop->flush();});
+    timer->start();
 }
 
 void sparkle::event(uint32_t events)

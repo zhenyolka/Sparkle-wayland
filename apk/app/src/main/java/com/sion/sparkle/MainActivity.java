@@ -16,6 +16,11 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.view.View; // Button callback
 
+// Script
+import java.io.File;
+import java.io.IOException;
+
+
 public class MainActivity extends Activity
 {
     @Override
@@ -39,6 +44,19 @@ public class MainActivity extends Activity
             {
                 Intent intent = new Intent(MainActivity.this, SparkleService.class);
                 startService(intent);
+
+                ProcessBuilder builder = new ProcessBuilder("/system/bin/sh", "/data/data/com.sion.sparkle/user.sh", "start");
+                builder.redirectOutput(new File("/data/data/com.sion.sparkle/user_log.txt"));
+                builder.redirectError(new File("/data/data/com.sion.sparkle/user_log.txt"));
+
+                try
+                {
+                    Runtime.getRuntime().exec("chmod 666 /data/data/com.sion.sparkle/user_log.txt");
+                    Process process = builder.start();
+                }
+                catch (IOException e)
+                {
+                }
             }
         });
 
@@ -51,6 +69,18 @@ public class MainActivity extends Activity
             {
                 Intent intent = new Intent(MainActivity.this, SparkleService.class);
                 stopService(intent);
+
+                ProcessBuilder builder = new ProcessBuilder("/system/bin/sh", "/data/data/com.sion.sparkle/user.sh", "stop");
+                builder.redirectOutput(new File("/data/data/com.sion.sparkle/user_log.txt"));
+                builder.redirectError(new File("/data/data/com.sion.sparkle/user_log.txt"));
+
+                try
+                {
+                    Process process = builder.start();
+                }
+                catch (IOException e)
+                {
+                }
             }
         });
 
