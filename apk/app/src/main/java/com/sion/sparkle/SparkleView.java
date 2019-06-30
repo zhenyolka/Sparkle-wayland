@@ -28,6 +28,10 @@ import android.content.IntentFilter;
 import android.content.Intent; // XXX Basic
 import android.content.Context; // XXX Basic
 
+// Orientation control
+import android.util.DisplayMetrics;
+import android.content.pm.ActivityInfo;
+
 
 public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
 {
@@ -46,10 +50,16 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
         else
             windowType = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT; // WindowManager.LayoutParams.TYPE_PHONE;
 
+        // WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+        int flags = 0;
+        flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL; // allow any pointer events outside of the window to be sent to the windows behind it
+        flags |= WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
+        //flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
+
         params = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT, 0, 0,
                 windowType,
-                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL, // WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                flags,
                 0);
         params.gravity = Gravity.CENTER;
         params.setTitle("Sparkle");
@@ -64,11 +74,21 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
         params.width = 100;
         params.height = 100;
 
+
         setVisibility(VISIBLE);
+
+
+
+        DisplayMetrics display_metrics = new DisplayMetrics();
+        sparkle_.window_manager_.getDefaultDisplay().getMetrics(display_metrics);
+        if (display_metrics.widthPixels > display_metrics.heightPixels)
+            params.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE;
+        else
+            params.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT;
+
 
         enabled_ = false;
         rmb_ = false;
-
 
 
         receiver_ = new BroadcastReceiver()
