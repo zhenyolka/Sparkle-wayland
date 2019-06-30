@@ -45,6 +45,7 @@ public:
 
 private:
     void event(uint32_t events);
+    void flush();
 
 private:
     were_object_pointer<sparkle_display> display_;

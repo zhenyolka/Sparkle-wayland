@@ -1,0 +1,87 @@
+<!doctype html>
+
+<html>
+
+<head>
+<title>Sparkle</title>
+<meta charset="UTF-8">
+</head>
+
+<body>
+<div>
+
+<b>Условия для запуска xwayland на sparkle:</b><br>
+<br>
+
+1. sparkle создает сокет (файл) <code>/data/data/com.sion.sparkle/wayland-0</code>.
+Если вы используете chroot, необходимо сделать этот файл доступным изнутри директории с дистрибутивом.
+Самый простой способ - это смонтировать <code>/data</code> в директорию дистрибутива:<br>
+<code>
+# в андроиде, от рута<br>
+mkdir -p путь_к_директории_дистрибутива/data<br>
+mount -o bind /data путь_к_директории_дистрибутива/data<br>
+</code>
+Но, если вы так сделаете, лучше бы вам об этом не забыть и не попытаться удалить дистрибутив командой
+<code>rm -rf</code>.<br>
+<br>
+
+2. wayland клиентам (включая xwayland) для работы нужна специальная директория (XDG_RUNTIME_DIR).
+Владельцем директории должен быть пользователь, который будет запускать клиент (не обязательно root).
+Лучше создать новую директорию на tmpfs.
+Если вы используете chroot, проверьте смонтировано ли у вас tmpfs на <code>/tmp</code>. Если нет, смонтируйте:<br>
+<code>
+# в дистрибутиве, от рута<br>
+mount -t tmpfs tmpfs /tmp<br>
+</code>
+Затем создайте директорию от имени вашего основного пользователя (название не обязательно должно быть "runtime"):<br>
+<code>
+# в дистрибутиве, от пользователя<br>
+mkdir /tmp/runtime<br>
+</code>
+Если клиент запускается в окружении андроида (без chroot), всё, в принципе, так же.
+Точкой монтирования tmpfs не обязательно должно быть <code>/tmp</code>.<br>
+<br>
+
+3. Создайте симлинк на <code>/data/data/com.sion.sparkle/wayland-0</code> в вашей XDG_RUNTIME_DIR:<br>
+<code>
+ln -s /data/data/com.sion.sparkle/wayland-0 /tmp/runtime/<br>
+</code>
+<br>
+
+4. К сожалению (вот облом) со включенным SELinux ничерта не работает.
+Если не передумали экспериментировать, отключите SELinux:<br>
+<code>
+# в андроиде, от рута<br>
+setenforce 0<br>
+</code>
+После запуска клиента можно включить SELinux обратно:<br>
+<code>
+# в андроиде, от рута<br>
+setenforce 1<br>
+</code>
+<br>
+
+5. Попробуйте запустить xwayland (или другой клиент):<br>
+<code>
+export XDG_RUNTIME_DIR=/tmp/runtime<br>
+Xwayland<br>
+</code>
+<br>
+
+6. А, ну еще важным условием для запуска xwayland является наличие установленного xwayland :)<br>
+<br>
+<br>
+
+<b>Отладка</b><br>
+<br>
+Лог в файле <code>/data/data/com.sion.sparkle/log.txt</code>.
+Читать его в реальном времени можно вот так:<br>
+<code>
+tail -f /data/data/com.sion.sparkle/log.txt<br>
+</code>
+<br>
+
+</div>
+</body>
+
+</html>

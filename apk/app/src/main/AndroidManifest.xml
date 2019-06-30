@@ -8,8 +8,7 @@
         android:allowBackup="true"
         android:label="Sparkle"
         android:icon="@drawable/ic_launcher"
-        android:supportsRtl="true"
-        android:debuggable="true">
+        android:supportsRtl="true">
 
         <activity android:name=".MainActivity">
             <intent-filter>

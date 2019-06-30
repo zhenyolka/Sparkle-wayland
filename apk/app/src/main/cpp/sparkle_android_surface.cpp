@@ -10,6 +10,9 @@
 
 #include <android/native_window_jni.h>
 
+#include <ctime>
+
+
 const int WINDOW_FORMAT = 5;
 
 sparkle_android_surface::~sparkle_android_surface()
@@ -107,6 +110,12 @@ void sparkle_android_surface::commit()
 
         if ((format == WL_SHM_FORMAT_ARGB8888 || format == WL_SHM_FORMAT_XRGB8888))
         {
+#if 0
+            struct timespec real1_, real2_;
+            clock_gettime(CLOCK_MONOTONIC, &real1_);
+#endif
+
+
             ANativeWindow_Buffer buffer;
 
             ARect rect;
@@ -137,6 +146,16 @@ void sparkle_android_surface::commit()
                 std::memcpy((char *)buffer.bits + buffer.stride * 4 * row, (char *)data + stride * row, line);
 
             ANativeWindow_unlockAndPost(window_);
+
+#if 0
+            clock_gettime(CLOCK_MONOTONIC, &real2_);
+
+            uint64_t elapsed_real = 0;
+            elapsed_real += 1000000000LL * (real2_.tv_sec - real1_.tv_sec);
+            elapsed_real += real2_.tv_nsec - real1_.tv_nsec;
+
+            fprintf(stdout, "elapsed %lu\n", elapsed_real);
+#endif
         }
         else
         {

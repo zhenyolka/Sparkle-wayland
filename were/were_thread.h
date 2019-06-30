@@ -5,6 +5,8 @@
 #include "were_object_pointer.h"
 #include <cstdint>
 #include <sys/epoll.h> // XXX
+#include <functional> // XXX
+
 
 class were_thread_fd_listener
 {
@@ -27,6 +29,8 @@ public:
 
     void process(int timeout = -1);
     void run();
+
+    std::function<void ()> idle; // FIXME
 
 private:
     static thread_local were_object_pointer<were_thread> current_thread_;

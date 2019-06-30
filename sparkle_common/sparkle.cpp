@@ -11,10 +11,11 @@
 
 #include <cstdio>
 
-#include "were_timer.h"
 
 sparkle::~sparkle()
 {
+    thread()->idle = nullptr; // FIXME
+
     shell_->collapse();
     seat_->collapse();
     compositor_->collapse();
@@ -51,15 +52,18 @@ sparkle::sparkle()
     seat_ = were_object_pointer<sparkle_global<sparkle_seat>>(new sparkle_global<sparkle_seat>(display_, &wl_seat_interface, 5));
     shell_ = were_object_pointer<sparkle_global<sparkle_shell>>(new sparkle_global<sparkle_shell>(display_, &wl_shell_interface, 1));
 
-    were_object_pointer<were_timer> timer(new were_timer(1000 / 60));
-    timer->add_dependency(this_wop);
-    were::connect(timer, &were_timer::timeout, this_wop, [this_wop](){this_wop->event(EPOLLIN);});
-    timer->start();
+
+    thread()->idle = [this](){flush();}; // FIXME
 }
 
 void sparkle::event(uint32_t events)
 {
     struct wl_event_loop *loop = wl_display_get_event_loop(display_->get());
+    wl_display_flush_clients(display_->get());
     wl_event_loop_dispatch(loop, 0);
+}
+
+void sparkle::flush()
+{
     wl_display_flush_clients(display_->get());
 }

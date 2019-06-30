@@ -6,26 +6,32 @@
 
 int object_count_ = 0;
 
+#ifdef X_DEBUG
 std::set<were_object *> object_set_;
 std::mutex object_set_mutex_;
 
 const char *state_normal = "NORMAL";
 const char *state_collapsed = "COLLAPSED";
 const char *state_lost = "LOST";
+#endif
 
 void were_debug_add_object(were_object *object__)
 {
+#ifdef X_DEBUG
     object_set_mutex_.lock();
     object_set_.insert(object__);
     object_set_mutex_.unlock();
+#endif
     object_count_ += 1;
 }
 
 void were_debug_remove_object(were_object *object__)
 {
+#ifdef X_DEBUG
     object_set_mutex_.lock();
     object_set_.erase(object__);
     object_set_mutex_.unlock();
+#endif
     object_count_ -= 1;
 }
 
@@ -36,6 +42,7 @@ int were_debug_object_count()
 
 void were_debug_print_objects()
 {
+#ifdef X_DEBUG
     object_set_mutex_.lock();
 
     fprintf(stdout, "%-20s%-45s%-5s%-10s\n", "Pointer", "Type", "RC", "State");
@@ -56,4 +63,5 @@ void were_debug_print_objects()
     }
 
     object_set_mutex_.unlock();
+#endif
 }

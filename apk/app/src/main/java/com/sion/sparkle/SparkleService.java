@@ -35,9 +35,9 @@ import android.content.IntentFilter;
 import android.util.Log;
 
 
-// TMP
-import java.util.Timer;
-import java.util.TimerTask;
+// Temporary
+//import java.util.Timer;
+//import java.util.TimerTask;
 
 
 public class SparkleService extends Service
@@ -128,15 +128,18 @@ public class SparkleService extends Service
         native_ = native_create();
 
 
+        /*
         Timer myTimer = new Timer();
-        myTimer.schedule(new TimerTask() {
+        myTimer.schedule(new TimerTask()
+        {
             @Override
-            public void run() {
-                Log.i("Sparkle", "TMR");
+            public void run()
+            {
+                Log.i("Sparkle", "Timer");
             }
 
         }, 0, 1000);
-
+        */
 
     }
 
@@ -175,7 +178,7 @@ public class SparkleService extends Service
     {
         DisplayMetrics display_metrics = new DisplayMetrics();
         window_manager_.getDefaultDisplay().getMetrics(display_metrics);
-        return display_metrics.heightPixels;
+        return display_metrics.heightPixels - 64;
     }
 
     public native long native_create();
@@ -205,6 +208,7 @@ public class SparkleService extends Service
         @Override
         public int onFileDescriptorEvents(FileDescriptor fd, int events)
         {
+            //Log.i("Sparkle", "Event");
             fd_event(listener_);
             return EVENT_INPUT;
         }

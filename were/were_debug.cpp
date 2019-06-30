@@ -39,11 +39,14 @@ void were_debug::timeout()
     real1_ = real2_;
     cpu1_ = cpu2_;
 
+#ifdef X_DEBUG
     printf("\033[2J"); // Clear screen
     printf("\033[0;0H"); // Move cursor
+#endif
 
-    fprintf(stdout, "CPU: %.1f%%\n", cpu_load);
-    fprintf(stdout, "Object count: %d%\n", were_debug_object_count());
+    fprintf(stdout, "CPU: %.1f%%, Object count: %d.\n", cpu_load, were_debug_object_count());
+#ifdef X_DEBUG
     were_debug_print_objects();
     fprintf(stdout, "\n");
+#endif
 }

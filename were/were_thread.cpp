@@ -52,6 +52,9 @@ void were_thread::process(int timeout)
         were_thread_fd_listener *listener = reinterpret_cast<were_thread_fd_listener *>(events[i].data.ptr);
         listener->event(events[i].events);
     }
+
+    if (idle)
+        idle();
 }
 
 void were_thread::run()

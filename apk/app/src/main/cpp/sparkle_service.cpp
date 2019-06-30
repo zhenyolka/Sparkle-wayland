@@ -71,7 +71,13 @@ public:
         sparkle_android_ = were_object_pointer<sparkle_android>(new sparkle_android(sparkle_, service_));
         debug_ = were_object_pointer<were_debug>(new were_debug());
 
-        service_->add_fd_listener(dup(thread_->fd()), this); // XXX Why we need dup() here?
+        /*
+         * XXX
+         * No idea why we need dup() here. But if we don't do this, android will close fd when
+         * we close MainActivity. Seems like its also possible to fix such behavior by storing ParcelFileDescritor
+         * on java side.
+         */
+        service_->add_fd_listener(dup(thread_->fd()), this);
 
         //int fd = open("/dev/pipe", O_RDONLY);
         //service_->add_fd_listener(dup(fd), this);
