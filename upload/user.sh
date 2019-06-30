@@ -18,7 +18,7 @@ user_install()
 {
     as_root $*
     cp $0 ${SPARKLE_HOME}/user.sh
-    chmod 666 ${SPARKLE_HOME}/user.sh
+    chmod 0755 ${SPARKLE_HOME}/user.sh
 }
 
 user_uninstall()

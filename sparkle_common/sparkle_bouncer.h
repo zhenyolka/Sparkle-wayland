@@ -43,7 +43,8 @@ public:
         T *object__ = reinterpret_cast<T *>(wl_resource_get_user_data(resource));
         were_object_pointer<T> object___(object__);
         were::emit(object___, method__, args...);
-        //wl_resource_destroy(resource); // FIXME
+
+        wl_resource_destroy(resource); // XXX
     }
 };
 

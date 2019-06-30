@@ -44,7 +44,7 @@ sparkle::sparkle()
 #endif
     wl_display_add_socket_auto(display_->get());
 #ifdef __ANDROID__
-    chmod("/data/data/com.sion.sparkle", 0777);
+    chmod("/data/data/com.sion.sparkle", 0755);
     chmod("/data/data/com.sion.sparkle/wayland-0", 0666);
 #endif
 

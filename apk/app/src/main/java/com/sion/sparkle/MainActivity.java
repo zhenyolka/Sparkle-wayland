@@ -45,9 +45,11 @@ public class MainActivity extends Activity
                 Intent intent = new Intent(MainActivity.this, SparkleService.class);
                 startService(intent);
 
-                ProcessBuilder builder = new ProcessBuilder("/system/bin/sh", "/data/data/com.sion.sparkle/user.sh", "start");
-                builder.redirectOutput(new File("/data/data/com.sion.sparkle/user_log.txt"));
-                builder.redirectError(new File("/data/data/com.sion.sparkle/user_log.txt"));
+                ProcessBuilder builder = new ProcessBuilder("/system/bin/sh", "-c",
+                    "/data/data/com.sion.sparkle/user.sh start > /data/data/com.sion.sparkle/user_log.txt");
+                // XXX Crashy
+                //builder.redirectOutput(new File("/data/data/com.sion.sparkle/user_log.txt"));
+                //builder.redirectError(new File("/data/data/com.sion.sparkle/user_log.txt"));
 
                 try
                 {
@@ -69,18 +71,6 @@ public class MainActivity extends Activity
             {
                 Intent intent = new Intent(MainActivity.this, SparkleService.class);
                 stopService(intent);
-
-                ProcessBuilder builder = new ProcessBuilder("/system/bin/sh", "/data/data/com.sion.sparkle/user.sh", "stop");
-                builder.redirectOutput(new File("/data/data/com.sion.sparkle/user_log.txt"));
-                builder.redirectError(new File("/data/data/com.sion.sparkle/user_log.txt"));
-
-                try
-                {
-                    Process process = builder.start();
-                }
-                catch (IOException e)
-                {
-                }
             }
         });
 
