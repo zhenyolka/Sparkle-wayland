@@ -5,9 +5,10 @@
 
 sparkle_resource::~sparkle_resource()
 {
-    wl_list_remove(&listener_.link);
-
-    // XXX
+    /* Can't call it from here. wl_resource is already destroyed.
+     * Probably, we don't have to call it at all.
+     */
+    //wl_list_remove(&instance->listener_.link);
 }
 
 sparkle_resource::sparkle_resource(struct wl_client *client, const struct wl_interface *interface, int version, uint32_t id, const void *implementation)
@@ -26,6 +27,8 @@ void sparkle_resource::destroy_(struct wl_listener *listener, void *data)
 {
     sparkle_resource *instance;
     instance = wl_container_of(listener, instance, listener_); // XXX
+
+    wl_list_remove(&instance->listener_.link); // XXX
 
     instance->resource_ = nullptr;
     were_object_pointer<sparkle_resource> instance__(instance);

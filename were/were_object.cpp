@@ -3,6 +3,7 @@
 #include <mutex>
 #include <cstdio>
 #include <typeinfo>
+#include "were_exception.h"
 
 int object_count_ = 0;
 
@@ -29,7 +30,25 @@ void were_debug_remove_object(were_object *object__)
 {
 #ifdef X_DEBUG
     object_set_mutex_.lock();
-    object_set_.erase(object__);
+
+    auto search = object_set_.find(object__);
+    if (search == object_set_.end())
+    {
+        const char *state;
+
+        if (object__->collapsed())
+            state = state_collapsed;
+        else if (object__->reference_count() == 0)
+            state = state_lost;
+        else
+            state = state_normal;
+
+        fprintf(stdout, "%-20p%-45.44s%-5d%-10s\n", object__, typeid(*object__).name(), object__->reference_count(), state);
+
+        throw were_exception(WE_SIMPLE);
+    }
+
+    object_set_.erase(search);
     object_set_mutex_.unlock();
 #endif
     object_count_ -= 1;

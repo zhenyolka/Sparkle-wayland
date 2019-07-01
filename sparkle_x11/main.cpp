@@ -29,8 +29,8 @@ int main(int argc, char *argv[])
             {
                 first_ = false;
 
-                sig.collapse();
-                debug.collapse();
+                //sig.collapse();
+                //debug.collapse();
                 sparkle_x11__.collapse();
                 sparkle__.collapse();
             }
@@ -48,11 +48,13 @@ int main(int argc, char *argv[])
     {
         thread->process(2000);
 
-        if (thread->reference_count() <= 2)
+        if (thread->reference_count() <= 5)
             break;
     }
 #endif
 
+    sig.collapse();
+    debug.collapse();
     thread.collapse();
 
     fprintf(stdout, "Done.\n");

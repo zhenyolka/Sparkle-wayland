@@ -12,6 +12,8 @@ sparkle_view::~sparkle_view()
 sparkle_view::sparkle_view(JNIEnv *env, were_object_pointer<sparkle_service> service) :
     sparkle_java_object(env, "com/sion/sparkle/SparkleView", "(Lcom/sion/sparkle/SparkleService;J)V", service->object1(), jlong(this))
 {
+    // XXX We store _this_ and need to increment reference count
+
     width_ = 100;
     height_ = 100;
 }
@@ -20,6 +22,11 @@ void sparkle_view::set_enabled(bool enabled)
 {
     jmethodID id = env()->GetMethodID(class1(), "set_enabled", "(Z)V");
     env()->CallVoidMethod(object1(), id, jboolean(enabled));
+
+    if (enabled) // XXX Yes, we need to increment it, but not here
+        increment_reference_count();
+    else
+        decrement_reference_count();
 }
 
 void sparkle_view::set_visible(bool visible)

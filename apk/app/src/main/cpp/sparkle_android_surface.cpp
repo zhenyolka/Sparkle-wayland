@@ -71,16 +71,19 @@ sparkle_android_surface::sparkle_android_surface(were_object_pointer<sparkle_and
 
     were::connect(surface, &sparkle_surface::frame, this_wop, [this_wop](uint32_t callback)
     {
-        were_object_pointer<sparkle_callback> callback__(new sparkle_callback(this_wop->surface_->client(), 1, callback));
-
-        were::connect(this_wop->surface_, &sparkle_surface::commit, callback__, [callback__]()
+        if (this_wop->callback_ != nullptr)
         {
-            callback__->send_done(sparkle::current_msecs());
-            wl_resource_destroy(callback__->resource()); // FIXME
-        });
+            fprintf(stdout, "callback_ != nullptr\n");
+            wl_callback_send_done(this_wop->callback_, sparkle::current_msecs());
+            wl_resource_destroy(this_wop->callback_); // XXX
+            this_wop->callback_ = nullptr;
+        }
+
+        this_wop->callback_ = wl_resource_create(this_wop->surface_->client(), &wl_callback_interface, 1, callback);
     });
 
     buffer_ = nullptr;
+    callback_ = nullptr;
 }
 
 void sparkle_android_surface::commit()
@@ -165,6 +168,13 @@ void sparkle_android_surface::commit()
     else
     {
             // XXX Error
+    }
+
+    if (callback_ != nullptr)
+    {
+        wl_callback_send_done(callback_, sparkle::current_msecs());
+        wl_resource_destroy(callback_); // XXX
+        callback_ = nullptr;
     }
 }
 

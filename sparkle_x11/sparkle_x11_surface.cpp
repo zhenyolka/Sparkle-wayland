@@ -1,7 +1,6 @@
 #include "sparkle_x11_surface.h"
 #include "sparkle_x11.h"
 #include "sparkle_surface.h"
-#include "sparkle_callback.h"
 #include <X11/Xutil.h> // XImage
 #include <linux/input-event-codes.h>
 
@@ -56,16 +55,19 @@ sparkle_x11_surface::sparkle_x11_surface(were_object_pointer<sparkle_x11> x11, w
 
     were::connect(surface, &sparkle_surface::frame, this_wop, [this_wop](uint32_t callback)
     {
-        were_object_pointer<sparkle_callback> callback__(new sparkle_callback(this_wop->surface_->client(), 1, callback));
-
-        were::connect(this_wop->surface_, &sparkle_surface::commit, callback__, [callback__]()
+        if (this_wop->callback_ != nullptr)
         {
-            callback__->send_done(sparkle::current_msecs());
-            wl_resource_destroy(callback__->resource()); // FIXME
-        });
+            fprintf(stdout, "callback_ != nullptr\n");
+            wl_callback_send_done(this_wop->callback_, sparkle::current_msecs());
+            wl_resource_destroy(this_wop->callback_); // XXX
+            this_wop->callback_ = nullptr;
+        }
+
+        this_wop->callback_ = wl_resource_create(this_wop->surface_->client(), &wl_callback_interface, 1, callback);
     });
 
     buffer_ = nullptr;
+    callback_ = nullptr;
 }
 
 void sparkle_x11_surface::process(XEvent event)
@@ -138,5 +140,12 @@ void sparkle_x11_surface::commit()
     else
     {
             // Error
+    }
+
+    if (callback_ != nullptr)
+    {
+        wl_callback_send_done(callback_, sparkle::current_msecs());
+        wl_resource_destroy(callback_); // XXX
+        callback_ = nullptr;
     }
 }

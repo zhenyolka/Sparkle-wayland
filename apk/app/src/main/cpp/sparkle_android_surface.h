@@ -33,7 +33,8 @@ private:
 private:
     were_object_pointer<sparkle_surface> surface_;
     were_object_pointer<sparkle_view> view_;
-    struct wl_resource *buffer_; // XXX
+    struct wl_resource *buffer_; // XXX Temporary
+    struct wl_resource *callback_; // XX Temporary
     ANativeWindow *window_;
 };
 

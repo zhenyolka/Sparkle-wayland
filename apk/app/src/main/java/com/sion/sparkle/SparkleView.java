@@ -164,7 +164,7 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height)
     {
         Log.i("Sparkle", "Surface changed");
-        if (user == 0) {return;}
+        if (!enabled_) {return;}
         surface_changed(user, holder.getSurface());
     }
 
@@ -172,7 +172,7 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
     public void surfaceCreated(SurfaceHolder holder)
     {
         Log.i("Sparkle", "Surface created");
-        if (user == 0) {return;}
+        if (!enabled_) {return;}
         surface_changed(user, holder.getSurface());
     }
 
@@ -180,7 +180,7 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
     public void surfaceDestroyed(SurfaceHolder holder)
     {
         Log.i("Sparkle", "Surface destroyed");
-        if (user == 0) {return;}
+        if (!enabled_) {return;}
         surface_changed(user, null);
     }
 
@@ -191,7 +191,7 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
 
     public boolean onMotionEvent(MotionEvent event)
     {
-        if (user == 0) {return false;}
+        if (!enabled_) {return false;}
 
         int source = event.getSource();
 
@@ -264,7 +264,7 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event)
     {
-        if (user == 0) {return false;}
+        if (!enabled_) {return false;}
 
         if (keyCode == KeyEvent.KEYCODE_BACK)
         {
@@ -288,7 +288,7 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event)
     {
-        if (user == 0) {return false;}
+        if (!enabled_) {return false;}
 
         if (keyCode == KeyEvent.KEYCODE_BACK)
         {
