@@ -36,6 +36,18 @@ void sparkle_service::remove_fd_listener(int fd)
     env()->CallVoidMethod(object1(), id, jint(fd));
 }
 
+void sparkle_service::add_idle_handler(sparkle_service_idle_handler *handler)
+{
+    jmethodID id = env()->GetMethodID(class1(), "add_idle_handler", "(J)V");
+    env()->CallVoidMethod(object1(), id, jlong(handler));
+}
+
+void sparkle_service::remove_idle_handler(sparkle_service_idle_handler *handler)
+{
+    jmethodID id = env()->GetMethodID(class1(), "remove_idle_handler", "(J)V");
+    env()->CallVoidMethod(object1(), id, jlong(handler));
+}
+
 int sparkle_service::display_width()
 {
     jmethodID id = env()->GetMethodID(class1(), "display_width", "()I");
@@ -50,12 +62,13 @@ int sparkle_service::display_height()
     return x;
 }
 
-class sparkle_native : public sparkle_service_fd_listener
+class sparkle_native : public sparkle_service_fd_listener, public sparkle_service_idle_handler
 {
 public:
 
     virtual ~sparkle_native()
     {
+        service_->remove_idle_handler(this);
         service_->remove_fd_listener(thread_->fd());
     }
 
@@ -75,12 +88,18 @@ public:
          * on java side.
          */
         service_->add_fd_listener(dup(thread_->fd()), this);
+        service_->add_idle_handler(this);
     }
 
     void event()
     {
         thread_->process(0);
     };
+
+    void idle()
+    {
+        thread_->idle();
+    }
 
 private:
     sparkle_android_logger logger_;
@@ -110,8 +129,15 @@ Java_com_sion_sparkle_SparkleService_native_1destroy(JNIEnv *env, jobject instan
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_sion_sparkle_SparkleService_fd_1event(JNIEnv *env, jobject instance, jlong listener)
+Java_com_sion_sparkle_SparkleService_fd_1event(JNIEnv *env, jobject instance, jlong user)
 {
-    sparkle_service_fd_listener *listener__ = reinterpret_cast<sparkle_service_fd_listener *>(listener);
+    sparkle_service_fd_listener *listener__ = reinterpret_cast<sparkle_service_fd_listener *>(user);
     listener__->event();
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_sion_sparkle_SparkleService_idle_1event(JNIEnv *env, jobject instance, jlong user)
+{
+    sparkle_service_idle_handler *handler__ = reinterpret_cast<sparkle_service_idle_handler *>(user);
+    handler__->idle();
 }

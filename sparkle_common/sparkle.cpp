@@ -8,14 +8,17 @@
 
 #include <wayland-server.h>
 #include <sys/stat.h>
-#include "were_timer.h"
+
 
 #include <cstdio>
 
 
 sparkle::~sparkle()
 {
-    thread()->idle = nullptr; // FIXME
+    thread()->remove_idle_handler(this);
+    struct wl_event_loop *loop = wl_display_get_event_loop(display_->get());
+    int fd = wl_event_loop_get_fd(loop);
+    thread()->remove_fd_listener(fd);
 
     shell_->collapse();
     seat_->collapse();
@@ -34,10 +37,6 @@ sparkle::sparkle()
         wl_display_destroy(display);
     });
 
-    struct wl_event_loop *loop = wl_display_get_event_loop(display_->get());
-    int fd = wl_event_loop_get_fd(loop);
-    thread()->add_fd_listener(fd, EPOLLIN | EPOLLET, this);
-
     wl_display_init_shm(display_->get());
 #ifdef __ANDROID__
     setenv("XDG_RUNTIME_DIR", "/data/data/com.sion.sparkle", 1);
@@ -53,13 +52,10 @@ sparkle::sparkle()
     seat_ = were_object_pointer<sparkle_global<sparkle_seat>>(new sparkle_global<sparkle_seat>(display_, &wl_seat_interface, 5));
     shell_ = were_object_pointer<sparkle_global<sparkle_shell>>(new sparkle_global<sparkle_shell>(display_, &wl_shell_interface, 1));
 
-
-    //thread()->idle = [this](){flush();}; // FIXME
-
-    were_object_pointer<were_timer> timer(new were_timer(1000 / 60));
-    timer->add_dependency(this_wop);
-    were::connect(timer, &were_timer::timeout, this_wop, [this_wop](){this_wop->flush();});
-    timer->start();
+    struct wl_event_loop *loop = wl_display_get_event_loop(display_->get());
+    int fd = wl_event_loop_get_fd(loop);
+    thread()->add_fd_listener(fd, EPOLLIN | EPOLLET, this);
+    thread()->add_idle_handler(this);
 }
 
 void sparkle::event(uint32_t events)
@@ -69,7 +65,7 @@ void sparkle::event(uint32_t events)
     wl_event_loop_dispatch(loop, 0);
 }
 
-void sparkle::flush()
+void sparkle::idle()
 {
     wl_display_flush_clients(display_->get());
 }

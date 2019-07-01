@@ -19,7 +19,7 @@ class sparkle_seat;
 class sparkle_shell;
 
 
-class sparkle : public were_object_2, public were_thread_fd_listener
+class sparkle : public were_object_2, public were_thread_fd_listener, public were_thread_idle_handler
 {
 public:
     ~sparkle();
@@ -45,7 +45,7 @@ public:
 
 private:
     void event(uint32_t events);
-    void flush();
+    void idle();
 
 private:
     were_object_pointer<sparkle_display> display_;

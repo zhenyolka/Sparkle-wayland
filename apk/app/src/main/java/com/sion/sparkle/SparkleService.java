@@ -32,6 +32,11 @@ import android.util.DisplayMetrics;
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
 
+// Map
+import java.util.Map;
+import java.util.HashMap;
+
+
 import android.util.Log;
 
 
@@ -150,11 +155,11 @@ public class SparkleService extends Service
     }
 
     @Keep
-    public void add_fd_listener(int fd, long listener)
+    public void add_fd_listener(int fd, long user)
     {
         ParcelFileDescriptor pfd = ParcelFileDescriptor.adoptFd(fd);
         FileDescriptor fd__ = pfd.getFileDescriptor();
-        queue_.addOnFileDescriptorEventListener(fd__, MessageQueue.OnFileDescriptorEventListener.EVENT_INPUT, new MyOnFileDescriptorEventListener(listener));
+        queue_.addOnFileDescriptorEventListener(fd__, MessageQueue.OnFileDescriptorEventListener.EVENT_INPUT, new MyOnFileDescriptorEventListener(user));
         Log.i("Sparkle", "fd listener added");
     }
 
@@ -165,6 +170,26 @@ public class SparkleService extends Service
         FileDescriptor fd__ = pfd.getFileDescriptor();
         queue_.removeOnFileDescriptorEventListener(fd__);
         Log.i("Sparkle", "fd listener removed");
+    }
+
+    @Keep
+    public void add_idle_handler(long user)
+    {
+        MyIdleHandler handler = new MyIdleHandler(user);
+        queue_.addIdleHandler(handler);
+        idle_handlers_.put(user, handler);
+
+        Log.i("Sparkle", "idle handler added");
+    }
+
+    @Keep
+    public void remove_idle_handler(long user)
+    {
+        MyIdleHandler handler = idle_handlers_.get(user);
+        queue_.removeIdleHandler(handler);
+        idle_handlers_.remove(user);
+
+        Log.i("Sparkle", "idle handler removed");
     }
 
     public int display_width()
@@ -183,7 +208,8 @@ public class SparkleService extends Service
 
     public native long native_create();
     public native void native_destroy(long native__);
-    public native void fd_event(long listener);
+    public native void fd_event(long user);
+    public native void idle_event(long user);
 
     MessageQueue queue_;
     NotificationManager notificationManager;
@@ -191,6 +217,8 @@ public class SparkleService extends Service
     long native_;
     WindowManager window_manager_;
     BroadcastReceiver receiver_;
+    //Map<long, MyOnFileDescriptorEventListener> on_file_descriptor_event_listeners_;
+    Map<Long, MyIdleHandler> idle_handlers_ = new HashMap<Long, MyIdleHandler>();
 
 
     static
@@ -200,19 +228,35 @@ public class SparkleService extends Service
 
     public class MyOnFileDescriptorEventListener implements MessageQueue.OnFileDescriptorEventListener
     {
-        MyOnFileDescriptorEventListener(long listener)
+        MyOnFileDescriptorEventListener(long user)
         {
-            listener_ = listener;
+            user_ = user;
         }
 
         @Override
         public int onFileDescriptorEvents(FileDescriptor fd, int events)
         {
-            //Log.i("Sparkle", "Event");
-            fd_event(listener_);
+            fd_event(user_);
             return EVENT_INPUT;
         }
 
-        long listener_;
+        long user_;
+    }
+
+    public class MyIdleHandler implements MessageQueue.IdleHandler
+    {
+        MyIdleHandler(long user)
+        {
+            user_ = user;
+        }
+
+        @Override
+        public boolean queueIdle()
+        {
+            idle_event(user_);
+            return true;
+        }
+
+        long user_;
     }
 }

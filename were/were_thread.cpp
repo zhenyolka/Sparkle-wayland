@@ -53,12 +53,27 @@ void were_thread::process(int timeout)
         listener->event(events[i].events);
     }
 
-    if (idle)
-        idle();
+    idle();
 }
 
 void were_thread::run()
 {
     for (;;)
         process(-1);
+}
+
+void were_thread::add_idle_handler(were_thread_idle_handler *handler)
+{
+    idle_handlers_.insert(handler);
+}
+
+void were_thread::remove_idle_handler(were_thread_idle_handler *handler)
+{
+    idle_handlers_.erase(handler);
+}
+
+void were_thread::idle()
+{
+    for (auto it = idle_handlers_.begin(); it != idle_handlers_.end(); ++it)
+        (*it)->idle();
 }
