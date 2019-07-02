@@ -10,7 +10,6 @@
 
 #include <android/native_window_jni.h>
 
-#include <ctime>
 
 
 const int WINDOW_FORMAT = 5;
@@ -82,6 +81,11 @@ sparkle_android_surface::sparkle_android_surface(were_object_pointer<sparkle_and
         this_wop->callback_ = wl_resource_create(this_wop->surface_->client(), &wl_callback_interface, 1, callback);
     });
 
+    were::connect(surface, &sparkle_surface::damage, this_wop, [this_wop](int32_t x, int32_t y, int32_t width, int32_t height)
+    {
+        this_wop->damage_.add(x, y, x + width, y + height);
+    });
+
     buffer_ = nullptr;
     callback_ = nullptr;
 }
@@ -113,19 +117,13 @@ void sparkle_android_surface::commit()
 
         if ((format == WL_SHM_FORMAT_ARGB8888 || format == WL_SHM_FORMAT_XRGB8888))
         {
-#if 0
-            struct timespec real1_, real2_;
-            clock_gettime(CLOCK_MONOTONIC, &real1_);
-#endif
-
-
             ANativeWindow_Buffer buffer;
 
             ARect rect;
-            rect.left = 0;
-            rect.top = 0;
-            rect.right = width;
-            rect.bottom = height;
+            rect.left = damage_.x1();
+            rect.top = damage_.y1();
+            rect.right = damage_.x2();
+            rect.bottom = damage_.y2();
 
             if (ANativeWindow_lock(window_, &buffer, &rect) != 0)
                 throw were_exception(WE_SIMPLE);
@@ -133,32 +131,29 @@ void sparkle_android_surface::commit()
             if (buffer.width != width || buffer.height != height)
                 throw were_exception(WE_SIMPLE);
 
-            int rows = 0;
-            if (height < buffer.height)
-                rows = height;
-            else
-                rows = buffer.height;
 
-            int line = 0;
-            if (stride < buffer.stride * 4)
-                line = stride;
-            else
-                line = buffer.stride * 4;
 
-            for (int row = 0; row < rows; ++row)
-                std::memcpy((char *)buffer.bits + buffer.stride * 4 * row, (char *)data + stride * row, line);
+            char *source = reinterpret_cast<char *>(data);
+            char *destination = reinterpret_cast<char *>(buffer.bits);
+            int source_stride_bytes = stride;
+            int destination_stride_bytes = buffer.stride * 4;
+            int offset = damage_.x1() * 4;
+            int length = damage_.width() * 4;
+
+            for (int y = damage_.y1(); y < damage_.y2(); ++y)
+            {
+                std::memcpy
+                (
+                    destination + destination_stride_bytes * y + offset,
+                    source + source_stride_bytes * y + offset,
+                    length
+                );
+            }
+
 
             ANativeWindow_unlockAndPost(window_);
 
-#if 0
-            clock_gettime(CLOCK_MONOTONIC, &real2_);
-
-            uint64_t elapsed_real = 0;
-            elapsed_real += 1000000000LL * (real2_.tv_sec - real1_.tv_sec);
-            elapsed_real += real2_.tv_nsec - real1_.tv_nsec;
-
-            fprintf(stdout, "elapsed %lu\n", elapsed_real);
-#endif
+            damage_.clear();
         }
         else
         {
