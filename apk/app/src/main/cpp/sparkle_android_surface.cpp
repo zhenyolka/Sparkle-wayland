@@ -45,7 +45,7 @@ sparkle_android_surface::sparkle_android_surface(were_object_pointer<sparkle_and
 
             ANativeWindow_setBuffersGeometry(window, w_width, w_height, WINDOW_FORMAT);
 
-            this_wop->commit();
+            this_wop->commit(true);
         }
         else
         {
@@ -90,7 +90,7 @@ sparkle_android_surface::sparkle_android_surface(were_object_pointer<sparkle_and
     callback_ = nullptr;
 }
 
-void sparkle_android_surface::commit()
+void sparkle_android_surface::commit(bool full)
 {
     if (buffer_ == nullptr)
         return;
@@ -117,6 +117,9 @@ void sparkle_android_surface::commit()
 
         if ((format == WL_SHM_FORMAT_ARGB8888 || format == WL_SHM_FORMAT_XRGB8888))
         {
+            if (full)
+                damage_.add(0, 0, width, height);
+
             ANativeWindow_Buffer buffer;
 
             ARect rect;

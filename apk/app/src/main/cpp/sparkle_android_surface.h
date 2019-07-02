@@ -84,7 +84,7 @@ public:
     void register_touch(were_object_pointer<sparkle_touch> touch);
 
 private:
-    void commit();
+    void commit(bool full = false);
 
 private:
     were_object_pointer<sparkle_surface> surface_;
