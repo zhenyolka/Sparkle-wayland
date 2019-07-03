@@ -39,7 +39,7 @@ sparkle_android_surface::sparkle_android_surface(were_object_pointer<sparkle_and
             int w_format = ANativeWindow_getFormat(window);
 
 #if X_DEBUG
-            fprintf(stdout, "surface changed %p %dx%d %p (view %dx%d)\n", window, w_width, w_height, w_format,
+            fprintf(stdout, "surface changed %p %dx%d-%d (view %dx%d)\n", window, w_width, w_height, w_format,
                 this_wop->view_->width(), this_wop->view_->height());
 #endif
 
@@ -140,7 +140,7 @@ void sparkle_android_surface::commit(bool full)
             rect.bottom = damage_.y2();
 
 #if X_DEBUG
-            fprintf(stdout, "locking win %dx%d-%d region %d %d %d %d\n", w_width, w_height, w_format
+            fprintf(stdout, "locking win %dx%d-%d region %d %d %d %d\n", w_width, w_height, w_format,
                 rect.left, rect.right, rect.top, rect.bottom);
 #endif
 
