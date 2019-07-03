@@ -19,8 +19,6 @@ sparkle_android::sparkle_android(were_object_pointer<sparkle> sparkle, were_obje
 
     were::connect(sparkle->output(), &sparkle_global<sparkle_output>::instance, this_wop, [this_wop](were_object_pointer<sparkle_output> output)
     {
-        fprintf(stdout, "output\n");
-
         int width = this_wop->service_->display_width();
         int height = this_wop->service_->display_height();
         int mm_width = width * 254 / 960;
@@ -41,8 +39,6 @@ sparkle_android::sparkle_android(were_object_pointer<sparkle> sparkle, were_obje
 
     were::connect(sparkle->shell(), &sparkle_global<sparkle_shell>::instance, this_wop, [this_wop](were_object_pointer<sparkle_shell> shell)
     {
-        fprintf(stdout, "shell\n");
-
         were::connect(shell, &sparkle_shell::shell_surface_created, this_wop, [this_wop](were_object_pointer<sparkle_shell_surface> shell_surface, were_object_pointer<sparkle_surface> surface)
         {
             were_object_pointer<sparkle_android_surface> android_surface(new sparkle_android_surface(this_wop, surface));
@@ -69,8 +65,6 @@ sparkle_android::sparkle_android(were_object_pointer<sparkle> sparkle, were_obje
 
     were::connect(sparkle->seat(), &sparkle_global<sparkle_seat>::instance, this_wop, [this_wop](were_object_pointer<sparkle_seat> seat)
     {
-        fprintf(stdout, "seat\n");
-
         were::connect(seat, &sparkle_seat::keyboard_created, this_wop, [this_wop](were_object_pointer<sparkle_keyboard> keyboard)
         {
             were::connect(this_wop, &sparkle_android::android_surface_created, keyboard, [keyboard](were_object_pointer<sparkle_android_surface> android_surface)

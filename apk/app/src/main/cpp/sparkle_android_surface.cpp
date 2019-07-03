@@ -38,11 +38,6 @@ sparkle_android_surface::sparkle_android_surface(were_object_pointer<sparkle_and
             int w_height = ANativeWindow_getHeight(window);
             int w_format = ANativeWindow_getFormat(window);
 
-#if X_DEBUG
-            fprintf(stdout, "surface changed %p %dx%d-%d (view %dx%d)\n", window, w_width, w_height, w_format,
-                this_wop->view_->width(), this_wop->view_->height());
-#endif
-
             if (w_width != this_wop->view_->width() || w_height != this_wop->view_->height())
                 throw were_exception(WE_SIMPLE);
 
@@ -53,9 +48,6 @@ sparkle_android_surface::sparkle_android_surface(were_object_pointer<sparkle_and
         }
         else
         {
-#if X_DEBUG
-            fprintf(stdout, "surface changed %p\n", window);
-#endif
         }
     });
 
@@ -80,7 +72,7 @@ sparkle_android_surface::sparkle_android_surface(were_object_pointer<sparkle_and
         {
             fprintf(stdout, "callback_ != nullptr\n");
             wl_callback_send_done(this_wop->callback_, sparkle::current_msecs());
-            wl_resource_destroy(this_wop->callback_); // XXX
+            wl_resource_destroy(this_wop->callback_);
             this_wop->callback_ = nullptr;
         }
 
@@ -103,7 +95,6 @@ void sparkle_android_surface::commit(bool full)
     if (buffer_ != nullptr)
         shm_buffer = wl_shm_buffer_get(buffer_);
 
-
     if (shm_buffer != nullptr)
     {
         uint32_t width = wl_shm_buffer_get_width(shm_buffer);
@@ -114,22 +105,12 @@ void sparkle_android_surface::commit(bool full)
 
         if (view_->width() != width || view_->height() != height)
         {
-#if X_DEBUG
-            fprintf(stdout, "resize view %dx%d -> %dx%d\n", view_->width(), view_->height(), width, height);
-#endif
             view_->set_size(width, height);
-            return;
         }
-
-        if ((format == WL_SHM_FORMAT_ARGB8888 || format == WL_SHM_FORMAT_XRGB8888) && window_ != nullptr)
+        else if ((format == WL_SHM_FORMAT_ARGB8888 || format == WL_SHM_FORMAT_XRGB8888) && window_ != nullptr)
         {
             if (full)
                 damage_.add(0, 0, width, height);
-
-
-            int w_width = ANativeWindow_getWidth(window_);
-            int w_height = ANativeWindow_getHeight(window_);
-            int w_format = ANativeWindow_getFormat(window_);
 
             ANativeWindow_Buffer buffer;
 
@@ -139,10 +120,6 @@ void sparkle_android_surface::commit(bool full)
             rect.right = damage_.x2();
             rect.bottom = damage_.y2();
 
-#if X_DEBUG
-            fprintf(stdout, "locking win %dx%d-%d region %d %d %d %d\n", w_width, w_height, w_format,
-                rect.left, rect.right, rect.top, rect.bottom);
-#endif
 
             // XXX ANativeWindow_acquire
             if (ANativeWindow_lock(window_, &buffer, &rect) != 0)
@@ -175,18 +152,12 @@ void sparkle_android_surface::commit(bool full)
 
             damage_.clear();
         }
-        else
-        {
-        }
-    }
-    else
-    {
     }
 
     if (callback_ != nullptr)
     {
         wl_callback_send_done(callback_, sparkle::current_msecs());
-        wl_resource_destroy(callback_); // XXX
+        wl_resource_destroy(callback_);
         callback_ = nullptr;
     }
 }

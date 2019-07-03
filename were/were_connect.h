@@ -16,8 +16,6 @@ uint64_t next_id();
 template <typename SourceType, typename SignalType, typename ContextType>
 void break_(SourceType source, SignalType signal, ContextType context, uint64_t pc_id, uint64_t sb_id, uint64_t cb_id)
 {
-    //fprintf(stdout, "DISCONNECT %p %p\n", source.operator->(), context.operator->());
-
     auto signal__ = &((source.operator->())->*signal);
     signal__->remove_connection(pc_id);
 
@@ -37,8 +35,6 @@ void connect(   were_object_pointer<SourceType> source,
 )
 {
     // XXX Thread.
-
-    //fprintf(stdout, "CONNECT %p %p\n", source.operator->(), context.operator->());
 
     uint64_t pc_id = next_id();
     uint64_t sb_id = next_id();

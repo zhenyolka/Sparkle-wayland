@@ -37,8 +37,6 @@ sparkle_x11::sparkle_x11(were_object_pointer<sparkle> sparkle)
 
     were::connect(sparkle->output(), &sparkle_global<sparkle_output>::instance, sparkle->output(), [](were_object_pointer<sparkle_output> output)
     {
-        fprintf(stdout, "output\n");
-
         int width = 1280;
         int height = 720;
         int mm_width = width * 254 / 960;
@@ -58,8 +56,6 @@ sparkle_x11::sparkle_x11(were_object_pointer<sparkle> sparkle)
 #if 0
     were::connect(sparkle->compositor(), &sparkle_global<sparkle_compositor>::instance, this_wop, [this_wop](were_object_pointer<sparkle_compositor> compositor)
     {
-        fprintf(stdout, "compositor\n");
-
         were::connect(compositor, &sparkle_compositor::surface_created, this_wop, [this_wop](were_object_pointer<sparkle_surface> surface)
         {
             were_object_pointer<sparkle_x11_surface> x11_surface(new sparkle_x11_surface(this_wop, surface));
@@ -81,8 +77,6 @@ sparkle_x11::sparkle_x11(were_object_pointer<sparkle> sparkle)
 #else
     were::connect(sparkle->shell(), &sparkle_global<sparkle_shell>::instance, this_wop, [this_wop](were_object_pointer<sparkle_shell> shell)
     {
-        fprintf(stdout, "shell\n");
-
         were::connect(shell, &sparkle_shell::shell_surface_created, this_wop, [this_wop](were_object_pointer<sparkle_shell_surface> shell_surface, were_object_pointer<sparkle_surface> surface)
         {
             were_object_pointer<sparkle_x11_surface> x11_surface(new sparkle_x11_surface(this_wop, surface));
@@ -105,8 +99,6 @@ sparkle_x11::sparkle_x11(were_object_pointer<sparkle> sparkle)
 
     were::connect(sparkle->seat(), &sparkle_global<sparkle_seat>::instance, this_wop, [this_wop](were_object_pointer<sparkle_seat> seat)
     {
-        fprintf(stdout, "seat\n");
-
         were::connect(seat, &sparkle_seat::keyboard_created, this_wop, [this_wop](were_object_pointer<sparkle_keyboard> keyboard)
         {
             were::connect(this_wop, &sparkle_x11::x11_surface_created, keyboard, [keyboard](were_object_pointer<sparkle_x11_surface> x11_surface)
@@ -159,7 +151,7 @@ void sparkle_x11::connect_keyboard(were_object_pointer<sparkle_x11_surface> x11_
         keyboard->key_release(code);
     });
 
-    fprintf(stdout, "keyboard connected\n");
+    fprintf(stdout, "keyboard registered\n");
 }
 
 void sparkle_x11::connect_pointer(were_object_pointer<sparkle_x11_surface> x11_surface, were_object_pointer<sparkle_pointer> pointer)
@@ -192,5 +184,5 @@ void sparkle_x11::connect_pointer(were_object_pointer<sparkle_x11_surface> x11_s
         pointer->leave(x11_surface->surface());
     });
 
-    fprintf(stdout, "pointer connected\n");
+    fprintf(stdout, "pointer registered\n");
 }
