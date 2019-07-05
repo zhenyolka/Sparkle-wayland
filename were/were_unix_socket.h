@@ -20,6 +20,7 @@ public:
 
 signals:
     were_signal<void ()> ready_read;
+    were_signal<void ()> disconnected;
 
 private:
     void event(uint32_t events);

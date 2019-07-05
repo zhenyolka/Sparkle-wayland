@@ -6,6 +6,8 @@
 
 sparkle_audio::~sparkle_audio()
 {
+    stop();
+
     (*playerObject)->Destroy(playerObject);
     (*outputmixObject)->Destroy(outputmixObject);
     (*engineObject)->Destroy(engineObject);
@@ -71,18 +73,11 @@ sparkle_audio::sparkle_audio()
     check_result(result);
 
 #if 1
-    state_ = SL_PLAYSTATE_STOPPED; // SL_PLAYSTATE_STOPPED
+    state_ = SL_PLAYSTATE_STOPPED;
     result = (*playerPlay)->SetPlayState(playerPlay, state_);
     check_result(result);
 #endif
 
-#if 0
-    result = (*playerBufferqueue)->Clear(playerBufferqueue);
-    checkResult(result);
-
-    SLresult result = (*playerBufferqueue)->Enqueue(playerBufferqueue, data, r_size);
-    checkResult(result);
-#endif
 
     MAKE_THIS_WOP
 
@@ -97,9 +92,18 @@ sparkle_audio::sparkle_audio()
         {
             this_wop->socket_ = this_wop->server_->accept();
 
+            fprintf(stdout, "audio connected\n");
+
             were::connect(this_wop->socket_, &were_unix_socket::ready_read, this_wop, [this_wop]()
             {
                 this_wop->read();
+            });
+
+            were::connect(this_wop->socket_, &were_unix_socket::disconnected, this_wop, [this_wop]()
+            {
+                fprintf(stdout, "audio disconnected\n");
+                this_wop->stop();
+                this_wop->socket_.collapse();
             });
         }
         else
@@ -111,14 +115,15 @@ void sparkle_audio::callback(BufferQueueItf playerBufferqueue, void *data)
 {
     sparkle_audio *instance = reinterpret_cast<sparkle_audio *>(data);
 
-    fprintf(stdout, "played\n");
+    if (instance->queue_.size() < 1)
+        throw were_exception(WE_SIMPLE);
 
-    delete[] instance->queue_.front();
     instance->queue_.pop();
 
-    instance->pointer_ += 65536;
+    instance->pointer_ += max_data_size;
 
-    instance->socket_->send((char *)&instance->pointer_, sizeof(uint64_t));
+    if (instance->socket_)
+        instance->socket_->send((char *)&instance->pointer_, sizeof(uint64_t));
 }
 
 void sparkle_audio::read()
@@ -129,31 +134,30 @@ void sparkle_audio::read()
     if (code == 1)
     {
         fprintf(stdout, "Start\n");
-        pointer_ = 0;
         start();
     }
     else if (code == 2)
     {
         fprintf(stdout, "Stop\n");
-        pointer_ = 0;
         stop();
     }
     else if (code == 3)
     {
         uint64_t size;
         socket_->receive((char *)&size, sizeof(uint64_t));
-        fprintf(stdout, "Data %lu\n", size);
 
-        if (size != 65536)
+
+        if (size != max_data_size)
             throw were_exception(WE_SIMPLE);
 
-        char *buffer = new char[size]; // XXX Shared ptr
-        socket_->receive(buffer, size);
+        std::shared_ptr<sparkle_audio_buffer> buffer(new sparkle_audio_buffer());
+        socket_->receive(buffer->data_, size);
+
+
+        SLresult result = (*playerBufferqueue)->Enqueue(playerBufferqueue, buffer->data_, max_data_size);
+        check_result(result);
 
         queue_.push(buffer);
-
-        SLresult result = (*playerBufferqueue)->Enqueue(playerBufferqueue, buffer, 65536);
-        check_result(result);
     }
 }
 
@@ -165,6 +169,8 @@ void sparkle_audio::start()
         state_ = SL_PLAYSTATE_PLAYING;
         result = (*playerPlay)->SetPlayState(playerPlay, state_);
         check_result(result);
+
+        pointer_ = 0;
     }
 }
 
@@ -176,5 +182,12 @@ void sparkle_audio::stop()
         state_ = SL_PLAYSTATE_STOPPED;
         result = (*playerPlay)->SetPlayState(playerPlay, state_);
         check_result(result);
+
+        result = (*playerBufferqueue)->Clear(playerBufferqueue);
+        check_result(result);
+
+        queue_ = std::queue< std::shared_ptr<sparkle_audio_buffer> >();
+
+        pointer_ = 0;
     }
 }

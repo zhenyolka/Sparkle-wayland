@@ -15,6 +15,8 @@
 #endif
 
 #include <queue>
+#include <memory>
+
 
 #ifdef USE_ANDROID_SIMPLE_BUFFER_QUEUE
 #define DATALOCATOR_BUFFERQUEUE SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE
@@ -32,9 +34,17 @@
 
 #define check_result(r) do { if ((r) != SL_RESULT_SUCCESS) throw were_exception(WE_SIMPLE); } while (0)
 
+const int max_data_size = 65536 / 4;
 
 class were_unix_server;
 class were_unix_socket;
+
+
+class sparkle_audio_buffer
+{
+public:
+    char data_[max_data_size];
+};
 
 
 class sparkle_audio : public were_object_2
@@ -66,7 +76,7 @@ private:
     were_object_pointer<were_unix_server> server_;
     were_object_pointer<were_unix_socket> socket_;
     uint64_t pointer_;
-    std::queue<char *> queue_;
+    std::queue< std::shared_ptr<sparkle_audio_buffer> > queue_;
 };
 
 #endif // SPARKLE_AUDIO_H

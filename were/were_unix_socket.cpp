@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <cstring>
+#include <errno.h>
 
 
 were_unix_socket::~were_unix_socket()
@@ -35,27 +36,47 @@ were_unix_socket::were_unix_socket(const std::string &path) :
 were_unix_socket::were_unix_socket(int fd)
 {
     fd_ = fd;
-    thread()->add_fd_listener(fd_, EPOLLIN | EPOLLET, this);
+    thread()->add_fd_listener(fd_, EPOLLIN, this); // XXX EPOLLET
 }
 
 void were_unix_socket::event(uint32_t events)
 {
     MAKE_THIS_WOP
 
+    fprintf(stdout, "ev %d\n", events);
+
     if (events == EPOLLIN)
         were::emit(this_wop, &were_unix_socket::ready_read);
+    else if (events == (EPOLLIN | EPOLLHUP))
+        were::emit(this_wop, &were_unix_socket::disconnected);
     else
         throw were_exception(WE_SIMPLE);
 }
 
 void were_unix_socket::send(const char *data, int size)
 {
-    if (::send(fd_, data, size, 0) != size)
+    errno = 0;
+
+    int r = ::send(fd_, data, size, 0);
+    if (r != size)
+    {
+        fprintf(stdout, "send error req %d got %d errno %s (%d)\n", size, r, strerror(errno), fd_);
+
         throw were_exception(WE_SIMPLE);
+    }
 }
 
 void were_unix_socket::receive(char *data, int size)
 {
-    if (::recv(fd_, data, size, 0) != size)
+    errno = 0;
+
+    int r = ::recv(fd_, data, size, 0);
+    if (r != size)
+    {
+        fprintf(stdout, "recv error req %d got %d errno %s (%d)\n", size, r, strerror(errno), fd_);
+
+        usleep(10000000);
+
         throw were_exception(WE_SIMPLE);
+    }
 }

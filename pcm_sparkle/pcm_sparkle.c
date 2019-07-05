@@ -532,7 +532,7 @@ SND_PCM_PLUGIN_DEFINE_FUNC(sparkle)
  error:
     if (sparkle->fd >= 0)
         close(sparkle->fd);
-    free(sparkle->device);
+    //free(sparkle->device);
     free(sparkle);
     return err;
 }
