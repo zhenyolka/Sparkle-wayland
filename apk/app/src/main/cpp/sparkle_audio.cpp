@@ -120,7 +120,7 @@ void sparkle_audio::callback(BufferQueueItf playerBufferqueue, void *data)
 
     instance->queue_.pop();
 
-    instance->pointer_ += max_data_size;
+    instance->pointer_ += period_size;
 
     if (instance->socket_)
         instance->socket_->send((char *)&instance->pointer_, sizeof(uint64_t));
@@ -133,12 +133,12 @@ void sparkle_audio::read()
 
     if (code == 1)
     {
-        fprintf(stdout, "Start\n");
+        fprintf(stdout, "staring player\n");
         start();
     }
     else if (code == 2)
     {
-        fprintf(stdout, "Stop\n");
+        fprintf(stdout, "stopping player\n");
         stop();
     }
     else if (code == 3)
@@ -147,17 +147,15 @@ void sparkle_audio::read()
         socket_->receive((char *)&size, sizeof(uint64_t));
 
 
-        if (size != max_data_size)
-            throw were_exception(WE_SIMPLE);
-
         std::shared_ptr<sparkle_audio_buffer> buffer(new sparkle_audio_buffer());
         socket_->receive(buffer->data_, size);
 
-
-        SLresult result = (*playerBufferqueue)->Enqueue(playerBufferqueue, buffer->data_, max_data_size);
-        check_result(result);
-
-        queue_.push(buffer);
+        if (size == period_size) // XXX
+        {
+            SLresult result = (*playerBufferqueue)->Enqueue(playerBufferqueue, buffer->data_, size);
+            check_result(result);
+            queue_.push(buffer);
+        }
     }
 }
 

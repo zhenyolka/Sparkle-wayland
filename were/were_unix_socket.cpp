@@ -43,7 +43,7 @@ void were_unix_socket::event(uint32_t events)
 {
     MAKE_THIS_WOP
 
-    fprintf(stdout, "ev %d\n", events);
+    //fprintf(stdout, "events %d\n", events);
 
     if (events == EPOLLIN)
         were::emit(this_wop, &were_unix_socket::ready_read);
@@ -55,28 +55,34 @@ void were_unix_socket::event(uint32_t events)
 
 void were_unix_socket::send(const char *data, int size)
 {
-    errno = 0;
+    int sent = 0;
 
-    int r = ::send(fd_, data, size, 0);
-    if (r != size)
+    while (sent != size)
     {
-        fprintf(stdout, "send error req %d got %d errno %s (%d)\n", size, r, strerror(errno), fd_);
-
-        throw were_exception(WE_SIMPLE);
+        int r = ::send(fd_, data + sent, size - sent, 0);
+        if (r == -1)
+            throw were_exception(WE_SIMPLE); // XXX Go disconnected
+        else
+        {
+            sent += r;
+            //fprintf(stdout, "sent %d/%d\n", sent, size);
+        }
     }
 }
 
 void were_unix_socket::receive(char *data, int size)
 {
-    errno = 0;
+    int received = 0;
 
-    int r = ::recv(fd_, data, size, 0);
-    if (r != size)
+    while (received != size)
     {
-        fprintf(stdout, "recv error req %d got %d errno %s (%d)\n", size, r, strerror(errno), fd_);
-
-        usleep(10000000);
-
-        throw were_exception(WE_SIMPLE);
+        int r = ::recv(fd_, data + received, size - received, 0);
+        if (r == -1)
+            throw were_exception(WE_SIMPLE); // XXX Go disconnected
+        else
+        {
+            received += r;
+            //fprintf(stdout, "received %d/%d\n", received, size);
+        }
     }
 }

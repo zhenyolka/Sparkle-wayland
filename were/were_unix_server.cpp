@@ -22,7 +22,7 @@ were_unix_server::were_unix_server(const std::string &path) :
 {
     unlink(path_.c_str());
 
-    fd_ = socket(AF_UNIX, SOCK_SEQPACKET, 0);
+    fd_ = socket(AF_UNIX, SOCK_STREAM, 0);
     if (fd_ == -1)
         throw were_exception(WE_SIMPLE);
 
