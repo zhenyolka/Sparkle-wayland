@@ -94,6 +94,8 @@ sparkle_audio::sparkle_audio()
 
             fprintf(stdout, "audio connected\n");
 
+            this_wop->stop();
+
             were::connect(this_wop->socket_, &were_unix_socket::ready_read, this_wop, [this_wop]()
             {
                 this_wop->read();
