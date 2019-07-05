@@ -1,5 +1,5 @@
 pcm.!default
 {
     type sparkle
-    #server 0
+    #server 123
 }

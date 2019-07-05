@@ -10,8 +10,14 @@
 #include <sys/un.h>
 #include <string.h>
 
+#include <errno.h>
 
-const char *server = "/tmp/sparkle-audio";
+
+const char *server = "/data/data/com.sion.sparkle/audio"; //XXX
+const int period_size = 65536 / 8;
+const int periods = 8;
+const int buffer_size = period_size * periods;
+const int max_data_size = period_size;
 
 
 typedef struct snd_pcm_sparkle {
@@ -43,15 +49,57 @@ static int fd_set_blocking(int fd, int blocking)
     if (ret == -1)
         return -1;
 
-    fprintf(stdout, "fd blocking %d\n", blocking);
-
     return 0;
 }
 #endif
 
+void send_all(int fd, const char *data, int size)
+{
+    int sent = 0;
+
+    while (sent != size)
+    {
+        int r = send(fd, data + sent, size - sent, 0);
+        if (r == -1)
+            abort();
+        else
+        {
+            sent += r;
+            //fprintf(stdout, "sent %d/%d\n", sent, size);
+        }
+    }
+}
+
+void receive_all(int fd, char *data, int size)
+{
+    int received = 0;
+
+    while (received != size)
+    {
+        int r = recv(fd, data + received, size - received, 0);
+        if (r == -1)
+            abort();
+        else
+        {
+            received += r;
+            //fprintf(stdout, "received %d/%d\n", received, size);
+        }
+    }
+}
+
+unsigned int bytes_available(int fd)
+{
+    int bytes = 0;
+
+    if (ioctl(fd, FIONREAD, &bytes) == -1)
+        abort();
+
+    return bytes;
+}
+
 static int sparkle_connect(snd_pcm_sparkle_t *sparkle)
 {
-    int fd = socket(AF_UNIX, SOCK_SEQPACKET, 0);
+    int fd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (fd == -1)
         return -1;
 
@@ -84,43 +132,27 @@ static int sparkle_disconnect(snd_pcm_sparkle_t *sparkle)
 
 static int sparkle_send_start(snd_pcm_sparkle_t *sparkle)
 {
-    fprintf(stdout, "sending start\n");
-
     uint64_t code = 1;
-
-    if (send(sparkle->fd, &code, sizeof(uint64_t), 0) != sizeof(uint64_t))
-        return -1;
+    send_all(sparkle->fd, (char *)&code, sizeof(uint64_t));
 
     return 0;
 }
 
 static int sparkle_send_stop(snd_pcm_sparkle_t *sparkle)
 {
-    fprintf(stdout, "sending stop\n");
-
     uint64_t code = 2;
-
-    if (send(sparkle->fd, &code, sizeof(uint64_t), 0) != sizeof(uint64_t))
-        return -1;
+    send_all(sparkle->fd, (char *)&code, sizeof(uint64_t));
 
     return 0;
 }
 
 static int sparkle_send_data(snd_pcm_sparkle_t *sparkle, const void *data, int size)
 {
-    //fprintf(stdout, "sending data %d\n", size);
-
     uint64_t code = 3;
     uint64_t size__ = size;
-
-    if (send(sparkle->fd, &code, sizeof(uint64_t), 0) != sizeof(uint64_t))
-        return -1;
-
-    if (send(sparkle->fd, &size__, sizeof(uint64_t), 0) != sizeof(uint64_t))
-        return -1;
-
-    if (send(sparkle->fd, data, size, 0) != size)
-        return -1;
+    send_all(sparkle->fd, (char *)&code, sizeof(uint64_t));
+    send_all(sparkle->fd, (char *)&size__, sizeof(uint64_t));
+    send_all(sparkle->fd, (char *)data, size);
 
     return 0;
 }
@@ -129,20 +161,10 @@ static int sparkle_receive_pointer(snd_pcm_sparkle_t *sparkle)
 {
     uint64_t data;
 
-    for (;;)
+    while (bytes_available(sparkle->fd) >= sizeof(uint64_t))
     {
-        int ret = recv(sparkle->fd, &data, sizeof(uint64_t), MSG_DONTWAIT);
-        if (ret == -1)
-        {
-            if (errno == EAGAIN)
-                break;
-            else
-                return -1;
-        }
-        else
-        {
-            sparkle->pointer = data;
-        }
+        receive_all(sparkle->fd, (char *)&data, sizeof(uint64_t));
+        sparkle->pointer = data;
     }
 
     return 0;
@@ -186,10 +208,8 @@ static snd_pcm_sframes_t sparkle_write(snd_pcm_ioplug_t *io,
 
     int size_bytes = size * sparkle->frame_bytes;
 
-    //fprintf(stdout, "write req %d\n", size_bytes);
-
-    if (size_bytes > 16 * 4096)
-        size_bytes = 16 * 4096;
+    if (size_bytes > max_data_size)
+        size_bytes = max_data_size;
 
     if (sparkle_send_data(sparkle, data, size_bytes) == -1)
         return -1;
@@ -344,6 +364,10 @@ static int sparkle_hw_params(snd_pcm_ioplug_t *io,
             return -EINVAL;
     }
 
+    fprintf(stdout,
+        "buffer_size_frames=%ld  period_size_frames=%ld frame_size_bytes=%d\n",
+        io->buffer_size,         io->period_size,       sparkle->frame_bytes);
+
     return 0;
 }
 
@@ -397,19 +421,22 @@ static int sparkle_hw_constraint(snd_pcm_sparkle_t *sparkle)
 
     // Period size
     //err = snd_pcm_ioplug_set_param_list(io, SND_PCM_IOPLUG_HW_PERIOD_BYTES, ARRAY_SIZE(bytes_list), bytes_list);
-    err = snd_pcm_ioplug_set_param_minmax(io, SND_PCM_IOPLUG_HW_PERIOD_BYTES, 1U<<16, 1U<<16);
+    //err = snd_pcm_ioplug_set_param_minmax(io, SND_PCM_IOPLUG_HW_PERIOD_BYTES, 1U<<16, 1U<<16);
+    err = snd_pcm_ioplug_set_param_minmax(io, SND_PCM_IOPLUG_HW_PERIOD_BYTES, period_size, period_size);
     if (err < 0)
         return err;
 
     // Periods
     //err = snd_pcm_ioplug_set_param_minmax(io, SND_PCM_IOPLUG_HW_PERIODS, 2, 1024);
-    err = snd_pcm_ioplug_set_param_minmax(io, SND_PCM_IOPLUG_HW_PERIODS, 4, 4);
+    //err = snd_pcm_ioplug_set_param_minmax(io, SND_PCM_IOPLUG_HW_PERIODS, 4, 4);
+    err = snd_pcm_ioplug_set_param_minmax(io, SND_PCM_IOPLUG_HW_PERIODS, periods, periods);
     if (err < 0)
         return err;
 
     // Buffer size
     //err = snd_pcm_ioplug_set_param_list(io, SND_PCM_IOPLUG_HW_BUFFER_BYTES, ARRAY_SIZE(bytes_list), bytes_list);
-    err = snd_pcm_ioplug_set_param_minmax(io, SND_PCM_IOPLUG_HW_BUFFER_BYTES, 1U<<18, 1U<<18);
+    //err = snd_pcm_ioplug_set_param_minmax(io, SND_PCM_IOPLUG_HW_BUFFER_BYTES, 1U<<18, 1U<<18);
+    err = snd_pcm_ioplug_set_param_minmax(io, SND_PCM_IOPLUG_HW_BUFFER_BYTES, buffer_size, buffer_size);
     if (err < 0)
         return err;
 
@@ -417,24 +444,22 @@ static int sparkle_hw_constraint(snd_pcm_sparkle_t *sparkle)
 }
 
 
-#if 0
-static int oss_close(snd_pcm_ioplug_t *io)
+static int sparkle_close(snd_pcm_ioplug_t *io)
 {
-    snd_pcm_oss_t *oss = io->private_data;
+    snd_pcm_sparkle_t *sparkle = io->private_data;
 
-    close(oss->fd);
-    free(oss->device);
-    free(oss);
+    sparkle_disconnect(sparkle);
+    //free(oss->device);
+    //free(oss); // XXX
     return 0;
 }
-#endif
 
 static const snd_pcm_ioplug_callback_t sparkle_playback_callback = {
     .start = sparkle_start,
     .stop = sparkle_stop,
     .transfer = sparkle_write,
     .pointer = sparkle_pointer,
-    //.close = oss_close,
+    .close = sparkle_close,
     .hw_params = sparkle_hw_params,
     //.prepare = oss_prepare,
     //.drain = oss_drain,
@@ -446,7 +471,7 @@ static const snd_pcm_ioplug_callback_t sparkle_capture_callback = {
     .stop = sparkle_stop,
     .transfer = sparkle_read,
     .pointer = sparkle_pointer,
-    //.close = oss_close,
+    .close = sparkle_close,
     .hw_params = sparkle_hw_params,
     //.prepare = oss_prepare,
     //.drain = oss_drain,
@@ -530,8 +555,8 @@ SND_PCM_PLUGIN_DEFINE_FUNC(sparkle)
     return 0;
 
  error:
-    if (sparkle->fd >= 0)
-        close(sparkle->fd);
+    //if (sparkle->fd >= 0)
+    //    close(sparkle->fd);
     //free(sparkle->device);
     free(sparkle);
     return err;
