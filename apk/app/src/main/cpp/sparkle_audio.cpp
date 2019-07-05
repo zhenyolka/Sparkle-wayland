@@ -135,7 +135,7 @@ void sparkle_audio::read()
 
     if (code == 1)
     {
-        fprintf(stdout, "staring player\n");
+        fprintf(stdout, "starting player\n");
         start();
     }
     else if (code == 2)

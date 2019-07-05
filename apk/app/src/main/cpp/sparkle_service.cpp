@@ -16,6 +16,13 @@
 #include <unistd.h>
 
 
+#define SOUND_THREAD
+
+#ifdef SOUND_THREAD
+#include <thread>
+#endif
+
+
 sparkle_service::~sparkle_service()
 {
 }
@@ -81,7 +88,9 @@ public:
         sparkle_ = were_object_pointer<sparkle>(new sparkle());
         sparkle_android_ = were_object_pointer<sparkle_android>(new sparkle_android(sparkle_, service_));
 
+#ifndef SOUND_THREAD
         audio_ = were_object_pointer<sparkle_audio>(new sparkle_audio());
+#endif
 
         debug_ = were_object_pointer<were_debug>(new were_debug());
 
@@ -93,6 +102,10 @@ public:
          */
         service_->add_fd_listener(dup(thread_->fd()), this);
         service_->add_idle_handler(this);
+
+#ifdef SOUND_THREAD
+        sound_thread_c_ = std::thread(&sparkle_native::sound, this);
+#endif
     }
 
     void event()
@@ -105,6 +118,15 @@ public:
         thread_->idle();
     }
 
+#ifdef SOUND_THREAD
+    void sound()
+    {
+        sound_thread_ = were_object_pointer<were_thread>(new were_thread());
+        audio_ = were_object_pointer<sparkle_audio>(new sparkle_audio());
+        sound_thread_->run();
+    }
+#endif
+
 private:
     sparkle_android_logger logger_;
     were_object_pointer<were_thread> thread_;
@@ -113,6 +135,10 @@ private:
     were_object_pointer<sparkle_android> sparkle_android_;
     were_object_pointer<sparkle_audio> audio_;
     were_object_pointer<were_debug> debug_;
+#ifdef SOUND_THREAD
+    std::thread sound_thread_c_;
+    were_object_pointer<were_thread> sound_thread_;
+#endif
 };
 
 
