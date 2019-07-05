@@ -4,6 +4,7 @@
 #include "were_thread.h"
 #include "sparkle.h"
 #include "sparkle_android.h"
+#include "sparkle_audio.h"
 #include "were_debug.h"
 
 #include <csignal>
@@ -79,6 +80,9 @@ public:
 
         sparkle_ = were_object_pointer<sparkle>(new sparkle());
         sparkle_android_ = were_object_pointer<sparkle_android>(new sparkle_android(sparkle_, service_));
+
+        audio_ = were_object_pointer<sparkle_audio>(new sparkle_audio());
+
         debug_ = were_object_pointer<were_debug>(new were_debug());
 
         /*
@@ -107,6 +111,7 @@ private:
     were_object_pointer<sparkle_service> service_;
     were_object_pointer<sparkle> sparkle_;
     were_object_pointer<sparkle_android> sparkle_android_;
+    were_object_pointer<sparkle_audio> audio_;
     were_object_pointer<were_debug> debug_;
 };
 

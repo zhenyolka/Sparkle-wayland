@@ -37,5 +37,5 @@ target_link_libraries(sparkle LINK_PUBLIC
     ${SPARKLE_ROOT}/foreign/install/${ANDROID_ABI}/usr/lib/libwayland-server.a
     ${SPARKLE_ROOT}/foreign/install/${ANDROID_ABI}/usr/lib/libffi.a
     android
-    log
+    OpenSLES
 )
