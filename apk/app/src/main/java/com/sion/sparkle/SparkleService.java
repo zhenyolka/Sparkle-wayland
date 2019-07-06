@@ -58,8 +58,6 @@ public class SparkleService extends Service
 
         unregisterReceiver(receiver_);
 
-        notificationManager.cancel(0);
-
         native_destroy(native_);
     }
 
@@ -70,34 +68,14 @@ public class SparkleService extends Service
 
         queue_ = Looper.myQueue();
 
-        notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+        //notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+        //notificationManager.notify(1, notification);
+        //notificationManager.cancel(1);
+
         window_manager_ = (WindowManager)getSystemService(Context.WINDOW_SERVICE);
 
 
-        Intent intent1 = new Intent();
-        intent1.setAction(ACTION_HIDE);
-        PendingIntent pendingIntent1 = PendingIntent.getBroadcast(this, 0, intent1, 0);
 
-        Intent intent2 = new Intent();
-        intent2.setAction(ACTION_SHOW);
-        PendingIntent pendingIntent2 = PendingIntent.getBroadcast(this, 0, intent2, 0);
-
-        Intent intent3 = new Intent();
-        intent3.setAction(ACTION_STOP);
-        PendingIntent pendingIntent3 = PendingIntent.getBroadcast(this, 0, intent3, 0);
-
-
-        notification = new Notification.Builder(this)
-            //.setContentTitle("Title")
-            .setContentText("Sparkle")
-            .setSmallIcon(R.drawable.notification_icon)
-            .setOngoing(true)
-            .addAction(R.drawable.notification_icon, "Hide", pendingIntent1)
-            .addAction(R.drawable.notification_icon, "Show", pendingIntent2)
-            .addAction(R.drawable.notification_icon, "Stop", pendingIntent3)
-            .build();
-
-        notificationManager.notify(0, notification);
 
         receiver_ = new BroadcastReceiver()
         {
@@ -106,19 +84,8 @@ public class SparkleService extends Service
             {
                 String action = intent.getAction();
 
-                if (action.equals(ACTION_HIDE))
+                if (action.equals(ACTION_STOP))
                 {
-                    Log.i("Sparkle", "Hide all");
-                    //hide_all(user);
-                }
-                else if (action.equals(ACTION_SHOW))
-                {
-                    Log.i("Sparkle", "Show all");
-                    //show_all(user);
-                }
-                else if (action.equals(ACTION_STOP))
-                {
-                    Log.i("Sparkle", "Stop");
                     stopSelf();
                 }
             }
@@ -146,6 +113,37 @@ public class SparkleService extends Service
         }, 0, 1000);
         */
 
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId)
+    {
+        Intent intent1 = new Intent();
+        intent1.setAction(ACTION_HIDE);
+        PendingIntent pendingIntent1 = PendingIntent.getBroadcast(this, 0, intent1, 0);
+
+        Intent intent2 = new Intent();
+        intent2.setAction(ACTION_SHOW);
+        PendingIntent pendingIntent2 = PendingIntent.getBroadcast(this, 0, intent2, 0);
+
+        Intent intent3 = new Intent();
+        intent3.setAction(ACTION_STOP);
+        PendingIntent pendingIntent3 = PendingIntent.getBroadcast(this, 0, intent3, 0);
+
+        Notification.Builder builder = new Notification.Builder(this) // XXX
+            //.setContentTitle("Title")
+            .setContentText("Sparkle")
+            .setSmallIcon(R.drawable.notification_icon)
+            //.setOngoing(true)
+            .addAction(R.drawable.notification_icon, "Hide", pendingIntent1)
+            .addAction(R.drawable.notification_icon, "Show", pendingIntent2)
+            .addAction(R.drawable.notification_icon, "Stop", pendingIntent3);
+
+        Notification notification = builder.build();
+
+        startForeground(1, notification);
+
+        return START_NOT_STICKY;
     }
 
     @Override
@@ -212,8 +210,8 @@ public class SparkleService extends Service
     public native void idle_event(long user);
 
     MessageQueue queue_;
-    NotificationManager notificationManager;
-    Notification notification;
+    //NotificationManager notificationManager;
+    //Notification notification;
     long native_;
     WindowManager window_manager_;
     BroadcastReceiver receiver_;

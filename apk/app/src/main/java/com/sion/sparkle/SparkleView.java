@@ -39,13 +39,12 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
     {
         super(sparkle);
 
-        Log.i("Sparkle", "Constructing view...");
 
         this.sparkle_ = sparkle;
         this.user = user;
 
         int windowType;
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             windowType = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         else
             windowType = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT; // WindowManager.LayoutParams.TYPE_PHONE;
@@ -100,12 +99,10 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
 
                 if (action.equals(sparkle_.ACTION_HIDE))
                 {
-                    Log.i("Sparkle", "Hide all (service)");
                     set_visible(false);
                 }
                 else if (action.equals(sparkle_.ACTION_SHOW))
                 {
-                    Log.i("Sparkle", "Show all (service)");
                     set_visible(true);
                 }
             }
@@ -163,7 +160,6 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height)
     {
-        Log.i("Sparkle", "Surface changed");
         if (!enabled_) {return;}
         surface_changed(user, holder.getSurface());
     }
@@ -171,7 +167,6 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
     @Override
     public void surfaceCreated(SurfaceHolder holder)
     {
-        Log.i("Sparkle", "Surface created");
         if (!enabled_) {return;}
         surface_changed(user, holder.getSurface());
     }
@@ -179,7 +174,6 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
     @Override
     public void surfaceDestroyed(SurfaceHolder holder)
     {
-        Log.i("Sparkle", "Surface destroyed");
         if (!enabled_) {return;}
         surface_changed(user, null);
     }

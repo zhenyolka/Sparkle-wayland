@@ -20,6 +20,9 @@ import android.view.View; // Button callback
 import java.io.File;
 import java.io.IOException;
 
+// Check version
+import android.os.Build;
+
 
 public class MainActivity extends Activity
 {
@@ -43,7 +46,11 @@ public class MainActivity extends Activity
             public void onClick(View v)
             {
                 Intent intent = new Intent(MainActivity.this, SparkleService.class);
-                startService(intent);
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                    startForegroundService(intent);
+                else
+                    startService(intent);
 
                 ProcessBuilder builder = new ProcessBuilder("/system/bin/sh", "-c",
                     "/data/data/com.sion.sparkle/user.sh start > /data/data/com.sion.sparkle/user_log.txt 2>&1");
