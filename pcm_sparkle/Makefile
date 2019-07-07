@@ -9,5 +9,5 @@ $(OUTPUT): $(SOURCES) $(HEADERS)
 	$(CC) -Wall -Wextra -Wno-unused-parameter -O2 -fPIC -DPIC -shared -o $(OUTPUT) $(SOURCES)
 
 clean:
-	rm $(OUTPUT)
+	rm -rf $(OUTPUT)
 
