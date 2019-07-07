@@ -9,15 +9,15 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <string.h>
-
 #include <errno.h>
+#include <stdint.h>
 
 
-const char *server = "/data/data/com.sion.sparkle/audio"; //XXX
-const int period_size = 65536 / 8;
-const int periods = 8;
-const int buffer_size = period_size * periods;
-const int max_data_size = period_size;
+#define sparkle_server "/data/data/com.sion.sparkle/audio" //XXX
+#define sparkle_period_size (65536 / 8)
+#define sparkle_periods 8
+#define sparkle_buffer_size (sparkle_period_size * sparkle_periods)
+#define sparkle_max_data_size sparkle_period_size
 
 
 typedef struct snd_pcm_sparkle {
@@ -106,7 +106,7 @@ static int sparkle_connect(snd_pcm_sparkle_t *sparkle)
     struct sockaddr_un name;
     memset(&name, 0, sizeof(struct sockaddr_un));
     name.sun_family = AF_UNIX;
-    strncpy(name.sun_path, server, sizeof(name.sun_path) - 1);
+    strncpy(name.sun_path, sparkle_server, sizeof(name.sun_path) - 1);
 
     if (connect(fd, (const struct sockaddr *)&name, sizeof(struct sockaddr_un)) == -1)
         return -1;
@@ -208,8 +208,8 @@ static snd_pcm_sframes_t sparkle_write(snd_pcm_ioplug_t *io,
 
     int size_bytes = size * sparkle->frame_bytes;
 
-    if (size_bytes > max_data_size)
-        size_bytes = max_data_size;
+    if (size_bytes > sparkle_max_data_size)
+        size_bytes = sparkle_max_data_size;
 
     if (sparkle_send_data(sparkle, data, size_bytes) == -1)
         return -1;
@@ -422,21 +422,21 @@ static int sparkle_hw_constraint(snd_pcm_sparkle_t *sparkle)
     // Period size
     //err = snd_pcm_ioplug_set_param_list(io, SND_PCM_IOPLUG_HW_PERIOD_BYTES, ARRAY_SIZE(bytes_list), bytes_list);
     //err = snd_pcm_ioplug_set_param_minmax(io, SND_PCM_IOPLUG_HW_PERIOD_BYTES, 1U<<16, 1U<<16);
-    err = snd_pcm_ioplug_set_param_minmax(io, SND_PCM_IOPLUG_HW_PERIOD_BYTES, period_size, period_size);
+    err = snd_pcm_ioplug_set_param_minmax(io, SND_PCM_IOPLUG_HW_PERIOD_BYTES, sparkle_period_size, sparkle_period_size);
     if (err < 0)
         return err;
 
     // Periods
     //err = snd_pcm_ioplug_set_param_minmax(io, SND_PCM_IOPLUG_HW_PERIODS, 2, 1024);
     //err = snd_pcm_ioplug_set_param_minmax(io, SND_PCM_IOPLUG_HW_PERIODS, 4, 4);
-    err = snd_pcm_ioplug_set_param_minmax(io, SND_PCM_IOPLUG_HW_PERIODS, periods, periods);
+    err = snd_pcm_ioplug_set_param_minmax(io, SND_PCM_IOPLUG_HW_PERIODS, sparkle_periods, sparkle_periods);
     if (err < 0)
         return err;
 
     // Buffer size
     //err = snd_pcm_ioplug_set_param_list(io, SND_PCM_IOPLUG_HW_BUFFER_BYTES, ARRAY_SIZE(bytes_list), bytes_list);
     //err = snd_pcm_ioplug_set_param_minmax(io, SND_PCM_IOPLUG_HW_BUFFER_BYTES, 1U<<18, 1U<<18);
-    err = snd_pcm_ioplug_set_param_minmax(io, SND_PCM_IOPLUG_HW_BUFFER_BYTES, buffer_size, buffer_size);
+    err = snd_pcm_ioplug_set_param_minmax(io, SND_PCM_IOPLUG_HW_BUFFER_BYTES, sparkle_buffer_size, sparkle_buffer_size);
     if (err < 0)
         return err;
 
