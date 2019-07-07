@@ -122,7 +122,7 @@ void sparkle_audio::callback(BufferQueueItf playerBufferqueue, void *data)
 
     instance->queue_.pop();
 
-    instance->pointer_ += period_size;
+    instance->pointer_ += period_size; // XXX It will be better to save buffer size
 
     if (instance->socket_)
         instance->socket_->send((char *)&instance->pointer_, sizeof(uint64_t));
@@ -148,16 +148,15 @@ void sparkle_audio::read()
         uint64_t size;
         socket_->receive((char *)&size, sizeof(uint64_t));
 
+        if (size > period_size)
+            throw were_exception(WE_SIMPLE);
 
         std::shared_ptr<sparkle_audio_buffer> buffer(new sparkle_audio_buffer());
         socket_->receive(buffer->data_, size);
 
-        if (size == period_size) // XXX
-        {
-            SLresult result = (*playerBufferqueue)->Enqueue(playerBufferqueue, buffer->data_, size);
-            check_result(result);
-            queue_.push(buffer);
-        }
+        SLresult result = (*playerBufferqueue)->Enqueue(playerBufferqueue, buffer->data_, period_size);
+        check_result(result);
+        queue_.push(buffer);
     }
 }
 
