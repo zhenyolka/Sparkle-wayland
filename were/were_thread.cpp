@@ -44,8 +44,8 @@ void were_thread::process(int timeout)
     struct epoll_event events[MAX_EVENTS];
 
     int n = epoll_wait(epoll_fd_, events, MAX_EVENTS, timeout);
-    if (n == -1)
-        throw were_exception(WE_SIMPLE);
+    if (n == -1 && errno != EINTR)
+        throw were_exception(WE_SIMPLE_ERRNO);
 
     for (int i = 0; i < n; ++i)
     {

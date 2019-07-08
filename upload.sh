@@ -2,7 +2,7 @@
 
 set -e
 
-make -C ./pcm_sparkle clean
+make -C ./pcm_sparkle clean > /dev/null 2>&1
 tar -czf upload/pcm_sparkle.tar.gz ./pcm_sparkle
 
 

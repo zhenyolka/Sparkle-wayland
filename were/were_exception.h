@@ -2,6 +2,7 @@
 #define WERE_EXCEPTION_H
 
 #include <exception>
+#include <cerrno>
 
 class were_exception : public std::exception
 {
@@ -20,5 +21,6 @@ private:
 };
 
 #define WE_SIMPLE "%s:%d", __FILE__, __LINE__
+#define WE_SIMPLE_ERRNO "%s:%d %d (%s)", __FILE__, __LINE__, errno, strerror(errno)
 
 #endif // WERE_EXCEPTION_H
