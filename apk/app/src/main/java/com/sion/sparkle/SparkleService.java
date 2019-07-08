@@ -7,11 +7,13 @@ import android.os.IBinder;
 import android.content.Intent;
 
 // System services
-import android.content.Context;
+import android.content.Context; // Basic
 
 // Notification
+import androidx.core.app.NotificationCompat;
 import android.app.NotificationManager;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.PendingIntent; // Actions
 
 // Queue
@@ -36,6 +38,9 @@ import android.content.IntentFilter;
 import java.util.Map;
 import java.util.HashMap;
 
+// Check version
+import android.os.Build;
+
 
 import android.util.Log;
 
@@ -50,6 +55,7 @@ public class SparkleService extends Service
     public static final String ACTION_HIDE = "com.sion.sparkle.ACTION_HIDE";
     public static final String ACTION_SHOW = "com.sion.sparkle.ACTION_SHOW";
     public static final String ACTION_STOP = "com.sion.sparkle.ACTION_STOP";
+    public static final String CHANNEL_ID = "SparkleChannel";
 
     @Override
     public void onDestroy()
@@ -118,6 +124,8 @@ public class SparkleService extends Service
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
+        createNotificationChannel();
+
         Intent intent1 = new Intent();
         intent1.setAction(ACTION_HIDE);
         PendingIntent pendingIntent1 = PendingIntent.getBroadcast(this, 0, intent1, 0);
@@ -130,10 +138,11 @@ public class SparkleService extends Service
         intent3.setAction(ACTION_STOP);
         PendingIntent pendingIntent3 = PendingIntent.getBroadcast(this, 0, intent3, 0);
 
-        Notification.Builder builder = new Notification.Builder(this) // XXX
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
             //.setContentTitle("Title")
             .setContentText("Sparkle")
             .setSmallIcon(R.drawable.notification_icon)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
             //.setOngoing(true)
             .addAction(R.drawable.notification_icon, "Hide", pendingIntent1)
             .addAction(R.drawable.notification_icon, "Show", pendingIntent2)
@@ -150,6 +159,21 @@ public class SparkleService extends Service
     public IBinder onBind(Intent intent)
     {
         return null;
+    }
+
+    private void createNotificationChannel()
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
+            CharSequence name = CHANNEL_ID;
+            String description = CHANNEL_ID;
+            int importance = NotificationManager.IMPORTANCE_LOW;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 
     @Keep
