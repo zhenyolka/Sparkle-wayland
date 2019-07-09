@@ -101,6 +101,8 @@ private:
     were_object *object_;
 };
 
-#define MAKE_THIS_WOP were_object_pointer<std::remove_pointer<decltype(this)>::type> this_wop(this);
+#define MAKE_THIS_WOP \
+if (collapsed()) {throw were_exception(WE_SIMPLE);} \
+were_object_pointer<std::remove_pointer<decltype(this)>::type> this_wop(this);
 
 #endif // WERE_OBJECT_POINTER_H

@@ -15,6 +15,8 @@ public:
 #endif
     were_unix_socket(int fd);
 
+    void disconnect(bool signal = true); // XXX
+
     void send(const char *data, int size);
     void receive(char *data, int size);
 

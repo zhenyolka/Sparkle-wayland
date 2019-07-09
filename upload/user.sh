@@ -101,6 +101,8 @@ user_stop()
 
 set -e -x
 
+type id su realpath mountpoint pidof chroot
+
 user_$1 $*
 
 #===============================================================================

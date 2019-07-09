@@ -9,9 +9,7 @@
 
 were_unix_socket::~were_unix_socket()
 {
-    thread()->remove_fd_listener(fd_);
-    shutdown(fd_, SHUT_RDWR);
-    close(fd_);
+    disconnect(false);
 }
 
 #if 0
@@ -36,53 +34,83 @@ were_unix_socket::were_unix_socket(const std::string &path) :
 were_unix_socket::were_unix_socket(int fd)
 {
     fd_ = fd;
-    thread()->add_fd_listener(fd_, EPOLLIN, this); // XXX EPOLLET
+    thread()->add_fd_listener(fd_, EPOLLIN, this); // XXX EPOLLET & bytes_available
+}
+
+void were_unix_socket::disconnect(bool signal)
+{
+    if (fd_ == -1)
+        return;
+
+    if (signal)
+    {
+        MAKE_THIS_WOP
+        were::emit(this_wop, &were_unix_socket::disconnected);
+    }
+
+    thread()->remove_fd_listener(fd_);
+    shutdown(fd_, SHUT_RDWR);
+    close(fd_);
+    fd_ = -1;
 }
 
 void were_unix_socket::event(uint32_t events)
 {
     MAKE_THIS_WOP
 
-    //fprintf(stdout, "events %d\n", events);
-
     if (events == EPOLLIN)
         were::emit(this_wop, &were_unix_socket::ready_read);
     else if (events == (EPOLLIN | EPOLLHUP))
-        were::emit(this_wop, &were_unix_socket::disconnected);
+    {
+        disconnect();
+    }
     else
+    {
+        fprintf(stdout, "socket event %d\n", events);
         throw were_exception(WE_SIMPLE);
+    }
 }
 
 void were_unix_socket::send(const char *data, int size)
 {
+    if (fd_ == -1)
+        return;
+
     int sent = 0;
 
     while (sent != size)
     {
         int r = ::send(fd_, data + sent, size - sent, 0);
         if (r == -1)
-            throw were_exception(WE_SIMPLE); // XXX Go disconnected
+        {
+            disconnect();
+            break;
+        }
         else
         {
             sent += r;
-            //fprintf(stdout, "sent %d/%d\n", sent, size);
         }
     }
 }
 
 void were_unix_socket::receive(char *data, int size)
 {
+    if (fd_ == -1)
+        return;
+
     int received = 0;
 
     while (received != size)
     {
         int r = ::recv(fd_, data + received, size - received, 0);
         if (r == -1)
-            throw were_exception(WE_SIMPLE); // XXX Go disconnected
+        {
+            disconnect();
+            break;
+        }
         else
         {
             received += r;
-            //fprintf(stdout, "received %d/%d\n", received, size);
         }
     }
 }
