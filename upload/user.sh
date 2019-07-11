@@ -91,6 +91,7 @@ user_start()
         mount -t tmpfs tmpfs ${CHROOT_HOME}/tmp
         assert $? == 0
     }
+    chcon "u:object_r:app_data_file:s0" ${CHROOT_HOME}/tmp
 
     x_exists ${CHROOT_HOME}/tmp/sparkle ||
     {
@@ -106,7 +107,7 @@ user_start()
 
     x_running Xwayland ||
     {
-        setenforce 0
+        #setenforce 0
         chroot ${CHROOT_HOME} /bin/su - ${MY_USER} -c "XDG_RUNTIME_DIR=/tmp/sparkle Xwayland :0" &
         sleep 2
         #setenforce 1
