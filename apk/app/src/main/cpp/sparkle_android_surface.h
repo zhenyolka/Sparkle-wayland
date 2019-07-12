@@ -60,6 +60,18 @@ public:
         damaged_ = false;
     }
 
+    void limit(int width, int height)
+    {
+        if (x1_ < 0)
+            x1_ = 0;
+        if (y1_ < 0)
+            y1_ = 0;
+        if (x2_ > width)
+            x2_ = width;
+        if (y2_ > height)
+            y2_ = height;
+    }
+
 private:
     int x1_;
     int y1_;

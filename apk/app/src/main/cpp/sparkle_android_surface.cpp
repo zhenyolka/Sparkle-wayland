@@ -16,6 +16,9 @@ const int WINDOW_FORMAT = 5;
 
 sparkle_android_surface::~sparkle_android_surface()
 {
+    if (window_ != nullptr)
+        ANativeWindow_release(window_);
+
     view_->set_enabled(false);
     view_->collapse();
 }
@@ -30,10 +33,15 @@ sparkle_android_surface::sparkle_android_surface(were_object_pointer<sparkle_and
 
     were::connect(view_, &sparkle_view::surface_changed, this_wop, [this_wop](ANativeWindow *window)
     {
+        if (this_wop->window_ != nullptr)
+            ANativeWindow_release(this_wop->window_);
+
         this_wop->window_ = window;
 
         if (window != nullptr)
         {
+            ANativeWindow_acquire(this_wop->window_); // XXX Move to sparkle_view
+
             int w_width = ANativeWindow_getWidth(window);
             int w_height = ANativeWindow_getHeight(window);
             int w_format = ANativeWindow_getFormat(window);
@@ -111,6 +119,8 @@ void sparkle_android_surface::commit(bool full)
         {
             if (full)
                 damage_.add(0, 0, width, height);
+
+            damage_.limit(width, height); // XXX
 
             ANativeWindow_Buffer buffer;
 

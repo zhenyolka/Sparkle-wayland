@@ -65,6 +65,9 @@ Java_com_sion_sparkle_SparkleView_surface_1changed(JNIEnv *env, jobject instance
         window = nullptr;
 
     were::emit(view, &sparkle_view::surface_changed, window);
+
+    if (window != nullptr)
+        ANativeWindow_release(window); // XXX
 }
 
 /* Keyboard */
