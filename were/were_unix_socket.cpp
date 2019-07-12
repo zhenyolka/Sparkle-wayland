@@ -60,15 +60,14 @@ void were_unix_socket::event(uint32_t events)
 
     if (events == EPOLLIN)
         were::emit(this_wop, &were_unix_socket::ready_read);
-    else if (events == (EPOLLIN | EPOLLHUP))
-    {
-        disconnect();
-    }
     else
-    {
-        fprintf(stdout, "socket event %d\n", events);
-        throw were_exception(WE_SIMPLE);
-    }
+        disconnect();
+
+    /*
+    !(events & EPOLLIN)
+    events & EPOLLHUP
+    events & EPOLLERR
+    */
 }
 
 void were_unix_socket::send(const char *data, int size)
