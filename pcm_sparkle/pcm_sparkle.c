@@ -22,7 +22,7 @@
 
 typedef struct snd_pcm_sparkle {
     snd_pcm_ioplug_t io;
-    char *device;
+    //char *device;
     int fd;
     //int fragment_set;
     //int caps;
@@ -63,10 +63,7 @@ void send_all(int fd, const char *data, int size)
         if (r == -1)
             abort();
         else
-        {
             sent += r;
-            //fprintf(stdout, "sent %d/%d\n", sent, size);
-        }
     }
 }
 
@@ -80,10 +77,7 @@ void receive_all(int fd, char *data, int size)
         if (r == -1)
             abort();
         else
-        {
             received += r;
-            //fprintf(stdout, "received %d/%d\n", received, size);
-        }
     }
 }
 
@@ -110,11 +104,6 @@ static int sparkle_connect(snd_pcm_sparkle_t *sparkle)
 
     if (connect(fd, (const struct sockaddr *)&name, sizeof(struct sockaddr_un)) == -1)
         return -1;
-
-#if 0
-    //if (fd_set_blocking(fd, 0) == -1)
-    //    return -1;
-#endif
 
     sparkle->fd = fd;
 
@@ -202,6 +191,7 @@ static snd_pcm_sframes_t sparkle_write(snd_pcm_ioplug_t *io,
         return result;
     return result / oss->frame_bytes;
 #endif
+
     snd_pcm_sparkle_t *sparkle = io->private_data;
 
     const char *data = (char *)areas->addr + (areas->first + areas->step * offset) / 8;
@@ -235,6 +225,7 @@ static snd_pcm_sframes_t sparkle_read(snd_pcm_ioplug_t *io,
         return result;
     return result / oss->frame_bytes;
 #endif
+
     return size;
 }
 
@@ -253,7 +244,6 @@ static snd_pcm_sframes_t sparkle_pointer(snd_pcm_ioplug_t *io)
     ptr = snd_pcm_bytes_to_frames(io->pcm, info.ptr);
     return ptr;
 #endif
-
 
     snd_pcm_sparkle_t *sparkle = io->private_data;
 
@@ -450,7 +440,8 @@ static int sparkle_close(snd_pcm_ioplug_t *io)
 
     sparkle_disconnect(sparkle);
     //free(oss->device);
-    //free(oss); // XXX
+    free(sparkle);
+
     return 0;
 }
 
@@ -482,30 +473,39 @@ static const snd_pcm_ioplug_callback_t sparkle_capture_callback = {
 SND_PCM_PLUGIN_DEFINE_FUNC(sparkle)
 {
     snd_config_iterator_t i, next;
-    const char *device = "/dev/dsp";
+    //const char *device = "/dev/dsp";
     int err;
     snd_pcm_sparkle_t *sparkle;
 
-    snd_config_for_each(i, next, conf) {
+    snd_config_for_each(i, next, conf)
+    {
         snd_config_t *n = snd_config_iterator_entry(i);
         const char *id;
+
         if (snd_config_get_id(n, &id) < 0)
             continue;
+
         if (strcmp(id, "comment") == 0 || strcmp(id, "type") == 0 || strcmp(id, "hint") == 0)
             continue;
-        if (strcmp(id, "device") == 0) {
-            if (snd_config_get_string(n, &device) < 0) {
+#if 0
+        if (strcmp(id, "device") == 0)
+        {
+            if (snd_config_get_string(n, &device) < 0)
+            {
                 SNDERR("Invalid type for %s", id);
                 return -EINVAL;
             }
             continue;
         }
+#endif
+
         SNDERR("Unknown field %s", id);
         return -EINVAL;
     }
 
     sparkle = calloc(1, sizeof(*sparkle));
-    if (!sparkle) {
+    if (!sparkle)
+    {
         SNDERR("cannot allocate");
         return -ENOMEM;
     }
@@ -529,12 +529,12 @@ SND_PCM_PLUGIN_DEFINE_FUNC(sparkle)
     if (sparkle_connect(sparkle) == -1)
     {
         err = -errno;
-        SNDERR("Cannot connect");
+        SNDERR("cannot connect");
         goto error;
     }
 
     sparkle->io.version = SND_PCM_IOPLUG_VERSION;
-    sparkle->io.name = "ALSA <-> OSS PCM I/O Plugin";
+    sparkle->io.name = "Sparkle PCM I/O Plugin";
     sparkle->io.poll_fd = sparkle->fd;
     sparkle->io.poll_events = stream == SND_PCM_STREAM_PLAYBACK ? POLLOUT : POLLIN;
     sparkle->io.mmap_rw = 0;
@@ -546,19 +546,22 @@ SND_PCM_PLUGIN_DEFINE_FUNC(sparkle)
     if (err < 0)
         goto error;
 
-    if ((err = sparkle_hw_constraint(sparkle)) < 0) {
+    if ((err = sparkle_hw_constraint(sparkle)) < 0)
+    {
         snd_pcm_ioplug_delete(&sparkle->io);
         return err;
     }
 
     *pcmp = sparkle->io.pcm;
+
     return 0;
 
  error:
-    //if (sparkle->fd >= 0)
-    //    close(sparkle->fd);
+    if (sparkle->fd != -1)
+        sparkle_disconnect(sparkle);
     //free(sparkle->device);
     free(sparkle);
+
     return err;
 }
 
