@@ -108,7 +108,7 @@ user_start()
     x_running Xwayland ||
     {
         #setenforce 0
-        chroot ${CHROOT_HOME} /bin/su - ${MY_USER} -c "XDG_RUNTIME_DIR=/tmp/sparkle Xwayland :0" &
+        chroot ${CHROOT_HOME} /bin/su - ${MY_USER} -c "XDG_RUNTIME_DIR=/tmp/sparkle Xwayland :0 -noreset" &
         sleep 2
         #setenforce 1
         chroot ${CHROOT_HOME} /bin/su - ${MY_USER} -c "DISPLAY=:0 /bin/sh ~/.xinitrc" &

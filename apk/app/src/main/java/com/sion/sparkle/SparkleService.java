@@ -225,7 +225,15 @@ public class SparkleService extends Service
     {
         DisplayMetrics display_metrics = new DisplayMetrics();
         window_manager_.getDefaultDisplay().getMetrics(display_metrics);
-        return display_metrics.heightPixels - 64;
+
+        int status_bar_height = 0;
+        int resource_id = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resource_id > 0)
+            status_bar_height = getResources().getDimensionPixelSize(resource_id);
+
+        Log.i("Sparkle", String.format("status_bar_height = %d", status_bar_height));
+
+        return display_metrics.heightPixels - status_bar_height;
     }
 
     public native long native_create();
