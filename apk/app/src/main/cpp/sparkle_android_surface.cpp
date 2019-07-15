@@ -11,8 +11,17 @@
 #include <android/native_window_jni.h>
 
 
+//#define SPARKLE_KOT
+//#define SPARKLE_KOT_CONVERT
+//#define SPARKLE_KOT_MASK
 
+
+#ifdef SPARKLE_KOT_CONVERT
+const int WINDOW_FORMAT = WINDOW_FORMAT_RGBX_8888;
+#else
 const int WINDOW_FORMAT = 5;
+#endif
+
 
 sparkle_android_surface::~sparkle_android_surface()
 {
@@ -96,6 +105,36 @@ sparkle_android_surface::sparkle_android_surface(were_object_pointer<sparkle_and
     callback_ = nullptr;
 }
 
+#ifdef SPARKLE_KOT_CONVERT
+struct sparkle_pixel
+{
+    uint8_t v1;
+    uint8_t v2;
+    uint8_t v3;
+    uint8_t v4;
+};
+inline static void memcpy_kot(struct sparkle_pixel *destination, const struct sparkle_pixel *source, size_t n)
+{
+    register sparkle_pixel output;
+
+    for (int i = 0; i < n; ++i)
+    {
+        output.v1 = source[i].v3;
+        output.v2 = source[i].v2;
+        output.v3 = source[i].v1;
+        destination[i] = output;
+    }
+}
+#endif
+
+#ifdef SPARKLE_KOT_MASK
+inline static void memcpy_kot(uint32_t *destination, const uint32_t *source, size_t n)
+{
+    for (int i = 0; i < n; ++i)
+        destination[i] = source[i] & 0x00FFFFFF;
+}
+#endif
+
 void sparkle_android_surface::commit(bool full)
 {
     struct wl_shm_buffer *shm_buffer = nullptr;
@@ -149,12 +188,33 @@ void sparkle_android_surface::commit(bool full)
 
             for (int y = damage_.y1(); y < damage_.y2(); ++y)
             {
+
+#ifndef SPARKLE_KOT
                 std::memcpy
                 (
-                    destination + destination_stride_bytes * y + offset,
-                    source + source_stride_bytes * y + offset,
+                    (destination + destination_stride_bytes * y + offset),
+                    (source + source_stride_bytes * y + offset),
                     length
                 );
+#endif
+
+#ifdef SPARKLE_KOT_CONVERT
+                memcpy_kot
+                (
+                    (sparkle_pixel *)(destination + destination_stride_bytes * y + offset),
+                    (sparkle_pixel *)(source + source_stride_bytes * y + offset),
+                    damage_.width()
+                );
+#endif
+
+#ifdef SPARKLE_KOT_MASK
+                memcpy_kot
+                (
+                    (uint32_t *)(destination + destination_stride_bytes * y + offset),
+                    (uint32_t *)(source + source_stride_bytes * y + offset),
+                    damage_.width()
+                );
+#endif
             }
 
 
