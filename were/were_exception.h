@@ -3,6 +3,7 @@
 
 #include <exception>
 #include <cerrno>
+#include <cstring>
 
 class were_exception : public std::exception
 {
