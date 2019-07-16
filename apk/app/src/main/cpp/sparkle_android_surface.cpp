@@ -242,17 +242,13 @@ void sparkle_android_surface::register_keyboard(were_object_pointer<sparkle_keyb
     were::connect(view_, &sparkle_view::key_down, keyboard, [keyboard, surface](int code)
     {
         keyboard->key_press(code);
-#ifdef SPARKLE_KOT
         keyboard->thread()->idle();
-#endif
     });
 
     were::connect(view_, &sparkle_view::key_up, keyboard, [keyboard, surface](int code)
     {
         keyboard->key_release(code);
-#ifdef SPARKLE_KOT
         keyboard->thread()->idle();
-#endif
     });
 
     keyboard->enter(surface); // XXX
