@@ -198,8 +198,8 @@ static snd_pcm_sframes_t sparkle_write(snd_pcm_ioplug_t *io,
 
     int size_bytes = size * sparkle->frame_bytes;
 
-    if (size_bytes > sparkle_max_data_size)
-        size_bytes = sparkle_max_data_size;
+    if (size_bytes > sparkle_period_size)
+        size_bytes = sparkle_period_size;
 
     if (sparkle_send_data(sparkle, data, size_bytes) == -1)
         return -1;

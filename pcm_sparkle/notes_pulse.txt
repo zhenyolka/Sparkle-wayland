@@ -1,0 +1,6 @@
+mkdir -p ~/.pulse/
+cp /etc/pulse/default.pa ~/.pulse/default.pa
+
+In "~/.pulse/default.pa":
+comment "load-module module-udev-detect" > "#load-module module-udev-detect"
+uncomment "#load-module module-alsa-sink" > "load-module module-alsa-sink"

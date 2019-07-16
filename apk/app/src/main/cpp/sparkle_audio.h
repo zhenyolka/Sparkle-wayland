@@ -44,6 +44,7 @@ class sparkle_audio_buffer
 {
 public:
     char data_[period_size];
+    int size_;
 };
 
 
