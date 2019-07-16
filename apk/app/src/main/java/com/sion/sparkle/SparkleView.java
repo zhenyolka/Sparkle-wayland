@@ -33,6 +33,9 @@ import android.util.DisplayMetrics;
 import android.content.pm.ActivityInfo;
 
 
+import android.util.Log;
+
+
 public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
 {
     SparkleView(SparkleService sparkle, long user)
@@ -230,6 +233,18 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
                     return true;
                 case MotionEvent.ACTION_MOVE:
                     pointer_motion(user, event.getX(), event.getY());
+                    return true;
+                case MotionEvent.ACTION_SCROLL:
+                    if (event.getAxisValue(MotionEvent.AXIS_VSCROLL) > 0.0f)
+                    {
+                        pointer_button_down(user, 5);
+                        pointer_button_up(user, 5);
+                    }
+                    else
+                    {
+                        pointer_button_down(user, 6);
+                        pointer_button_up(user, 6);
+                    }
                     return true;
             }
         }

@@ -6,7 +6,7 @@
 
 #include <cstdio>
 
-static const int button_map[4] = {0, BTN_LEFT, BTN_MIDDLE, BTN_RIGHT};
+static const int button_map[6] = {0, BTN_LEFT, BTN_MIDDLE, BTN_RIGHT, BTN_GEAR_UP, BTN_GEAR_DOWN};
 
 sparkle_x11_surface::~sparkle_x11_surface()
 {

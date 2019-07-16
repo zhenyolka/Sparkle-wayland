@@ -3,7 +3,7 @@
 #include <android/native_window_jni.h>
 #include <linux/input-event-codes.h>
 
-static const int button_map[5] = {0, BTN_LEFT, BTN_RIGHT, 0, BTN_MIDDLE};
+static const int button_map[7] = {0, BTN_LEFT, BTN_RIGHT, 0, BTN_MIDDLE, BTN_GEAR_UP, BTN_GEAR_DOWN};
 
 sparkle_view::~sparkle_view()
 {

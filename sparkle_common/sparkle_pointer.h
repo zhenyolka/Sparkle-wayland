@@ -4,6 +4,7 @@
 #include "sparkle.h"
 #include "generated/sparkle_wl_pointer.h"
 #include "sparkle_surface.h"
+#include <linux/input-event-codes.h> // XXX
 
 
 class sparkle_pointer : public sparkle_wl_pointer
@@ -16,12 +17,20 @@ public:
 
     void button_down(int button)
     {
-        send_button(sparkle::next_serial(display_), sparkle::current_msecs(), button, WL_POINTER_BUTTON_STATE_PRESSED);
+        if (button == BTN_GEAR_UP)
+            wheel_up();
+        else if (button == BTN_GEAR_DOWN)
+            wheel_down();
+        else
+            send_button(sparkle::next_serial(display_), sparkle::current_msecs(), button, WL_POINTER_BUTTON_STATE_PRESSED);
     }
 
     void button_up(int button)
     {
-        send_button(sparkle::next_serial(display_), sparkle::current_msecs(), button, WL_POINTER_BUTTON_STATE_RELEASED);
+        if (button == BTN_GEAR_UP) {}
+        else if (button == BTN_GEAR_DOWN) {}
+        else
+            send_button(sparkle::next_serial(display_), sparkle::current_msecs(), button, WL_POINTER_BUTTON_STATE_RELEASED);
     }
 
     void motion(int x, int y)
@@ -43,6 +52,16 @@ public:
         send_leave(sparkle::next_serial(display_), surface->resource());
         if (version() >= WL_POINTER_FRAME_SINCE_VERSION)
             send_frame();
+    }
+
+    void wheel_down()
+    {
+        send_axis(sparkle::current_msecs(), 0, wl_fixed_from_double(10.0));
+    }
+
+    void wheel_up()
+    {
+        send_axis(sparkle::current_msecs(), 0, wl_fixed_from_double(-10.0));
     }
 
 private:
