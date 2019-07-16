@@ -30,6 +30,36 @@ android {
                 }
             }
         }
+        kot1 {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            signingConfig signingConfigs.debug
+
+            ndk {
+                abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+            }
+            externalNativeBuild {
+                cmake {
+                    cppFlags += "-DSPARKLE_KOT -DSPARKLE_KOT_CONVERT"
+                }
+            }
+        }
+        kot2 {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            signingConfig signingConfigs.debug
+
+            ndk {
+                abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+            }
+            externalNativeBuild {
+                cmake {
+                    cppFlags += "-DSPARKLE_KOT -DSPARKLE_KOT_MASK"
+                }
+            }
+        }
     }
     externalNativeBuild {
         cmake {
