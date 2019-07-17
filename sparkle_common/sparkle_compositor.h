@@ -5,7 +5,7 @@
 #include "generated/sparkle_wl_compositor.h"
 #include "sparkle_surface.h"
 #include "sparkle_region.h"
-#include "were_thread.h" // XXX
+#include "were_thread.h" // XXX3
 
 
 class sparkle_compositor : public sparkle_wl_compositor

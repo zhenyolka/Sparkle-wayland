@@ -25,8 +25,8 @@ import android.view.inputmethod.InputMethodManager;
 // Broadcast receiver
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
-import android.content.Intent; // XXX Basic
-import android.content.Context; // XXX Basic
+import android.content.Intent; // XXX3 Basic
+import android.content.Context; // XXX3 Basic
 
 // Orientation control
 import android.util.DisplayMetrics;
@@ -277,12 +277,12 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
 
         if (keyCode == KeyEvent.KEYCODE_BACK)
         {
-            set_visible(false); // XXX
+            set_visible(false);
         }
         else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP)
         {
             InputMethodManager imm = (InputMethodManager)sparkle_.getSystemService(sparkle_.INPUT_METHOD_SERVICE);
-            imm.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT); // XXX Move
+            imm.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT);
         }
         else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)
         {

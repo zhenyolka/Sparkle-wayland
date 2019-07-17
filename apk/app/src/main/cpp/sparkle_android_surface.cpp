@@ -37,7 +37,7 @@ sparkle_android_surface::sparkle_android_surface(were_object_pointer<sparkle_and
 {
     MAKE_THIS_WOP
 
-    view_ = were_object_pointer<sparkle_view>(new sparkle_view(android->service()->env(), android->service())); // XXX
+    view_ = were_object_pointer<sparkle_view>(new sparkle_view(android->service()->env(), android->service()));
     view_->set_enabled(true);
 
     were::connect(view_, &sparkle_view::surface_changed, this_wop, [this_wop](ANativeWindow *window)
@@ -49,7 +49,7 @@ sparkle_android_surface::sparkle_android_surface(were_object_pointer<sparkle_and
 
         if (window != nullptr)
         {
-            ANativeWindow_acquire(this_wop->window_); // XXX Move to sparkle_view
+            ANativeWindow_acquire(this_wop->window_); // XXX2 Move to sparkle_view
 
             int w_width = ANativeWindow_getWidth(window);
             int w_height = ANativeWindow_getHeight(window);
@@ -70,8 +70,6 @@ sparkle_android_surface::sparkle_android_surface(were_object_pointer<sparkle_and
 
     were::connect(surface, &sparkle_surface::attach, this_wop, [this_wop](struct wl_resource *buffer, int32_t x, int32_t y)
     {
-        // XXX
-
         if (this_wop->buffer_ != nullptr)
             wl_buffer_send_release(this_wop->buffer_);
 
@@ -159,7 +157,7 @@ void sparkle_android_surface::commit(bool full)
             if (full)
                 damage_.add(0, 0, width, height);
 
-            damage_.limit(width, height); // XXX
+            damage_.limit(width, height);
 
             ANativeWindow_Buffer buffer;
 
@@ -170,7 +168,6 @@ void sparkle_android_surface::commit(bool full)
             rect.bottom = damage_.y2();
 
 
-            // XXX ANativeWindow_acquire
             if (ANativeWindow_lock(window_, &buffer, &rect) != 0)
                 throw were_exception(WE_SIMPLE);
 
@@ -237,7 +234,7 @@ void sparkle_android_surface::register_keyboard(were_object_pointer<sparkle_keyb
     were_object_pointer<sparkle_surface> surface(surface_);
 
     //if (wl_resource_get_client(keyboard->resource()) != wl_resource_get_client(surface_->resource()))
-    //    return; // XXX
+    //    return; // XXX2
 
     were::connect(view_, &sparkle_view::key_down, keyboard, [keyboard, surface](int code)
     {
@@ -251,7 +248,7 @@ void sparkle_android_surface::register_keyboard(were_object_pointer<sparkle_keyb
         keyboard->thread()->idle();
     });
 
-    keyboard->enter(surface); // XXX
+    keyboard->enter(surface); // XXX2
 
     fprintf(stdout, "keyboard registered\n");
 }
@@ -261,7 +258,7 @@ void sparkle_android_surface::register_pointer(were_object_pointer<sparkle_point
     were_object_pointer<sparkle_surface> surface(surface_);
 
     //if (wl_resource_get_client(keyboard->resource()) != wl_resource_get_client(surface_->resource()))
-    //    return; // XXX
+    //    return; // XXX2
 
     were::connect(view_, &sparkle_view::pointer_button_down, pointer, [pointer](int button)
     {
@@ -288,7 +285,7 @@ void sparkle_android_surface::register_pointer(were_object_pointer<sparkle_point
         pointer->leave(surface);
     });
 
-    pointer->enter(surface); // XXX
+    pointer->enter(surface); // XXX2
 
     fprintf(stdout, "pointer registered\n");
 }

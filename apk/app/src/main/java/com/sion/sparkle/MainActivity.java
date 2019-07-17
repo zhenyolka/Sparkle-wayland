@@ -54,14 +54,14 @@ public class MainActivity extends Activity
 
                 ProcessBuilder builder = new ProcessBuilder("/system/bin/sh", "-c",
                     "/data/data/com.sion.sparkle/user.sh start > /data/data/com.sion.sparkle/user_log.txt 2>&1");
-                // XXX Crashy
+                // Crashy
                 //builder.redirectOutput(new File("/data/data/com.sion.sparkle/user_log.txt"));
                 //builder.redirectError(new File("/data/data/com.sion.sparkle/user_log.txt"));
 
                 try
                 {
                     Process process = builder.start();
-                    Runtime.getRuntime().exec("chmod 666 /data/data/com.sion.sparkle/user_log.txt"); // XXX
+                    Runtime.getRuntime().exec("chmod 666 /data/data/com.sion.sparkle/user_log.txt"); // XXX3
                 }
                 catch (IOException e)
                 {

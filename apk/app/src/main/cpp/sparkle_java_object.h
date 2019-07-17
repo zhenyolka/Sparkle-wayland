@@ -14,7 +14,7 @@ public:
     template <typename ...Args>
     sparkle_java_object(JNIEnv *env, const char *class_id, const char *constructor_id, Args... args)
     {
-            jclass class__ = env->FindClass(class_id); // XXX More checks
+            jclass class__ = env->FindClass(class_id); // XXX2 Check
             jmethodID id = env->GetMethodID(class__, "<init>", constructor_id);
             jobject instance = env->NewObject(class__, id, args...);
 

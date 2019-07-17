@@ -40,8 +40,6 @@ sparkle_x11_surface::sparkle_x11_surface(were_object_pointer<sparkle_x11> x11, w
 
     were::connect(surface, &sparkle_surface::attach, this_wop, [this_wop](struct wl_resource *buffer, int32_t x, int32_t y)
     {
-        // XXX
-
         if (this_wop->buffer_ != nullptr)
             wl_buffer_send_release(this_wop->buffer_);
 
@@ -59,7 +57,7 @@ sparkle_x11_surface::sparkle_x11_surface(were_object_pointer<sparkle_x11> x11, w
         {
             fprintf(stdout, "callback_ != nullptr\n");
             wl_callback_send_done(this_wop->callback_, sparkle::current_msecs());
-            wl_resource_destroy(this_wop->callback_); // XXX
+            wl_resource_destroy(this_wop->callback_);
             this_wop->callback_ = nullptr;
         }
 
@@ -145,7 +143,7 @@ void sparkle_x11_surface::commit()
     if (callback_ != nullptr)
     {
         wl_callback_send_done(callback_, sparkle::current_msecs());
-        wl_resource_destroy(callback_); // XXX
+        wl_resource_destroy(callback_);
         callback_ = nullptr;
     }
 }

@@ -37,7 +37,7 @@ public:
 private:
     std::list<connection_type> connections_;
     bool single_shot_;
-    bool emit_; // XXX
+    bool emit_; // XXXT
 };
 
 
@@ -81,7 +81,7 @@ void were_signal<void (Args...)>::emit(Args... args)
 {
     //emit_ = true;
 
-    std::list<connection_type> connections_copy = connections_; // XXX
+    std::list<connection_type> connections_copy = connections_; // XXXT
 
     for (auto it = connections_copy.begin(); it != connections_copy.end(); ++it)
     {

@@ -2,7 +2,7 @@
 #define WERE_UNIX_SERVER_H
 
 #include "were_object_2.h"
-#include "were_thread.h" // XXX
+#include "were_thread.h" // XXX3
 #include <string>
 
 

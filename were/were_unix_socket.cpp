@@ -25,7 +25,7 @@ were_unix_socket::were_unix_socket(const std::string &path) :
     strncpy(name.sun_path, path_.c_str(), sizeof(name.sun_path) - 1);
 
     if (::connect(fd_, (const struct sockaddr *)&name, sizeof(struct sockaddr_un)) == -1)
-        throw were_exception(WE_SIMPLE); // XXX EINPROGRESS
+        throw were_exception(WE_SIMPLE); // EINPROGRESS
 
     thread()->add_fd_listener(fd_, EPOLLIN | EPOLLET, this);
 }
@@ -34,7 +34,7 @@ were_unix_socket::were_unix_socket(const std::string &path) :
 were_unix_socket::were_unix_socket(int fd)
 {
     fd_ = fd;
-    thread()->add_fd_listener(fd_, EPOLLIN, this); // XXX EPOLLET & bytes_available
+    thread()->add_fd_listener(fd_, EPOLLIN, this); // XXX2 EPOLLET & bytes_available
 }
 
 void were_unix_socket::disconnect(bool signal)

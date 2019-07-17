@@ -59,7 +59,7 @@ sparkle_x11::sparkle_x11(were_object_pointer<sparkle> sparkle)
         were::connect(compositor, &sparkle_compositor::surface_created, this_wop, [this_wop](were_object_pointer<sparkle_surface> surface)
         {
             were_object_pointer<sparkle_x11_surface> x11_surface(new sparkle_x11_surface(this_wop, surface));
-            x11_surface->add_dependency(surface); // XXX
+            x11_surface->add_dependency(surface); // XXX2
 
             were::connect(this_wop, &sparkle_x11::keyboard_created, x11_surface, [x11_surface](were_object_pointer<sparkle_keyboard> keyboard)
             {
@@ -80,7 +80,7 @@ sparkle_x11::sparkle_x11(were_object_pointer<sparkle> sparkle)
         were::connect(shell, &sparkle_shell::shell_surface_created, this_wop, [this_wop](were_object_pointer<sparkle_shell_surface> shell_surface, were_object_pointer<sparkle_surface> surface)
         {
             were_object_pointer<sparkle_x11_surface> x11_surface(new sparkle_x11_surface(this_wop, surface));
-            x11_surface->add_dependency(surface); // XXX
+            x11_surface->add_dependency(surface); // XXX2
 
             were::connect(this_wop, &sparkle_x11::keyboard_created, x11_surface, [x11_surface](were_object_pointer<sparkle_keyboard> keyboard)
             {
@@ -137,7 +137,7 @@ void sparkle_x11::timeout()
 void sparkle_x11::connect_keyboard(were_object_pointer<sparkle_x11_surface> x11_surface, were_object_pointer<sparkle_keyboard> keyboard)
 {
     //if (wl_resource_get_client(keyboard->resource()) != wl_resource_get_client(surface_->resource()))
-    //    return; // XXX
+    //    return; // XXX2
 
     were::connect(x11_surface, &sparkle_x11_surface::key_press, keyboard, [keyboard, x11_surface](int code)
     {
@@ -157,7 +157,7 @@ void sparkle_x11::connect_keyboard(were_object_pointer<sparkle_x11_surface> x11_
 void sparkle_x11::connect_pointer(were_object_pointer<sparkle_x11_surface> x11_surface, were_object_pointer<sparkle_pointer> pointer)
 {
     //if (wl_resource_get_client(keyboard->resource()) != wl_resource_get_client(surface_->resource()))
-    //    return; // XXX
+    //    return; // XXX2
 
     were::connect(x11_surface, &sparkle_x11_surface::pointer_button_press, pointer, [pointer](int button)
     {

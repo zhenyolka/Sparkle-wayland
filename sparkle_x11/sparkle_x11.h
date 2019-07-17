@@ -21,7 +21,7 @@ public:
     were_object_pointer<x11_display> display() const {return display_;}
 
 signals:
-    were_signal<void (XEvent event)> event; // XXX
+    were_signal<void (XEvent event)> event; // XXX3
     were_signal<void (were_object_pointer<sparkle_x11_surface> x11_surface)> x11_surface_created;
     were_signal<void (were_object_pointer<sparkle_keyboard> keyboard)> keyboard_created;
     were_signal<void (were_object_pointer<sparkle_pointer> pointer)> pointer_created;

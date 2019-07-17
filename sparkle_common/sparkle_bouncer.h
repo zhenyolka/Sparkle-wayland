@@ -44,7 +44,7 @@ public:
         were_object_pointer<T> object___(object__);
         were::emit(object___, method__, args...);
 
-        wl_resource_destroy(resource); // XXX
+        wl_resource_destroy(resource); // XXX2
     }
 };
 

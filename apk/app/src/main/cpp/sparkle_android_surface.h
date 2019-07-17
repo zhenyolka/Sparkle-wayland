@@ -12,7 +12,7 @@ class sparkle_touch;
 
 class ANativeWindow;
 
-class sparkle_surface_damage // XXX Move elsewhere
+class sparkle_surface_damage // XXX3 Move elsewhere
 {
 public:
     sparkle_surface_damage() :
@@ -101,8 +101,8 @@ private:
 private:
     were_object_pointer<sparkle_surface> surface_;
     were_object_pointer<sparkle_view> view_;
-    struct wl_resource *buffer_; // XXX Temporary
-    struct wl_resource *callback_; // XX Temporary
+    struct wl_resource *buffer_; // XXX2 Temporary
+    struct wl_resource *callback_; // XX2 Temporary
     ANativeWindow *window_;
     sparkle_surface_damage damage_;
 };

@@ -34,14 +34,14 @@ void connect(   were_object_pointer<SourceType> source,
                 Functor call
 )
 {
-    // XXX Thread.
+    // XXXT Thread.
 
     uint64_t pc_id = next_id();
     uint64_t sb_id = next_id();
     uint64_t cb_id = next_id();
 
     auto signal__ = &((source.operator->())->*signal);
-    signal__->add_connection(call, pc_id); // XXX Direct.
+    signal__->add_connection(call, pc_id); // XXXT Direct.
 
     auto signal1__ = &((source.operator->())->destroyed);
     signal1__->add_connection([source, signal, context, pc_id, sb_id, cb_id]()

@@ -22,7 +22,7 @@ sparkle_java_object::~sparkle_java_object()
 
 sparkle_java_object::sparkle_java_object(JNIEnv *env, jobject instance)
 {
-    jclass class__ = env->GetObjectClass(instance); // XXX More checks
+    jclass class__ = env->GetObjectClass(instance); // XXX2 Check
 
     class_ = (jclass)env->NewGlobalRef(class__);
     object_ = env->NewGlobalRef(instance);

@@ -4,7 +4,7 @@
 #include "were_object.h"
 #include "were_object_pointer.h"
 #include <cstdint>
-#include <sys/epoll.h> // XXX
+#include <sys/epoll.h> // XXX3
 #include <set>
 
 
@@ -44,7 +44,7 @@ public:
 private:
     static thread_local were_object_pointer<were_thread> current_thread_;
     int epoll_fd_;
-    std::set<were_thread_idle_handler *> idle_handlers_; // XXX Thread safety
+    std::set<were_thread_idle_handler *> idle_handlers_; // XXXT Thread safety
 };
 
 #endif // WERE_THREAD_H

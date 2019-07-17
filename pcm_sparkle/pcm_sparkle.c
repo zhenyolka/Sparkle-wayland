@@ -13,7 +13,7 @@
 #include <stdint.h>
 
 
-#define sparkle_server "/data/data/com.sion.sparkle/audio" //XXX
+#define sparkle_server "/data/data/com.sion.sparkle/audio" //XXX2
 #define sparkle_period_size (65536 / 8)
 #define sparkle_periods 8
 #define sparkle_buffer_size (sparkle_period_size * sparkle_periods)

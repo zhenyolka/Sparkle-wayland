@@ -2,7 +2,7 @@
 #define WERE_TIMER_H
 
 #include "were_object_2.h"
-#include "were_thread.h" // XXX
+#include "were_thread.h" // XXX3
 
 class were_timer : public were_object_2, public were_thread_fd_listener
 {

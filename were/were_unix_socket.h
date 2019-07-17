@@ -2,7 +2,7 @@
 #define WERE_UNIX_SOCKET_H
 
 #include "were_object_2.h"
-#include "were_thread.h" // XXX
+#include "were_thread.h" // XXX3
 #include <string>
 
 
@@ -15,7 +15,7 @@ public:
 #endif
     were_unix_socket(int fd);
 
-    void disconnect(bool signal = true); // XXX
+    void disconnect(bool signal = true); // XXX2
 
     void send(const char *data, int size);
     void receive(char *data, int size);

@@ -95,7 +95,7 @@ public:
         debug_ = were_object_pointer<were_debug>(new were_debug());
 
         /*
-         * XXX
+         * XXX1
          * No idea why we need dup() here. But if we don't do this, android will close fd when
          * we close MainActivity. Seems like its also possible to fix such behavior by storing ParcelFileDescritor
          * on java side.
@@ -153,6 +153,7 @@ Java_com_sion_sparkle_SparkleService_native_1create(JNIEnv *env, jobject instanc
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleService_native_1destroy(JNIEnv *env, jobject instance, jlong native)
 {
+    // XXX1
     raise(SIGINT); /* That is how we deal with program termination and proper resource deallocation! Yeah! */
 
     //sparkle_native *native__ = reinterpret_cast<sparkle_native *>(native);

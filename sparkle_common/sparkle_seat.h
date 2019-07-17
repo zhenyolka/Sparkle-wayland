@@ -6,7 +6,8 @@
 #include "sparkle_keyboard.h"
 #include "sparkle_pointer.h"
 #include "sparkle_touch.h"
-#include "were_thread.h" // XXX Remove
+#include "were_thread.h" // XXX3
+
 
 class sparkle_seat : public sparkle_wl_seat
 {
@@ -14,7 +15,7 @@ public:
     sparkle_seat(struct wl_client *client, int version, uint32_t id, were_object_pointer<sparkle_display> display) :
         sparkle_wl_seat(client, version, id), display_(display)
     {
-        // XXX Move to cpp
+        // XXX3 Move to cpp
 
         MAKE_THIS_WOP
 

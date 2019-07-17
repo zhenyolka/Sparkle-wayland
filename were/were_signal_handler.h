@@ -2,7 +2,7 @@
 #define WERE_SIGNAL_HANDLER_H
 
 #include "were_object_2.h"
-#include "were_thread.h" // XXX
+#include "were_thread.h" // XXX3
 
 class were_signal_handler : public were_object_2, public were_thread_fd_listener
 {
