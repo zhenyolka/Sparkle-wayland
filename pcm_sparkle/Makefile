@@ -14,10 +14,12 @@ clean:
 	rm -rf $(OUTPUT)
 
 install:
+	test -n "$(INSTALL_DIR)"
 	mkdir -p $(INSTALL_DIR)/alsa-lib/
 	cp $(OUTPUT) $(INSTALL_DIR)/alsa-lib/
 
 uninstall:
+	test -n "$(INSTALL_DIR)"
 	rm $(INSTALL_DIR)/alsa-lib/$(OUTPUT)
 
 pack: clean
