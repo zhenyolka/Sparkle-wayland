@@ -18,8 +18,7 @@ sparkle_view::sparkle_view(JNIEnv *env, were_object_pointer<sparkle_service> ser
 
 void sparkle_view::set_enabled(bool enabled)
 {
-    jmethodID id = env()->GetMethodID(class1(), "set_enabled", "(Z)V");
-    env()->CallVoidMethod(object1(), id, jboolean(enabled));
+    call_void_method("set_enabled", "(Z)V", jboolean(enabled));
 
     if (enabled) // XXX2 Yes, we need to increment it, but not here
         increment_reference_count();
@@ -29,22 +28,19 @@ void sparkle_view::set_enabled(bool enabled)
 
 void sparkle_view::set_visible(bool visible)
 {
-    jmethodID id = env()->GetMethodID(class1(), "set_visible", "(Z)V");
-    env()->CallVoidMethod(object1(), id, jboolean(visible));
+    call_void_method("set_visible", "(Z)V", jboolean(visible));
 }
 
 void sparkle_view::set_position(int x, int y)
 {
-    jmethodID id = env()->GetMethodID(class1(), "set_position", "(II)V");
-    env()->CallVoidMethod(object1(), id, jint(x), jint(y));
+    call_void_method("set_position", "(II)V", jint(x), jint(y));
 }
 
 void sparkle_view::set_size(int width, int height)
 {
     if (width != width_ || height != height_)
     {
-        jmethodID id = env()->GetMethodID(class1(), "set_size", "(II)V");
-        env()->CallVoidMethod(object1(), id, jint(width), jint(height));
+        call_void_method("set_size", "(II)V", jint(width), jint(height));
         width_ = width;
         height_ = height;
     }

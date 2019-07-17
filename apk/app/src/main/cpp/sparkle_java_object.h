@@ -10,21 +10,15 @@ class sparkle_java_object
 public:
     ~sparkle_java_object();
     sparkle_java_object(JNIEnv *env, jobject instance);
-
-    template <typename ...Args>
-    sparkle_java_object(JNIEnv *env, const char *class_id, const char *constructor_id, Args... args)
-    {
-            jclass class__ = env->FindClass(class_id); // XXX2 Check
-            jmethodID id = env->GetMethodID(class__, "<init>", constructor_id);
-            jobject instance = env->NewObject(class__, id, args...);
-
-            class_ = (jclass)env->NewGlobalRef(class__);
-            object_ = env->NewGlobalRef(instance);
-    }
+    sparkle_java_object(JNIEnv *env, const char *class_id, const char *constructor_id, ...);
 
     static JNIEnv *env();
     jclass class1() const {return class_;}
     jobject object1() const {return object_;}
+
+    jmethodID get_method_id(const char *name, const char *signature);
+    void call_void_method(const char *name, const char *signature, ...);
+    int call_int_method(const char *name, const char *signature, ...);
 
 private:
     jclass class_;

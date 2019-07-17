@@ -34,40 +34,32 @@ sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
 
 void sparkle_service::add_fd_listener(int fd, sparkle_service_fd_listener *listener)
 {
-    jmethodID id = env()->GetMethodID(class1(), "add_fd_listener", "(IJ)V");
-    env()->CallVoidMethod(object1(), id, jint(fd), jlong(listener));
+    call_void_method("add_fd_listener", "(IJ)V", jint(fd), jlong(listener));
 }
 
 void sparkle_service::remove_fd_listener(int fd)
 {
-    jmethodID id = env()->GetMethodID(class1(), "remove_fd_listener", "(I)V");
-    env()->CallVoidMethod(object1(), id, jint(fd));
+    call_void_method("remove_fd_listener", "(I)V", jint(fd));
 }
 
 void sparkle_service::add_idle_handler(sparkle_service_idle_handler *handler)
 {
-    jmethodID id = env()->GetMethodID(class1(), "add_idle_handler", "(J)V");
-    env()->CallVoidMethod(object1(), id, jlong(handler));
+    call_void_method("add_idle_handler", "(J)V", jlong(handler));
 }
 
 void sparkle_service::remove_idle_handler(sparkle_service_idle_handler *handler)
 {
-    jmethodID id = env()->GetMethodID(class1(), "remove_idle_handler", "(J)V");
-    env()->CallVoidMethod(object1(), id, jlong(handler));
+    call_void_method("remove_idle_handler", "(J)V", jlong(handler));
 }
 
 int sparkle_service::display_width()
 {
-    jmethodID id = env()->GetMethodID(class1(), "display_width", "()I");
-    int x = env()->CallIntMethod(object1(), id);
-    return x;
+    return call_int_method("display_width", "()I");
 }
 
 int sparkle_service::display_height()
 {
-    jmethodID id = env()->GetMethodID(class1(), "display_height", "()I");
-    int x = env()->CallIntMethod(object1(), id);
-    return x;
+    return call_int_method("display_height", "()I");
 }
 
 class sparkle_native : public sparkle_service_fd_listener, public sparkle_service_idle_handler
