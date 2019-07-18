@@ -168,7 +168,8 @@ static int sparkle_poll_revents(snd_pcm_ioplug_t *io,
 
     sparkle_receive_pointer(sparkle);
 
-    *revents = io->stream == SND_PCM_STREAM_PLAYBACK ? POLLOUT : POLLIN;
+    //*revents = io->stream == SND_PCM_STREAM_PLAYBACK ? POLLOUT : POLLIN;
+    *revents = POLLOUT;
 
     return 0;
 }
@@ -536,7 +537,8 @@ SND_PCM_PLUGIN_DEFINE_FUNC(sparkle)
     sparkle->io.version = SND_PCM_IOPLUG_VERSION;
     sparkle->io.name = "Sparkle PCM I/O Plugin";
     sparkle->io.poll_fd = sparkle->fd;
-    sparkle->io.poll_events = stream == SND_PCM_STREAM_PLAYBACK ? POLLOUT : POLLIN;
+    //sparkle->io.poll_events = stream == SND_PCM_STREAM_PLAYBACK ? POLLOUT : POLLIN;
+    sparkle->io.poll_events = POLLIN;
     sparkle->io.mmap_rw = 0;
     sparkle->io.callback = stream == SND_PCM_STREAM_PLAYBACK ?
         &sparkle_playback_callback : &sparkle_capture_callback;
