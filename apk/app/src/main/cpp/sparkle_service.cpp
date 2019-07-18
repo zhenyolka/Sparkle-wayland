@@ -86,13 +86,7 @@ public:
 
         debug_ = were_object_pointer<were_debug>(new were_debug());
 
-        /*
-         * XXX1
-         * No idea why we need dup() here. But if we don't do this, android will close fd when
-         * we close MainActivity. Seems like its also possible to fix such behavior by storing ParcelFileDescritor
-         * on java side.
-         */
-        service_->add_fd_listener(dup(thread_->fd()), this);
+        service_->add_fd_listener(thread_->fd(), this);
         service_->add_idle_handler(this);
 
 #ifdef SOUND_THREAD

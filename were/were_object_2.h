@@ -15,8 +15,8 @@ public:
 
     void collapse()
     {
+        were::emit(were_object_pointer<were_object_2>(this), &were_object_2::destroyed); // XXX3 this_wop
         were_object_1::collapse();
-        were::emit(were_object_pointer<were_object_2>(this), &were_object_2::destroyed);
     }
 
     template <typename DependencyType>

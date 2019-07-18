@@ -26,6 +26,9 @@ public:
 
         if (object_ != nullptr)
             object_->increment_reference_count();
+
+        if (object_ != nullptr && object_->collapsed()) // XXXT
+            throw were_exception(WE_SIMPLE);
     }
 
     were_object_pointer(const were_object_pointer &other)
@@ -50,7 +53,7 @@ public:
 
     void reset()
     {
-        // TODO Thread.
+        // XXXT Thread.
 
         if (object_ != nullptr)
         {
@@ -74,7 +77,7 @@ public:
 
     T *operator->() const
     {
-        // TODO Thread check.
+        // XXXT Thread check.
 
         if (object_ == nullptr)
             throw were_exception(WE_SIMPLE);
@@ -102,7 +105,6 @@ private:
 };
 
 #define MAKE_THIS_WOP \
-if (collapsed()) {throw were_exception(WE_SIMPLE);} \
 were_object_pointer<std::remove_pointer<decltype(this)>::type> this_wop(this);
 
 #endif // WERE_OBJECT_POINTER_H
