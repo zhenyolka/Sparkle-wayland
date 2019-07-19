@@ -59,7 +59,7 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
         flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL; // allow any pointer events outside of the window to be sent to the windows behind it
         flags |= WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
         //flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
-        flags |= WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+        //flags |= WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 
         params = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT, 0, 0,
@@ -74,7 +74,7 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
         setFocusableInTouchMode(true);
         getHolder().addCallback(this);
         //getHolder().setFormat(PixelFormat.TRANSLUCENT);
-        getHolder().setFormat(PixelFormat.OPAQUE);
+        //getHolder().setFormat(PixelFormat.OPAQUE);
 
 
 
@@ -82,8 +82,8 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
         params.y = 0;
         params.width = 100;
         params.height = 100;
-        params.alpha = 0;
-        params.dimAmount = 1.0F;
+        //params.alpha = 0.5F;
+        //params.dimAmount = 1.0F;
         //params.format = PixelFormat.TRANSLUCENT;
         //params.format = PixelFormat.OPAQUE;
 
