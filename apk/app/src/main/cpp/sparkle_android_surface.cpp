@@ -129,7 +129,7 @@ inline static void memcpy_kot(struct sparkle_pixel *destination, const struct sp
 inline static void memcpy_kot(uint32_t *destination, const uint32_t *source, size_t n)
 {
     for (int i = 0; i < n; ++i)
-        destination[i] = source[i] & 0x00FFFFFF;
+        destination[i] = source[i] | 0xFF000000;
 }
 #endif
 
