@@ -23,6 +23,13 @@ import java.io.IOException;
 // Check version
 import android.os.Build;
 
+// Assets
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.FileOutputStream;
+
+import android.util.Log;
+
 
 public class MainActivity extends Activity
 {
@@ -65,6 +72,7 @@ public class MainActivity extends Activity
                 }
                 catch (IOException e)
                 {
+                    Log.e("Sparkle", e.getMessage());
                 }
             }
         });
@@ -86,6 +94,41 @@ public class MainActivity extends Activity
         layout.addView(button1);
         layout.addView(button2);
 
+        copyAsset("settings.xml");
+
         setContentView(layout);
+    }
+
+    private void copyAsset(String path)
+    {
+        File file = new File(getApplicationInfo().dataDir, path);
+
+        if (file.exists())
+            return;
+
+        try
+        {
+            InputStream in = getAssets().open(path);
+            OutputStream out = new FileOutputStream(file);
+
+            byte[] buffer = new byte[1024];
+
+            int read = in.read(buffer);
+            while (read != -1)
+            {
+                out.write(buffer, 0, read);
+                read = in.read(buffer);
+            }
+
+            out.close();
+            in.close();
+
+            file.setReadable(true, false);
+            file.setWritable(true, false); // XXX2
+        }
+        catch (IOException e)
+        {
+            Log.e("Sparkle", e.getMessage());
+        }
     }
 }
