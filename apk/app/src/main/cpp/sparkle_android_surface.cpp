@@ -11,9 +11,9 @@
 #include <android/native_window_jni.h>
 
 
-//#define SPARKLE_KOT
+#define SPARKLE_KOT
 //#define SPARKLE_KOT_CONVERT
-//#define SPARKLE_KOT_MASK
+#define SPARKLE_KOT_MASK
 
 
 #ifdef SPARKLE_KOT_CONVERT

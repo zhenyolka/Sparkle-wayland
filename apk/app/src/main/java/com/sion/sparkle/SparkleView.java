@@ -288,6 +288,13 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
 
         if (keyCode == KeyEvent.KEYCODE_BACK)
         {
+            int source = event.getSource();
+            if (hasSource(source, InputDevice.SOURCE_MOUSE))
+            {
+                pointer_button_down(user, 2);
+                return true;
+            }
+
             set_visible(false);
         }
         else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP)
@@ -312,6 +319,12 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
 
         if (keyCode == KeyEvent.KEYCODE_BACK)
         {
+            int source = event.getSource();
+            if (hasSource(source, InputDevice.SOURCE_MOUSE))
+            {
+                pointer_button_up(user, 2);
+                return true;
+            }
         }
         else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP)
         {
