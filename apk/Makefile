@@ -6,6 +6,7 @@ debug:
 	./gradlew assembleDebug
 
 release:
+	./gradlew lint
 	./gradlew assembleRelease
 
 install-debug: debug

@@ -38,7 +38,9 @@ public class MainActivity extends Activity
     {
         super.onCreate(savedInstanceState);
 
-        if (!Settings.canDrawOverlays(this))
+        setup();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this))
         {
             Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
             intent.setData(Uri.parse("package:" + getPackageName()));
@@ -61,9 +63,6 @@ public class MainActivity extends Activity
 
                 ProcessBuilder builder = new ProcessBuilder("/system/bin/sh", "-c",
                     "/data/data/com.sion.sparkle/user.sh start > /data/data/com.sion.sparkle/user_log.txt 2>&1");
-                // Crashy
-                //builder.redirectOutput(new File("/data/data/com.sion.sparkle/user_log.txt"));
-                //builder.redirectError(new File("/data/data/com.sion.sparkle/user_log.txt"));
 
                 try
                 {
@@ -94,9 +93,15 @@ public class MainActivity extends Activity
         layout.addView(button1);
         layout.addView(button2);
 
-        copyAsset("settings.xml");
 
         setContentView(layout);
+    }
+
+    private void setup()
+    {
+        setPermissions(getApplicationInfo().dataDir, true, true, true, true, false, true);
+        copyAsset("settings.xml");
+        setPermissions(getApplicationInfo().dataDir + "/" + "settings.xml", true, true, false, true, true, false);
     }
 
     private void copyAsset(String path)
@@ -122,13 +127,18 @@ public class MainActivity extends Activity
 
             out.close();
             in.close();
-
-            file.setReadable(true, false);
-            file.setWritable(true, false); // XXX2
         }
         catch (IOException e)
         {
             Log.e("Sparkle", e.getMessage());
         }
+    }
+
+    private void setPermissions(String path, boolean r, boolean w, boolean x, boolean r1, boolean w1, boolean x1)
+    {
+        File file = new File(path);
+        file.setReadable(r, !r1);
+        file.setWritable(w, !w1);
+        file.setExecutable(x, !x1);
     }
 }
