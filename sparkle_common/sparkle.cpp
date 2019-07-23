@@ -1,6 +1,7 @@
 #include "sparkle.h"
-#include "sparkle_global.h"
 
+#include "sparkle_settings.h"
+#include "sparkle_global.h"
 #include "sparkle_output.h"
 #include "sparkle_compositor.h"
 #include "sparkle_seat.h"
@@ -20,16 +21,20 @@ sparkle::~sparkle()
     int fd = wl_event_loop_get_fd(loop);
     thread()->remove_fd_listener(fd);
 
-    shell_->collapse();
-    seat_->collapse();
-    compositor_->collapse();
-    output_->collapse();
-    display_->collapse();
+    shell_.collapse();
+    seat_.collapse();
+    compositor_.collapse();
+    output_.collapse();
+    display_.collapse();
+
+    settings_.collapse();
 }
 
 sparkle::sparkle()
 {
     MAKE_THIS_WOP
+
+    settings_ = were_object_pointer<sparkle_settings>(new sparkle_settings());
 
     display_ = were_object_pointer<sparkle_display>(new sparkle_display(wl_display_create()));
     display_->set_destructor([](struct wl_display *&display)

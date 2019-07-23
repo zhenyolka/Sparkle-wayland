@@ -1,9 +1,13 @@
 #include "sparkle_android.h"
+#include "sparkle.h"
+#include "sparkle_settings.h"
+
+#include "sparkle_global.h" // XXX3
 #include "sparkle_output.h"
 #include "sparkle_compositor.h"
 #include "sparkle_seat.h"
 #include "sparkle_shell.h"
-#include "sparkle_global.h" // XXX3
+
 #include "sparkle_android_surface.h"
 #include "sparkle_service.h"
 
@@ -13,18 +17,20 @@ sparkle_android::~sparkle_android()
 }
 
 sparkle_android::sparkle_android(were_object_pointer<sparkle> sparkle, were_object_pointer<sparkle_service> service) :
-    service_(service)
+    sparkle_(sparkle), service_(service)
 {
     MAKE_THIS_WOP
+
+    dpi_ = sparkle->settings()->get_int("DPI", 96);
 
     were::connect(sparkle->output(), &sparkle_global<sparkle_output>::instance, this_wop, [this_wop](were_object_pointer<sparkle_output> output)
     {
         int width = this_wop->service_->display_width();
         int height = this_wop->service_->display_height();
-        int mm_width = width * 254 / 960;
-        int mm_height = height * 254 / 960;
+        int mm_width = width * 254 / (this_wop->dpi_ * 10);
+        int mm_height = height * 254 / (this_wop->dpi_ * 10);
 
-        fprintf(stdout, "display size: %dx%d\n", width, height);
+        fprintf(stdout, "display size: %dx%d %dx%d\n", width, height, mm_width, mm_height);
 
         output->send_geometry(0, 0, mm_width, mm_height, 0, "Barely working solutions", "Sparkle", 0);
 

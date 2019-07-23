@@ -35,6 +35,7 @@ private:
 private:
     were_object_pointer<x11_display> display_;
     were_object_pointer<were_timer> timer_;
+    int dpi_;
 };
 
 #endif // SPARKLE_X11_H

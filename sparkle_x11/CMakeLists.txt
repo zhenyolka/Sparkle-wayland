@@ -28,4 +28,5 @@ target_link_libraries(sparkle LINK_PUBLIC
     sparkle_common
     wayland-server
     X11
+    expat
 )

@@ -96,6 +96,12 @@ public:
     void register_touch(were_object_pointer<sparkle_touch> touch);
 
 private:
+    static void upload_0(void *destination, const void *source,
+        int source_stride_bytes, int destination_stride_bytes, int x1, int y1, int x2, int y2);
+    static void upload_1(void *destination, const void *source,
+        int source_stride_bytes, int destination_stride_bytes, int x1, int y1, int x2, int y2);
+    static void upload_2(void *destination, const void *source,
+        int source_stride_bytes, int destination_stride_bytes, int x1, int y1, int x2, int y2);
     void commit(bool full = false);
 
 private:
@@ -105,6 +111,8 @@ private:
     struct wl_resource *callback_; // XX2 Temporary
     ANativeWindow *window_;
     sparkle_surface_damage damage_;
+    int upload_mode_;
+    bool no_damage_;
 };
 
 #endif // SPARKLE_ANDROID_SURFACE_H

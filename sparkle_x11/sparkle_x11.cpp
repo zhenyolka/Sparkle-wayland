@@ -1,7 +1,8 @@
 #include "sparkle_x11.h"
 #include "sparkle.h"
-#include "sparkle_global.h"
+#include "sparkle_settings.h"
 
+#include "sparkle_global.h"
 #include "sparkle_output.h"
 #include "sparkle_compositor.h"
 #include "sparkle_surface.h"
@@ -23,6 +24,8 @@ sparkle_x11::sparkle_x11(were_object_pointer<sparkle> sparkle)
 {
     MAKE_THIS_WOP
 
+    dpi_ = sparkle->settings()->get_int("DPI", 96);
+
     display_ = were_object_pointer<x11_display>(new x11_display(XOpenDisplay(nullptr)));
     if (display_->get() == nullptr)
         throw were_exception(WE_SIMPLE);
@@ -35,12 +38,12 @@ sparkle_x11::sparkle_x11(were_object_pointer<sparkle> sparkle)
     were::connect(timer_, &were_timer::timeout, this_wop, [this_wop](){this_wop->timeout();});
     timer_->start();
 
-    were::connect(sparkle->output(), &sparkle_global<sparkle_output>::instance, sparkle->output(), [](were_object_pointer<sparkle_output> output)
+    were::connect(sparkle->output(), &sparkle_global<sparkle_output>::instance, this_wop, [this_wop](were_object_pointer<sparkle_output> output)
     {
         int width = 1280;
         int height = 720;
-        int mm_width = width * 254 / 960;
-        int mm_height = height * 254 / 960;
+        int mm_width = width * 254 / (this_wop->dpi_ * 10);
+        int mm_height = height * 254 / (this_wop->dpi_ * 10);
 
         output->send_geometry(0, 0, mm_width, mm_height, 0, "Barely working solutions", "Sparkle", 0);
 
