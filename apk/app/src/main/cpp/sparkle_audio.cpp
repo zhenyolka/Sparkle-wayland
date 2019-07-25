@@ -2,6 +2,7 @@
 #include "were_unix_server.h"
 #include "were_unix_socket.h"
 #include <sys/stat.h> // chmod
+#include "were_log.h"
 
 
 sparkle_audio::~sparkle_audio()
@@ -86,13 +87,13 @@ sparkle_audio::sparkle_audio()
 
     were::connect(server_, &were_unix_server::new_connection, this_wop, [this_wop]()
     {
-        fprintf(stdout, "audio connection\n");
+        were_log("audio connection\n");
 
         if (!this_wop->socket_)
         {
             this_wop->socket_ = this_wop->server_->accept();
 
-            fprintf(stdout, "audio connected\n");
+            were_log("audio connected\n");
 
             this_wop->stop();
 
@@ -103,13 +104,13 @@ sparkle_audio::sparkle_audio()
 
             were::connect(this_wop->socket_, &were_unix_socket::disconnected, this_wop, [this_wop]()
             {
-                fprintf(stdout, "audio disconnected\n");
+                were_log("audio disconnected\n");
                 this_wop->stop();
                 this_wop->socket_.collapse();
             });
         }
         else
-            fprintf(stdout, "can't accept audio connection\n");
+            were_log("can't accept audio connection\n");
     });
 }
 
@@ -117,16 +118,18 @@ void sparkle_audio::callback(BufferQueueItf playerBufferqueue, void *data)
 {
     sparkle_audio *instance = reinterpret_cast<sparkle_audio *>(data);
 
-    if (instance->queue_.size() > 0)
-    {
-        instance->pointer_ += instance->queue_.front()->size_;
-        instance->queue_.pop();
+    instance->mutex_.lock();
 
-        if (instance->socket_)
-            instance->socket_->send((char *)&instance->pointer_, sizeof(uint64_t));
-    }
-    else
-        fprintf(stdout, "WARNING %s:%d\n", __FILE__, __LINE__);
+    if (instance->queue_.size() < 1)
+        throw were_exception(WE_SIMPLE);
+
+    instance->pointer_ += instance->queue_.front()->size_;
+    instance->queue_.pop();
+
+    instance->mutex_.unlock();
+
+    if (instance->socket_)
+        instance->socket_->send((char *)&instance->pointer_, sizeof(uint64_t));
 }
 
 void sparkle_audio::read()
@@ -138,12 +141,10 @@ void sparkle_audio::read()
 
         if (code == 1)
         {
-            fprintf(stdout, "starting player\n");
             start();
         }
         else if (code == 2)
         {
-            fprintf(stdout, "stopping player\n");
             stop();
         }
         else if (code == 3)
@@ -158,9 +159,14 @@ void sparkle_audio::read()
             socket_->receive(buffer->data_, size);
             buffer->size_ = size;
 
+
+            mutex_.lock();
+
             SLresult result = (*playerBufferqueue)->Enqueue(playerBufferqueue, buffer->data_, buffer->size_);
             check_result(result);
             queue_.push(buffer);
+
+            mutex_.unlock();
         }
     }
 }
@@ -169,6 +175,8 @@ void sparkle_audio::start()
 {
     if (state_ != SL_PLAYSTATE_PLAYING)
     {
+        were_log("starting player\n");
+
         SLresult result;
         state_ = SL_PLAYSTATE_PLAYING;
         result = (*playerPlay)->SetPlayState(playerPlay, state_);
@@ -182,6 +190,8 @@ void sparkle_audio::stop()
 {
     if (state_ != SL_PLAYSTATE_STOPPED)
     {
+        were_log("stopping player\n");
+
         SLresult result;
         state_ = SL_PLAYSTATE_STOPPED;
         result = (*playerPlay)->SetPlayState(playerPlay, state_);
