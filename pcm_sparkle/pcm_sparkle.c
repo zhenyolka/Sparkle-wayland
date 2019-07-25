@@ -406,7 +406,7 @@ static int sparkle_hw_constraint(snd_pcm_sparkle_t *sparkle)
         return err;
 
     // Rates
-    err = snd_pcm_ioplug_set_param_minmax(io, SND_PCM_IOPLUG_HW_RATE, 44100, 44100);
+    err = snd_pcm_ioplug_set_param_minmax(io, SND_PCM_IOPLUG_HW_RATE, 48000, 48000);
     if (err < 0)
         return err;
 
