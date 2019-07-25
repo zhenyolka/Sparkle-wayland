@@ -34,7 +34,7 @@
 
 #define check_result(r) do { if ((r) != SL_RESULT_SUCCESS) throw were_exception(WE_SIMPLE); } while (0)
 
-const int period_size = 65536 / 8;
+const int sparkle_audio_buffer_size = 65536;
 
 class were_unix_server;
 class were_unix_socket;
@@ -43,7 +43,7 @@ class were_unix_socket;
 class sparkle_audio_buffer
 {
 public:
-    char data_[period_size];
+    char data_[sparkle_audio_buffer_size];
     int size_;
 };
 

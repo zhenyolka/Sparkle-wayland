@@ -130,34 +130,37 @@ void sparkle_audio::callback(BufferQueueItf playerBufferqueue, void *data)
 
 void sparkle_audio::read()
 {
-    uint64_t code;
-    socket_->receive((char *)&code, sizeof(uint64_t));
-
-    if (code == 1)
+    while (socket_->bytes_available() > 0)
     {
-        fprintf(stdout, "starting player\n");
-        start();
-    }
-    else if (code == 2)
-    {
-        fprintf(stdout, "stopping player\n");
-        stop();
-    }
-    else if (code == 3)
-    {
-        uint64_t size;
-        socket_->receive((char *)&size, sizeof(uint64_t));
+        uint64_t code;
+        socket_->receive((char *)&code, sizeof(uint64_t));
 
-        if (size > period_size)
-            throw were_exception(WE_SIMPLE);
+        if (code == 1)
+        {
+            fprintf(stdout, "starting player\n");
+            start();
+        }
+        else if (code == 2)
+        {
+            fprintf(stdout, "stopping player\n");
+            stop();
+        }
+        else if (code == 3)
+        {
+            uint64_t size;
+            socket_->receive((char *)&size, sizeof(uint64_t));
 
-        std::shared_ptr<sparkle_audio_buffer> buffer(new sparkle_audio_buffer());
-        socket_->receive(buffer->data_, size);
-        buffer->size_ = size;
+            if (size > sparkle_audio_buffer_size)
+                throw were_exception(WE_SIMPLE);
 
-        SLresult result = (*playerBufferqueue)->Enqueue(playerBufferqueue, buffer->data_, buffer->size_);
-        check_result(result);
-        queue_.push(buffer);
+            std::shared_ptr<sparkle_audio_buffer> buffer(new sparkle_audio_buffer());
+            socket_->receive(buffer->data_, size);
+            buffer->size_ = size;
+
+            SLresult result = (*playerBufferqueue)->Enqueue(playerBufferqueue, buffer->data_, buffer->size_);
+            check_result(result);
+            queue_.push(buffer);
+        }
     }
 }
 

@@ -5,6 +5,7 @@
 #include <sys/un.h>
 #include <cstring>
 #include <errno.h>
+#include <sys/ioctl.h>
 
 
 were_unix_socket::~were_unix_socket()
@@ -34,7 +35,7 @@ were_unix_socket::were_unix_socket(const std::string &path) :
 were_unix_socket::were_unix_socket(int fd)
 {
     fd_ = fd;
-    thread()->add_fd_listener(fd_, EPOLLIN, this); // XXX2 EPOLLET & bytes_available
+    thread()->add_fd_listener(fd_, EPOLLIN | EPOLLET, this);
 }
 
 void were_unix_socket::disconnect(bool signal)
@@ -112,4 +113,16 @@ void were_unix_socket::receive(char *data, int size)
             received += r;
         }
     }
+}
+
+int were_unix_socket::bytes_available()
+{
+    if (fd_ == -1)
+        return 0;
+
+    int bytes = 0;
+    if (ioctl(fd_, FIONREAD, &bytes) == -1)
+        throw were_exception(WE_SIMPLE);
+
+    return bytes;
 }
