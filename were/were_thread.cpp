@@ -1,6 +1,8 @@
 #include "were_thread.h"
 #include "were_exception.h"
 #include <unistd.h>
+#include <sys/eventfd.h>
+
 
 const int MAX_EVENTS = 16;
 
@@ -8,6 +10,9 @@ thread_local were_object_pointer<were_thread> were_thread::current_thread_;
 
 were_thread::~were_thread()
 {
+    remove_fd_listener(event_fd_);
+
+    close(event_fd_);
     close(epoll_fd_);
 }
 
@@ -16,6 +21,12 @@ were_thread::were_thread()
     epoll_fd_ = epoll_create1(0);
     if (epoll_fd_ == -1)
         throw were_exception(WE_SIMPLE);
+
+    event_fd_ = eventfd(0, 0);
+    if (event_fd_ == -1)
+        throw were_exception(WE_SIMPLE);
+
+    add_fd_listener(event_fd_, EPOLLIN | EPOLLET, this);
 
     if (!current_thread_)
         current_thread_ = were_object_pointer<were_thread>(this);
@@ -76,4 +87,38 @@ void were_thread::idle()
 {
     for (auto it = idle_handlers_.begin(); it != idle_handlers_.end(); ++it)
         (*it)->idle();
+}
+
+void were_thread::event(uint32_t events)
+{
+    if (events == EPOLLIN)
+    {
+        uint64_t counter = 0;
+        if (read(event_fd_, &counter, sizeof(uint64_t)) != sizeof(uint64_t))
+            throw were_exception(WE_SIMPLE);
+
+        call_queue_mutex_.lock();
+        for (unsigned int i = 0; i < counter; ++i)
+        {
+            std::function<void ()> call = call_queue_.front();
+            call_queue_.pop();
+            call_queue_mutex_.unlock();
+            call();
+            call_queue_mutex_.lock();
+        }
+        call_queue_mutex_.unlock();
+    }
+    else
+        throw were_exception(WE_SIMPLE);
+}
+
+void were_thread::post(const std::function<void ()> &call)
+{
+    call_queue_mutex_.lock();
+    call_queue_.push(call);
+    call_queue_mutex_.unlock();
+
+    uint64_t add = 1;
+    if (write(event_fd_, &add, sizeof(uint64_t)) != sizeof(uint64_t))
+        throw were_exception(WE_SIMPLE);
 }

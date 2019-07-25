@@ -16,7 +16,6 @@
 
 #include <queue>
 #include <memory>
-#include <mutex>
 
 
 #ifdef USE_ANDROID_SIMPLE_BUFFER_QUEUE
@@ -57,6 +56,7 @@ public:
 
 private:
     static void callback(BufferQueueItf playerBufferqueue, void *data);
+    void callback();
     void read();
     void start();
     void stop();
@@ -79,7 +79,6 @@ private:
     were_object_pointer<were_unix_socket> socket_;
     uint64_t pointer_;
     std::queue< std::shared_ptr<sparkle_audio_buffer> > queue_;
-    std::mutex mutex_; // Don't forget you need this
 };
 
 #endif // SPARKLE_AUDIO_H

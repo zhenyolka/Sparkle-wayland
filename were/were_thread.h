@@ -6,6 +6,9 @@
 #include <cstdint>
 #include <sys/epoll.h> // XXX3
 #include <set>
+#include <functional>
+#include <queue>
+#include <mutex>
 
 
 class were_thread_fd_listener
@@ -22,7 +25,7 @@ private:
     virtual void idle() = 0;
 };
 
-class were_thread : public were_object
+class were_thread : public were_object, public were_thread_fd_listener
 {
 public:
     ~were_thread();
@@ -41,10 +44,18 @@ public:
 
     void idle();
 
+    void post(const std::function<void ()> &call);
+
+private:
+    void event(uint32_t events);
+
 private:
     static thread_local were_object_pointer<were_thread> current_thread_;
     int epoll_fd_;
     std::set<were_thread_idle_handler *> idle_handlers_; // XXXT Thread safety
+    int event_fd_;
+    std::queue< std::function<void ()> > call_queue_;
+    std::mutex call_queue_mutex_;
 };
 
 #endif // WERE_THREAD_H

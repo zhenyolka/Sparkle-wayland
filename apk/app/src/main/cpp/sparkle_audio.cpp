@@ -117,19 +117,27 @@ sparkle_audio::sparkle_audio()
 void sparkle_audio::callback(BufferQueueItf playerBufferqueue, void *data)
 {
     sparkle_audio *instance = reinterpret_cast<sparkle_audio *>(data);
+    were_object_pointer<sparkle_audio> instance__(instance);
 
-    instance->mutex_.lock();
+    instance__->thread()->post([instance__]()
+    {
+        instance__->callback();
+    });
+}
 
-    if (instance->queue_.size() < 1)
+void sparkle_audio::callback()
+{
+    if (state_ != SL_PLAYSTATE_PLAYING)
+        return;
+
+    if (queue_.size() < 1)
         throw were_exception(WE_SIMPLE);
 
-    instance->pointer_ += instance->queue_.front()->size_;
-    instance->queue_.pop();
+    pointer_ += queue_.front()->size_;
+    queue_.pop();
 
-    instance->mutex_.unlock();
-
-    if (instance->socket_)
-        instance->socket_->send((char *)&instance->pointer_, sizeof(uint64_t));
+    if (socket_)
+        socket_->send((char *)&pointer_, sizeof(uint64_t));
 }
 
 void sparkle_audio::read()
@@ -160,13 +168,9 @@ void sparkle_audio::read()
             buffer->size_ = size;
 
 
-            mutex_.lock();
-
             SLresult result = (*playerBufferqueue)->Enqueue(playerBufferqueue, buffer->data_, buffer->size_);
             check_result(result);
             queue_.push(buffer);
-
-            mutex_.unlock();
         }
     }
 }
