@@ -117,15 +117,16 @@ void sparkle_audio::callback(BufferQueueItf playerBufferqueue, void *data)
 {
     sparkle_audio *instance = reinterpret_cast<sparkle_audio *>(data);
 
-    if (instance->queue_.size() < 1)
-        throw were_exception(WE_SIMPLE);
+    if (instance->queue_.size() > 0)
+    {
+        instance->pointer_ += instance->queue_.front()->size_;
+        instance->queue_.pop();
 
-    instance->pointer_ += instance->queue_.front()->size_;
-    instance->queue_.pop();
-
-
-    if (instance->socket_)
-        instance->socket_->send((char *)&instance->pointer_, sizeof(uint64_t));
+        if (instance->socket_)
+            instance->socket_->send((char *)&instance->pointer_, sizeof(uint64_t));
+    }
+    else
+        fprintf(stdout, "WARNING %s:%d\n", __FILE__, __LINE__);
 }
 
 void sparkle_audio::read()
