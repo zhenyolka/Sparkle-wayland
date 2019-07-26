@@ -20,7 +20,8 @@ public:
     void send(const char *data, int size);
     void receive(char *data, int size);
 
-    int bytes_available();
+    int bytes_available() const;
+    bool connected() const;
 
 signals:
     were_signal<void ()> ready_read;

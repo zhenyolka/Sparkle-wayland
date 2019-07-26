@@ -106,7 +106,16 @@ sparkle_audio::sparkle_audio()
             {
                 were_log("audio disconnected\n");
                 this_wop->stop();
-                this_wop->socket_.collapse();
+
+                //this_wop->socket_.collapse();
+                // XXXT send -> error -> disconnect -> disconnect callback ->
+                // -> collapse -> unregister fd -> exception
+                // XXXT collapse -> epoll event -> make_this_wop -> exception
+
+                this_wop->thread()->post([this_wop]()
+                {
+                    this_wop->socket_.collapse();
+                });
             });
         }
         else

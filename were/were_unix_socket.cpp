@@ -115,7 +115,7 @@ void were_unix_socket::receive(char *data, int size)
     }
 }
 
-int were_unix_socket::bytes_available()
+int were_unix_socket::bytes_available() const
 {
     if (fd_ == -1)
         return 0;
@@ -125,4 +125,9 @@ int were_unix_socket::bytes_available()
         throw were_exception(WE_SIMPLE);
 
     return bytes;
+}
+
+bool were_unix_socket::connected() const
+{
+    return fd_ != -1;
 }

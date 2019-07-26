@@ -97,16 +97,15 @@ void were_thread::event(uint32_t events)
         if (read(event_fd_, &counter, sizeof(uint64_t)) != sizeof(uint64_t))
             throw were_exception(WE_SIMPLE);
 
-        call_queue_mutex_.lock();
         for (unsigned int i = 0; i < counter; ++i)
         {
+            call_queue_mutex_.lock();
             std::function<void ()> call = call_queue_.front();
             call_queue_.pop();
             call_queue_mutex_.unlock();
             call();
-            call_queue_mutex_.lock();
         }
-        call_queue_mutex_.unlock();
+
     }
     else
         throw were_exception(WE_SIMPLE);

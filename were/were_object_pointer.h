@@ -3,6 +3,8 @@
 
 #include "were_exception.h"
 #include "were_object.h"
+#include <cstdio>
+#include <typeinfo>
 
 
 template <typename T>
@@ -28,7 +30,10 @@ public:
             object_->increment_reference_count();
 
         if (object_ != nullptr && object_->collapsed()) // XXXT
+        {
+            fprintf(stdout, "Type %s\n", typeid(T).name());
             throw were_exception(WE_SIMPLE);
+        }
     }
 
     were_object_pointer(const were_object_pointer &other)
@@ -80,7 +85,10 @@ public:
         // XXXT Thread check.
 
         if (object_ == nullptr)
+        {
+            fprintf(stdout, "Type %s\n", typeid(T).name());
             throw were_exception(WE_SIMPLE);
+        }
 
         return static_cast<T *>(object_);
     }
