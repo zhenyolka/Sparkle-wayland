@@ -18,7 +18,8 @@ package_make()
 package_install()
 {
     cd ./lua
-    make DESTDIR="${MOGRYPH_TOOLCHAIN}/sysroot/" install
-    make DESTDIR="${MOGRYPH_INSTALL_DIR}" install
-    make clean
+    cp liblua.a ${MOGRYPH_INSTALL_DIR}/usr/lib
+    find . -name "*.o" -exec rm {} \;
+    rm liblua.a
+    rm lua
 }
