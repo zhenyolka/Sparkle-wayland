@@ -1,0 +1,24 @@
+package_source()
+{
+    git clone --depth 1 -b "v5.3" https://github.com/lua/lua.git
+    rm -rf ./lua/.git
+}
+
+package_configure()
+{
+    echo "Patch me!"
+}
+
+package_make()
+{
+    cd ./lua
+    make
+}
+
+package_install()
+{
+    cd ./lua
+    make DESTDIR="${MOGRYPH_TOOLCHAIN}/sysroot/" install
+    make DESTDIR="${MOGRYPH_INSTALL_DIR}" install
+    make clean
+}
