@@ -6,13 +6,13 @@
 > #MYCFLAGS= $(LOCAL) -std=c99 -DLUA_USE_LINUX -DLUA_COMPAT_5_2
 > #MYLDFLAGS= $(LOCAL) -Wl,-E
 > #MYLIBS= -ldl -lreadline
-61c61
+61,64c61,64
 < CC= gcc
----
-> CC= $(MOGRYPH_HOST)-gcc
-63,64c63,64
+< CFLAGS= -Wall -O2 $(MYCFLAGS)
 < AR= ar rc
 < RANLIB= ranlib
 ---
+> CC= $(MOGRYPH_HOST)-gcc
+> CFLAGS= -Wall -O2 $(MYCFLAGS) -fPIC
 > AR= $(MOGRYPH_HOST)-ar rc
 > RANLIB= $(MOGRYPH_HOST)-ranlib

@@ -59,7 +59,7 @@ LOCAL = $(TESTS) $(CWARNS) -g
 
 
 CC= $(MOGRYPH_HOST)-gcc
-CFLAGS= -Wall -O2 $(MYCFLAGS)
+CFLAGS= -Wall -O2 $(MYCFLAGS) -fPIC
 AR= $(MOGRYPH_HOST)-ar rc
 RANLIB= $(MOGRYPH_HOST)-ranlib
 RM= rm -f
