@@ -214,6 +214,7 @@ public class SparkleService extends Service
         Log.i("Sparkle", "idle handler removed");
     }
 
+    @Keep
     public int display_width()
     {
         DisplayMetrics display_metrics = new DisplayMetrics();
@@ -221,6 +222,7 @@ public class SparkleService extends Service
         return display_metrics.widthPixels;
     }
 
+    @Keep
     public int display_height()
     {
         DisplayMetrics display_metrics = new DisplayMetrics();

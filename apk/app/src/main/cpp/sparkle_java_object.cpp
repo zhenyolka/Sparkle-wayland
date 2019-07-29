@@ -62,7 +62,10 @@ jmethodID sparkle_java_object::get_method_id(const char *name, const char *signa
 {
     jmethodID id = env()->GetMethodID(class1(), name, signature);
     if (id == nullptr)
+    {
+        fprintf(stderr, "%s\n", name);
         throw were_exception(WE_SIMPLE);
+    }
 
     return id;
 }

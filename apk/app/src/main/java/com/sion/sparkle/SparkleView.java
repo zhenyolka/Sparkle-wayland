@@ -8,6 +8,8 @@ import android.view.Surface;
 import android.view.WindowManager;
 import android.view.Gravity;
 
+import androidx.annotation.Keep; // XXX3 Basic
+
 // Check version
 import android.os.Build;
 
@@ -40,6 +42,7 @@ import android.util.Log;
 
 public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
 {
+    @Keep
     SparkleView(SparkleService sparkle, long user)
     {
         super(sparkle);
@@ -124,6 +127,7 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
 
     }
 
+    @Keep
     public void set_enabled(boolean enabled)
     {
         if (enabled && !enabled_)
@@ -147,6 +151,7 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
         }
     }
 
+    @Keep
     public void set_visible(boolean visible)
     {
         if (visible)
@@ -155,6 +160,7 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
             setVisibility(INVISIBLE);
     }
 
+    @Keep
     public void set_position(int x, int y)
     {
         params.x = x;
@@ -163,6 +169,7 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
             sparkle_.window_manager_.updateViewLayout(this, params);
     }
 
+    @Keep
     public void set_size(int width, int height)
     {
         params.width = width;
@@ -192,7 +199,7 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
         surface_changed(user, null);
     }
 
-    public static boolean hasSource(int sources, int source)
+    private static boolean hasSource(int sources, int source)
     {
         return (sources & source) == source;
     }
