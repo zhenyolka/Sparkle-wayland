@@ -1,75 +1,137 @@
 #include "sparkle_settings.h"
 #include "were_exception.h"
 
+extern "C"
+{
+#include <lauxlib.h>
+#include <lualib.h>
+#include <lua.h>
+}
+
+
 sparkle_settings::~sparkle_settings()
 {
 }
 
-sparkle_settings::sparkle_settings() :
-    depth_(0)
+sparkle_settings::sparkle_settings()
 {
     load();
 }
 
-void sparkle_settings::start_element(void *userData, const XML_Char *name, const XML_Char **atts)
+static void lua_stack(lua_State *L)
 {
-    sparkle_settings *instance = reinterpret_cast<sparkle_settings *>(userData);
+    int i;
+    int top = lua_gettop(L);
 
-    std::string name__(name);
-
-    if (name__ == "sparkle")
+    fprintf(stdout, "STACK: ");
+    for (i = 1; i <= top; i++) /* repeat for each level */
     {
-        fprintf(stdout, "Settings:\n");
-        for (int i = 0; atts[i]; i += 2)
+        int t = lua_type(L, i);
+        switch (t)
         {
-            fprintf(stdout, "  %s = %s\n", atts[i], atts[i + 1]);
-            instance->settings_.insert(std::make_pair(std::string(atts[i]), std::string(atts[i + 1])));
+            case LUA_TSTRING:  /* strings */
+                fprintf(stdout, "`%s'", lua_tostring(L, i));
+                break;
+            case LUA_TBOOLEAN:  /* booleans */
+                fprintf(stdout, lua_toboolean(L, i) ? "true" : "false");
+                break;
+            case LUA_TNUMBER:  /* numbers */
+                fprintf(stdout, "%g", lua_tonumber(L, i));
+                break;
+            default:  /* other values */
+                fprintf(stdout, "%s", lua_typename(L, t));
+                break;
         }
+        fprintf(stdout, "  ");  /* put a separator */
     }
-
-    instance->depth_ += 1;
-}
-
-void sparkle_settings::end_element(void *userData, const XML_Char *name)
-{
-    sparkle_settings *instance = reinterpret_cast<sparkle_settings *>(userData);
-
-    instance->depth_ -= 1;
+    fprintf(stdout, "\n");  /* end the listing */
 }
 
 void sparkle_settings::load()
 {
-    char buf[BUFSIZ];
-
 #ifdef __ANDROID__
-    FILE *file = fopen("/data/data/com.sion.sparkle/settings.xml", "r"); // XXX2
+    const char *file = "/data/data/com.sion.sparkle/settings.lua";
 #else
-    FILE *file = fopen("settings.xml", "r");
+    const char *file = "settings.lua";
 #endif
-    if (file == nullptr)
+    int status;
+
+
+    lua_State *L = luaL_newstate();
+    luaL_openlibs(L);
+
+    status = luaL_loadfile(L, file);
+    if (status)
+    {
+        fprintf(stdout, "Failed to load file: %s\n", lua_tostring(L, -1));
+        return;
+    }
+
+#if 1 /* Sandbox */
+    lua_newtable(L);
+
+    //lua_pushstring(L, "print");
+    //lua_getglobal(L, "print");
+    //lua_settable(L, -3);
+
+    lua_setglobal(L, "sandbox");
+    lua_getglobal(L, "sandbox");
+
+    lua_setupvalue(L, -2, 1);
+#endif
+
+    status = lua_pcall(L, 0, 0, 0);
+    if (status)
+    {
+        fprintf(stderr, "Failed to run script: %s\n", lua_tostring(L, -1));
+        return;
+    }
+
+    //lua_stack(L);
+
+    lua_getglobal(L, "sandbox");
+    if (!lua_istable(L, -1))
         return;
 
-    XML_Parser parser = XML_ParserCreate(NULL);
-    XML_SetUserData(parser, this);
-    XML_SetElementHandler(parser, start_element, end_element);
+    lua_pushstring(L, "sparkle");
+    lua_gettable(L, -2);
 
-    int done;
-    do
+    if (!lua_istable(L, -1))
+        return;
+
+    lua_pushnil(L);  /* first key */
+
+    while (lua_next(L, -2) != 0)
     {
-        size_t len = fread(buf, 1, sizeof(buf), file);
-        done = len < sizeof(buf);
-
-        if (XML_Parse(parser, buf, (int)len, done) == XML_STATUS_ERROR)
+        if (lua_isstring(L, -2))
         {
-            fprintf(stderr, "%s at line %lu\n", XML_ErrorString(XML_GetErrorCode(parser)), XML_GetCurrentLineNumber(parser));
-            return;
+            const char *key = nullptr;
+            const char *value = nullptr;
+
+            if (lua_isstring(L, -2))
+                key = lua_tostring(L, -2);
+
+            if (lua_isstring(L, -1))
+                value = lua_tostring(L, -1);
+            else
+                fprintf(stdout, "%s\n", lua_typename(L, lua_type(L, -1)));
+
+            if (key != nullptr && value != nullptr)
+            {
+                fprintf(stdout, "%s = %s\n", key, value);
+                settings_.insert(std::make_pair(std::string(key), std::string(value)));
+            }
         }
 
-    } while (!done);
+        lua_pop(L, 1);
+    }
 
-    XML_ParserFree(parser);
+    lua_pop(L, 1);
+    lua_pop(L, 1);
 
-    fclose(file);
+    //lua_stack(L);
+
+    lua_close(L);
 }
 
 std::string sparkle_settings::get_string(const std::string &key, const std::string &default_value)

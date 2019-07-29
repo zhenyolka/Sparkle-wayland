@@ -36,7 +36,7 @@ target_link_libraries(sparkle LINK_PUBLIC
     sparkle_common
     ${SPARKLE_ROOT}/foreign/install/${ANDROID_ABI}/usr/lib/libwayland-server.a
     ${SPARKLE_ROOT}/foreign/install/${ANDROID_ABI}/usr/lib/libffi.a
-    ${SPARKLE_ROOT}/foreign/install/${ANDROID_ABI}/usr/lib/libexpat.a
+    ${SPARKLE_ROOT}/foreign/install/${ANDROID_ABI}/usr/lib/liblua.a
     android
     OpenSLES
 )

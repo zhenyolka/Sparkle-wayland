@@ -100,8 +100,8 @@ public class MainActivity extends Activity
     private void setup()
     {
         setPermissions(getApplicationInfo().dataDir, true, true, true, true, false, true);
-        copyAsset("settings.xml");
-        setPermissions(getApplicationInfo().dataDir + "/" + "settings.xml", true, true, false, true, true, false);
+        copyAsset("settings.lua");
+        setPermissions(getApplicationInfo().dataDir + "/" + "settings.lua", true, true, false, true, true, false);
     }
 
     private void copyAsset(String path)

@@ -19,6 +19,7 @@ package_install()
 {
     cd ./lua
     cp liblua.a ${MOGRYPH_INSTALL_DIR}/usr/lib
+    cp *.h ${MOGRYPH_INSTALL_DIR}/usr/include
     find . -name "*.o" -exec rm {} \;
     rm liblua.a
     rm lua

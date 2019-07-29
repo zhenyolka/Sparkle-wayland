@@ -2,10 +2,13 @@
 #include <cstdarg>
 #include <cstdio>
 
+#ifdef __ANDROID__
 #include <unwind.h>
 #include <dlfcn.h>
 #include <cxxabi.h>
+#endif
 
+#ifdef __ANDROID__
 
 struct android_backtrace_state
 {
@@ -67,6 +70,14 @@ void dump_stack()
 
     fprintf(stdout, "android stack dump done\n");
 }
+
+#else
+
+void dump_stack()
+{
+}
+
+#endif
 
 
 were_exception::~were_exception()
