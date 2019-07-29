@@ -53,15 +53,15 @@ LOCAL = $(TESTS) $(CWARNS) -g
 
 
 # enable Linux goodies
-#MYCFLAGS= $(LOCAL) -std=c99 -DLUA_USE_LINUX -DLUA_COMPAT_5_2
-#MYLDFLAGS= $(LOCAL) -Wl,-E
-#MYLIBS= -ldl -lreadline
+MYCFLAGS= $(LOCAL) -std=c99 -DLUA_USE_LINUX -DLUA_COMPAT_5_2
+MYLDFLAGS= $(LOCAL) -Wl,-E
+MYLIBS= -ldl -lreadline
 
 
-CC= $(MOGRYPH_HOST)-gcc
+CC= gcc
 CFLAGS= -Wall -O2 $(MYCFLAGS)
-AR= $(MOGRYPH_HOST)-ar rc
-RANLIB= $(MOGRYPH_HOST)-ranlib
+AR= ar rc
+RANLIB= ranlib
 RM= rm -f
 
 
