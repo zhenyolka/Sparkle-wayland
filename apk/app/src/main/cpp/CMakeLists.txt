@@ -8,8 +8,8 @@ get_filename_component(SPARKLE_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../../../../" 
 add_subdirectory(${SPARKLE_ROOT}/sparkle_common sparkle_common)
 
 file(GLOB EVERYTHING
-    "*.cpp"
-    "*.h"
+    "sparkle_*.cpp"
+    "sparkle_*.h"
 )
 
 #HACK
@@ -43,3 +43,10 @@ target_link_libraries(sparkle LINK_PUBLIC
     android
     OpenSLES
 )
+
+#set(EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/src/main/assets/${ANDROID_ABI}")
+#set(EXECUTABLE_OUTPUT_PATH "${SPARKLE_ROOT}/apk/app/src/main/assets/${ANDROID_ABI}")
+
+#add_executable(xtest
+#    main.cpp
+#)

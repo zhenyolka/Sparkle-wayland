@@ -100,20 +100,21 @@ public class MainActivity extends Activity
     private void setup()
     {
         setPermissions(getApplicationInfo().dataDir, true, true, true, true, false, true);
-        copyAsset("settings.lua");
+
+        copyAsset("settings.lua", "settings.lua");
         setPermissions(getApplicationInfo().dataDir + "/" + "settings.lua", true, true, false, true, true, false);
     }
 
-    private void copyAsset(String path)
+    private void copyAsset(String source, String destination)
     {
-        File file = new File(getApplicationInfo().dataDir, path);
+        File file = new File(getApplicationInfo().dataDir, destination);
 
         if (file.exists())
             return;
 
         try
         {
-            InputStream in = getAssets().open(path);
+            InputStream in = getAssets().open(source);
             OutputStream out = new FileOutputStream(file);
 
             byte[] buffer = new byte[1024];
