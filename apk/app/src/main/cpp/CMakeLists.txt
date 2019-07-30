@@ -12,6 +12,9 @@ file(GLOB EVERYTHING
     "*.h"
 )
 
+#HACK
+set(CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS "-pie -rdynamic")
+
 add_library(sparkle SHARED
     ${EVERYTHING}
 )
