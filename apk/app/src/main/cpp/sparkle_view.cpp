@@ -1,5 +1,5 @@
 #include "sparkle_view.h"
-#include "sion_keymap.h"
+#include "sparkle_keymap.h"
 #include <android/native_window_jni.h>
 #include <linux/input-event-codes.h>
 
@@ -70,7 +70,7 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleView_key_1down(JNIEnv *env, jobject instance, jlong user, jint code)
 {
     were_object_pointer<sparkle_view> view(reinterpret_cast<sparkle_view *>(user));
-    int x = sion_keymap[code];
+    int x = sparkle_keymap[code];
     if (x != 0)
         were::emit(view, &sparkle_view::key_down, x);
 }
@@ -79,7 +79,7 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleView_key_1up(JNIEnv *env, jobject instance, jlong user, jint code)
 {
     were_object_pointer<sparkle_view> view(reinterpret_cast<sparkle_view *>(user));
-    int x = sion_keymap[code];
+    int x = sparkle_keymap[code];
     if (x != 0)
         were::emit(view, &sparkle_view::key_up, x);
 }

@@ -1,7 +1,7 @@
-#ifndef SION_KEYMAP_H
-#define SION_KEYMAP_H
+#ifndef SPARKLE_KEYMAP_H
+#define SPARKLE_KEYMAP_H
 
-static const int sion_keymap[] = {
+static const int sparkle_keymap[] = {
 
 //     0     1     2     3     4     5     6     7     8     9
        0,    0,    0,    0,    0,    0,    0,   19,   10,   11,
@@ -41,4 +41,4 @@ static const int sion_keymap[] = {
 
 };
 
-#endif // SION_KEYMAP_H
+#endif // SPARKLE_KEYMAP_H
