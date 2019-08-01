@@ -63,7 +63,8 @@ void sparkle_settings::load()
     status = luaL_loadfile(L, file);
     if (status)
     {
-        fprintf(stdout, "Failed to load file: %s\n", lua_tostring(L, -1));
+        fprintf(stdout, "Failed to load script: %s\n", lua_tostring(L, -1));
+        lua_close(L);
         return;
     }
 
@@ -84,6 +85,7 @@ void sparkle_settings::load()
     if (status)
     {
         fprintf(stderr, "Failed to run script: %s\n", lua_tostring(L, -1));
+        lua_close(L);
         return;
     }
 
@@ -91,13 +93,19 @@ void sparkle_settings::load()
 
     lua_getglobal(L, "sandbox");
     if (!lua_istable(L, -1))
+    {
+        lua_close(L);
         return;
+    }
 
     lua_pushstring(L, "sparkle");
     lua_gettable(L, -2);
 
     if (!lua_istable(L, -1))
+    {
+        lua_close(L);
         return;
+    }
 
     lua_pushnil(L);  /* first key */
 

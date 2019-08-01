@@ -16,14 +16,12 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.view.View; // Button callback
 
-// Script
-import java.io.File;
-import java.io.IOException;
-
 // Check version
-import android.os.Build;
+import android.os.Build; // XXX3 Basic
 
 // Assets
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
@@ -61,18 +59,7 @@ public class MainActivity extends Activity
                 else
                     startService(intent);
 
-                ProcessBuilder builder = new ProcessBuilder("/system/bin/sh", "-c",
-                    "/data/data/com.sion.sparkle/user.sh start > /data/data/com.sion.sparkle/user_log.txt 2>&1");
-
-                try
-                {
-                    Process process = builder.start();
-                    Runtime.getRuntime().exec("chmod 666 /data/data/com.sion.sparkle/user_log.txt"); // XXX3
-                }
-                catch (IOException e)
-                {
-                    Log.e("Sparkle", e.getMessage());
-                }
+                native_start();
             }
         });
 
@@ -85,6 +72,8 @@ public class MainActivity extends Activity
             {
                 Intent intent = new Intent(MainActivity.this, SparkleService.class);
                 stopService(intent);
+
+                native_stop();
             }
         });
 
@@ -103,6 +92,9 @@ public class MainActivity extends Activity
 
         copyAsset("settings.lua", "settings.lua");
         setPermissions(getApplicationInfo().dataDir + "/" + "settings.lua", true, true, false, true, true, false);
+
+        copyAsset("user.lua", "user.lua");
+        setPermissions(getApplicationInfo().dataDir + "/" + "user.lua", true, true, false, true, false, false);
     }
 
     private void copyAsset(String source, String destination)
@@ -142,4 +134,12 @@ public class MainActivity extends Activity
         file.setWritable(w, !w1);
         file.setExecutable(x, !x1);
     }
+
+    static
+    {
+        System.loadLibrary("sparkle");
+    }
+
+    private native void native_start();
+    private native void native_stop();
 }
