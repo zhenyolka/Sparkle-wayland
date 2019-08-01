@@ -1,8 +1,19 @@
 #ifndef SPARKLE_SERVICE_H
 #define SPARKLE_SERVICE_H
 
-#include "were_object_2.h"
 #include "sparkle_java_object.h"
+#include "sparkle_android_logger.h" // XXX2
+
+#define SOUND_THREAD
+
+#ifdef SOUND_THREAD
+#include <thread>
+#endif
+
+class sparkle;
+class sparkle_android;
+class sparkle_audio;
+class were_debug;
 
 class sparkle_service_fd_listener
 {
@@ -16,7 +27,7 @@ public:
     virtual void idle() = 0;
 };
 
-class sparkle_service : public were_object_2, public sparkle_java_object
+class sparkle_service : public sparkle_java_object, public sparkle_service_fd_listener, public sparkle_service_idle_handler
 {
 public:
     ~sparkle_service();
@@ -29,6 +40,26 @@ public:
 
     int display_width();
     int display_height();
+
+private:
+    void event();
+    void idle();
+
+#ifdef SOUND_THREAD
+    void sound();
+#endif
+
+private:
+    sparkle_android_logger logger_;
+    were_object_pointer<were_thread> thread_;
+    were_object_pointer<sparkle> sparkle_;
+    were_object_pointer<sparkle_android> sparkle_android_;
+    were_object_pointer<sparkle_audio> audio_;
+    were_object_pointer<were_debug> debug_;
+#ifdef SOUND_THREAD
+    std::thread sound_thread_c_;
+    were_object_pointer<were_thread> sound_thread_;
+#endif
 };
 
 #endif // SPARKLE_SERVICE_H

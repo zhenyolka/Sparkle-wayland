@@ -32,6 +32,14 @@ import android.util.Log;
 public class MainActivity extends Activity
 {
     @Override
+    protected void onDestroy()
+    {
+        native_destroy(native_);
+
+        super.onDestroy();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
@@ -59,7 +67,7 @@ public class MainActivity extends Activity
                 else
                     startService(intent);
 
-                native_start();
+                native_start(native_);
             }
         });
 
@@ -73,7 +81,7 @@ public class MainActivity extends Activity
                 Intent intent = new Intent(MainActivity.this, SparkleService.class);
                 stopService(intent);
 
-                native_stop();
+                native_stop(native_);
             }
         });
 
@@ -84,6 +92,8 @@ public class MainActivity extends Activity
 
 
         setContentView(layout);
+
+        native_ = native_create();
     }
 
     private void setup()
@@ -140,6 +150,10 @@ public class MainActivity extends Activity
         System.loadLibrary("sparkle");
     }
 
-    private native void native_start();
-    private native void native_stop();
+    private native long native_create();
+    private native void native_destroy(long native__);
+    private native void native_start(long native__);
+    private native void native_stop(long native__);
+
+    private long native_;
 }

@@ -238,8 +238,8 @@ public class SparkleService extends Service
         return display_metrics.heightPixels - status_bar_height;
     }
 
-    public native long native_create();
-    public native void native_destroy(long native__);
+    private native long native_create();
+    private native void native_destroy(long native__);
     public native void fd_event(long user);
     public native void idle_event(long user);
 

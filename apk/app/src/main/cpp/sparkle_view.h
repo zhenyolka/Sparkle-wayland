@@ -1,13 +1,12 @@
 #ifndef SPARKLE_VIEW_H
 #define SPARKLE_VIEW_H
 
-#include "were_object_2.h"
 #include "sparkle_java_object.h"
 #include "sparkle_service.h"
 
 class ANativeWindow;
 
-class sparkle_view : public were_object_2, public sparkle_java_object
+class sparkle_view : public sparkle_java_object
 {
 public:
     ~sparkle_view();

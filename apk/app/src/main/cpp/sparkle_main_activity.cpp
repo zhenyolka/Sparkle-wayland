@@ -9,12 +9,20 @@ extern "C"
 #include <lua.h>
 }
 
-#include "sparkle_android_logger.h"
 
-void lua_thread()
+sparkle_main_activity::~sparkle_main_activity()
 {
-    sparkle_android_logger logger;
+    if (lua_thread_.joinable())
+        lua_thread_.join();
+}
 
+sparkle_main_activity::sparkle_main_activity(JNIEnv *env, jobject instance) :
+    sparkle_java_object(env, instance), lua_done_(true)
+{
+}
+
+void sparkle_main_activity::lua()
+{
     int status;
 
     lua_State *L = luaL_newstate();
@@ -47,16 +55,56 @@ void lua_thread()
     }
 
     lua_close(L);
+
+    lua_done_ = true;
+}
+
+void sparkle_main_activity::start()
+{
+    if (lua_done_)
+    {
+        lua_done_ = false;
+
+        if (lua_thread_.joinable())
+            lua_thread_.join();
+
+        lua_thread_ = std::thread(&sparkle_main_activity::lua, this);
+    }
+}
+
+void sparkle_main_activity::stop()
+{
+}
+
+
+
+extern "C" JNIEXPORT jlong JNICALL
+Java_com_sion_sparkle_MainActivity_native_1create(JNIEnv *env, jobject instance)
+{
+    were_object_pointer<sparkle_main_activity> native__(new sparkle_main_activity(env, instance));
+    native__->increment_reference_count();
+
+    return jlong(native__.get());
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_sion_sparkle_MainActivity_native_1start(JNIEnv *env, jobject instance)
+Java_com_sion_sparkle_MainActivity_native_1destroy(JNIEnv *env, jobject instance, jlong native)
 {
-    std::thread lua(lua_thread);
-    lua.detach();
+    were_object_pointer<sparkle_main_activity> native__(reinterpret_cast<sparkle_main_activity *>(native));
+    native__->decrement_reference_count();
+    native__.collapse();
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_sion_sparkle_MainActivity_native_1stop(JNIEnv *env, jobject instance)
+Java_com_sion_sparkle_MainActivity_native_1start(JNIEnv *env, jobject instance, jlong native)
 {
+    were_object_pointer<sparkle_main_activity> native__(reinterpret_cast<sparkle_main_activity *>(native));
+    native__->start();
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_sion_sparkle_MainActivity_native_1stop(JNIEnv *env, jobject instance, jlong native)
+{
+    were_object_pointer<sparkle_main_activity> native__(reinterpret_cast<sparkle_main_activity *>(native));
+    native__->stop();
 }

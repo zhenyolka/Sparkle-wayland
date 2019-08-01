@@ -93,6 +93,11 @@ public:
         return static_cast<T *>(object_);
     }
 
+    T *get() const
+    {
+        return operator->();
+    }
+
     operator bool() const
     {
         return object_ != nullptr;
