@@ -103,6 +103,9 @@ public class MainActivity extends Activity
         copyAsset("settings.lua", "settings.lua");
         setPermissions(getApplicationInfo().dataDir + "/" + "settings.lua", true, true, false, true, true, false);
 
+        copyAsset("sparkle.lua", "sparkle.lua");
+        setPermissions(getApplicationInfo().dataDir + "/" + "user.lua", true, true, false, true, false, false);
+
         copyAsset("user.lua", "user.lua");
         setPermissions(getApplicationInfo().dataDir + "/" + "user.lua", true, true, false, true, false, false);
     }

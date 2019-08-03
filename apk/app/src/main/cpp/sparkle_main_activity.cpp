@@ -9,6 +9,8 @@ extern "C"
 #include <lua.h>
 }
 
+#include <unistd.h> // chdir
+
 
 sparkle_main_activity::~sparkle_main_activity()
 {
@@ -25,6 +27,8 @@ void sparkle_main_activity::lua()
 {
     int status;
 
+    chdir("/data/data/com.sion.sparkle/");
+
     lua_State *L = luaL_newstate();
     luaL_openlibs(L);
 
@@ -33,6 +37,7 @@ void sparkle_main_activity::lua()
     {
         fprintf(stderr, "Failed to load script: %s\n", lua_tostring(L, -1));
         lua_close(L);
+        lua_done_ = true; // XXX2
         return;
     }
 
@@ -41,6 +46,7 @@ void sparkle_main_activity::lua()
     {
         fprintf(stderr, "Failed to run script: %s\n", lua_tostring(L, -1));
         lua_close(L);
+        lua_done_ = true;
         return;
     }
 
@@ -51,11 +57,11 @@ void sparkle_main_activity::lua()
     {
         fprintf(stderr, "Failed to run script: %s\n", lua_tostring(L, -1));
         lua_close(L);
+        lua_done_ = true;
         return;
     }
 
     lua_close(L);
-
     lua_done_ = true;
 }
 
