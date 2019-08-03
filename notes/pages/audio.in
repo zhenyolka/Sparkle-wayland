@@ -1,3 +1,5 @@
+[title]Звук[/title]
+
 1. Скомпилировать и установить драйвер из архива [file]pcm_sparkle.tar.gz[/file]:
 [code]
 make

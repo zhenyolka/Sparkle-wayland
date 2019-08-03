@@ -1,3 +1,5 @@
+[title]Лог[/title]
+
 Лог в файле [file]data/data/com.sion.sparkle/log.txt[/file]. Читать его в реальном времени можно вот так:
 [code]
 tail -f /data/data/com.sion.sparkle/log.txt
