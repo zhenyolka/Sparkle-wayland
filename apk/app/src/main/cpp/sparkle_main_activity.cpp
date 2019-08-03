@@ -36,18 +36,14 @@ void sparkle_main_activity::lua()
     if (status)
     {
         fprintf(stderr, "Failed to load script: %s\n", lua_tostring(L, -1));
-        lua_close(L);
-        lua_done_ = true; // XXX2
-        return;
+        goto finish;
     }
 
     status = lua_pcall(L, 0, 0, 0);
     if (status)
     {
         fprintf(stderr, "Failed to run script: %s\n", lua_tostring(L, -1));
-        lua_close(L);
-        lua_done_ = true;
-        return;
+        goto finish;
     }
 
     lua_getglobal(L, "start");
@@ -56,11 +52,10 @@ void sparkle_main_activity::lua()
     if (status)
     {
         fprintf(stderr, "Failed to run script: %s\n", lua_tostring(L, -1));
-        lua_close(L);
-        lua_done_ = true;
-        return;
+        goto finish;
     }
 
+finish:
     lua_close(L);
     lua_done_ = true;
 }

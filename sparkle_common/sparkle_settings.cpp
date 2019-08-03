@@ -64,8 +64,7 @@ void sparkle_settings::load()
     if (status)
     {
         fprintf(stdout, "Failed to load script: %s\n", lua_tostring(L, -1));
-        lua_close(L);
-        return;
+        goto finish;
     }
 
 #if 1 /* Sandbox */
@@ -85,50 +84,41 @@ void sparkle_settings::load()
     if (status)
     {
         fprintf(stderr, "Failed to run script: %s\n", lua_tostring(L, -1));
-        lua_close(L);
-        return;
+        goto finish;
     }
 
     //lua_stack(L);
 
     lua_getglobal(L, "sandbox");
     if (!lua_istable(L, -1))
-    {
-        lua_close(L);
-        return;
-    }
+        goto finish;
 
     lua_pushstring(L, "sparkle");
     lua_gettable(L, -2);
-
     if (!lua_istable(L, -1))
-    {
-        lua_close(L);
-        return;
-    }
+        goto finish;
 
     lua_pushnil(L);  /* first key */
 
     while (lua_next(L, -2) != 0)
     {
+        const char *key = nullptr;
+        const char *value = nullptr;
+
         if (lua_isstring(L, -2))
+            key = lua_tostring(L, -2);
+        else
+            fprintf(stdout, "type %s\n", lua_typename(L, lua_type(L, -1)));
+
+        if (lua_isstring(L, -1))
+            value = lua_tostring(L, -1);
+        else
+            fprintf(stdout, "value %s\n", lua_typename(L, lua_type(L, -1)));
+
+        if (key != nullptr && value != nullptr)
         {
-            const char *key = nullptr;
-            const char *value = nullptr;
-
-            if (lua_isstring(L, -2))
-                key = lua_tostring(L, -2);
-
-            if (lua_isstring(L, -1))
-                value = lua_tostring(L, -1);
-            else
-                fprintf(stdout, "%s\n", lua_typename(L, lua_type(L, -1)));
-
-            if (key != nullptr && value != nullptr)
-            {
-                fprintf(stdout, "%s = %s\n", key, value);
-                settings_.insert(std::make_pair(std::string(key), std::string(value)));
-            }
+            fprintf(stdout, "%s = %s\n", key, value);
+            settings_.insert(std::make_pair(std::string(key), std::string(value)));
         }
 
         lua_pop(L, 1);
@@ -139,6 +129,7 @@ void sparkle_settings::load()
 
     //lua_stack(L);
 
+finish:
     lua_close(L);
 }
 

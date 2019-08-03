@@ -4,7 +4,7 @@ local sparkle = require "sparkle";
 
 function start()
     --os.execute("./user.sh");
-    start_generic_container({source="/dev/block/mmcblk0p36", point="/data/local/tmp/fedora", user="sion"});
+    --start_generic_container({source="/dev/block/mmcblk0p36", point="/data/local/tmp/fedora", user="sion"});
     --start_sparkle_container({source="/dev/block/mmcblk0p36", point="/data/local/tmp/fedora", user="sion"});
 end
 
