@@ -1,6 +1,6 @@
 #include "sparkle_service.h"
 
-
+#include "sparkle_android_logger.h"
 #include "were_thread.h"
 #include "sparkle.h"
 #include "sparkle_android.h"
@@ -28,6 +28,8 @@ sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
     sparkle_java_object(env, instance)
 {
     MAKE_THIS_WOP
+
+    sparkle_android_logger::redirect();
 
     thread_ = were_object_pointer<were_thread>(new were_thread());
 

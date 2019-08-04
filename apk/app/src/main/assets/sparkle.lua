@@ -27,6 +27,8 @@ sparkle.create = function()
             if (string.sub(line, 1, 3) == "RC=") then
                 local rc = tonumber(string.sub(line, 4, -1));
                 return rc, text;
+            elseif (line == nil) then
+                return 127, "";
             else
                 text = text .. line;
             end

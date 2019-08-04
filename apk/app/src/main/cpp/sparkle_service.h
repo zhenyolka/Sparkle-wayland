@@ -2,7 +2,6 @@
 #define SPARKLE_SERVICE_H
 
 #include "sparkle_java_object.h"
-#include "sparkle_android_logger.h" // XXX2
 
 #define SOUND_THREAD
 
@@ -50,7 +49,6 @@ private:
 #endif
 
 private:
-    sparkle_android_logger logger_;
     were_object_pointer<were_thread> thread_;
     were_object_pointer<sparkle> sparkle_;
     were_object_pointer<sparkle_android> sparkle_android_;

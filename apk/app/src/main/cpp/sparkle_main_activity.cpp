@@ -2,6 +2,8 @@
 #include <jni.h>
 #include <thread>
 
+#include "sparkle_android_logger.h"
+
 extern "C"
 {
 #include <lauxlib.h>
@@ -21,6 +23,7 @@ sparkle_main_activity::~sparkle_main_activity()
 sparkle_main_activity::sparkle_main_activity(JNIEnv *env, jobject instance) :
     sparkle_java_object(env, instance), lua_done_(true)
 {
+    sparkle_android_logger::redirect();
 }
 
 void sparkle_main_activity::lua()
