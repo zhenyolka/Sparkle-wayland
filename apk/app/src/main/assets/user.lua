@@ -1,11 +1,9 @@
-#!/usr/bin/lua
 
 local sparkle = require "sparkle";
 
 function start()
     --os.execute("./user.sh");
     --start_generic_container({source="/dev/block/mmcblk0p36", point="/data/local/tmp/fedora", user="sion"});
-    --start_sparkle_container({source="/dev/block/mmcblk0p36", point="/data/local/tmp/fedora", user="sion"});
 end
 
 function start_generic_container(args)
@@ -17,7 +15,6 @@ function start_generic_container(args)
 
     s.critical("cd " .. args.point);
 
-
     s.check_mount({source="/dev", options="bind", point="dev"});
     s.check_mount({source="devpts", type="devpts", point="dev/pts"});
     s.check_mount({source="proc", type="proc", point="proc"});
@@ -26,14 +23,10 @@ function start_generic_container(args)
     s.check_mount({source="tmpfs", type="tmpfs", point="dev/shm"});
     s.check_mount({source="/data", options="bind", point="data"});
 
-
     s.optional("chcon u:object_r:app_data_file:s0 tmp");
 
-    if (not s.exists("tmp/sparkle")) then
-        s.chroot({user=args.user, command="mkdir /tmp/sparkle"});
-    end
-
     if (not s.exists("tmp/sparkle/wayland-0")) then
+        s.chroot({user=args.user, command="mkdir -p /tmp/sparkle"});
         s.critical("busybox ln -s /data/data/com.sion.sparkle/files/wayland-0 tmp/sparkle/wayland-0");
     end
 
@@ -52,16 +45,3 @@ function start_generic_container(args)
     s.destroy();
 end
 
-function start_sparkle_container(args)
-    local s = sparkle.create();
-
-    if (not s.exists(args.point .. "/bin/su")) then
-        s.check_mount({source=args.source, options="noatime", point=args.point});
-    end
-
-    s.critical("cd " .. args.point);
-
-    s.critical("./init");
-
-    s.destroy();
-end
