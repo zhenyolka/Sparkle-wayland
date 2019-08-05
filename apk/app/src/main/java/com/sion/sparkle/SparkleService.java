@@ -177,6 +177,12 @@ public class SparkleService extends Service
     }
 
     @Keep
+    public String files_dir()
+    {
+        return getFilesDir().getAbsolutePath();
+    }
+
+    @Keep
     public void add_fd_listener(int fd, long user)
     {
         ParcelFileDescriptor pfd = ParcelFileDescriptor.adoptFd(fd);

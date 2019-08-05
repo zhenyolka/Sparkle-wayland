@@ -6,6 +6,7 @@
 #include "were_object_wrapper.h" // XXX3
 #include <wayland-server.h>
 #include <ctime>
+#include <string>
 
 
 typedef were_object_wrapper<were_object_wrapper_primitive<struct wl_display *>> sparkle_display;
@@ -25,7 +26,7 @@ class sparkle : public were_object_2, public were_thread_fd_listener, public wer
 {
 public:
     ~sparkle();
-    sparkle();
+    sparkle(const std::string &home_dir = std::string());
 
     were_object_pointer<sparkle_settings> settings() const {return settings_;}
 

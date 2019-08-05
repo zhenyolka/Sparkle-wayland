@@ -1,6 +1,7 @@
 package com.sion.sparkle;
 
 // Basic
+import androidx.annotation.Keep;
 import android.app.Activity;
 import android.os.Bundle;
 
@@ -99,20 +100,21 @@ public class MainActivity extends Activity
     private void setup()
     {
         setPermissions(getApplicationInfo().dataDir, true, true, true, true, false, true);
+        setPermissions(files_dir(), true, true, true, true, false, true);
 
         copyAsset("settings.lua", "settings.lua");
-        setPermissions(getApplicationInfo().dataDir + "/" + "settings.lua", true, true, false, true, true, false);
+        setPermissions(files_dir() + "/settings.lua", true, true, false, true, true, false);
 
         copyAsset("sparkle.lua", "sparkle.lua");
-        setPermissions(getApplicationInfo().dataDir + "/" + "user.lua", true, true, false, true, false, false);
+        setPermissions(files_dir() + "/sparkle.lua", true, true, false, true, false, false);
 
         copyAsset("user.lua", "user.lua");
-        setPermissions(getApplicationInfo().dataDir + "/" + "user.lua", true, true, false, true, false, false);
+        setPermissions(files_dir() + "/user.lua", true, true, false, true, false, false);
     }
 
     private void copyAsset(String source, String destination)
     {
-        File file = new File(getApplicationInfo().dataDir, destination);
+        File file = new File(files_dir(), destination);
 
         if (file.exists())
             return;
@@ -146,6 +148,12 @@ public class MainActivity extends Activity
         file.setReadable(r, !r1);
         file.setWritable(w, !w1);
         file.setExecutable(x, !x1);
+    }
+
+    @Keep
+    public String files_dir()
+    {
+        return getFilesDir().getAbsolutePath();
     }
 
     static

@@ -13,7 +13,7 @@
 В разделе "Подробности" описывается много всякой сложной хрени. Это нужно для тех, кто хочет всё понять и сделать вручную. В принципе, понимать и делать всю эту хрень не обязательно. Вот самая простая инструкция:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;1. Подготовить дистрибутив (в директории, образе или на разделе). В дистрибутиве должен быть установлен Xwayland. В домашней директории пользователя должен лежать файл <span class="file">.xinitrc</span>, содержащий команду запуска окружения. Если окружение не установлено, то можно прописать туда xterm.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;2. Установить и запустить apk sparkle.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;3. Отредактировать скрипт <span class="file">/data/data/com.sion.sparkle/user.lua</span>. В скрипте нужно раскомментировать (убрать --) строку start_generic_container и прописать в ней свои данные.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;3. Отредактировать скрипт <span class="file">/data/data/com.sion.sparkle/files/user.lua</span>. В скрипте нужно раскомментировать (убрать --) строку start_generic_container и прописать в ней свои данные.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&bull; source - образ или раздел с дистрибутивом. Если дистрибутив установлен в директорию и монтирование не нужно, source можно не заполнять.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&bull; point - точка монтирования дистрибутива или директория с дистрибутивом. Если дистрибутив установлен в образ или на раздел, point можно не менять.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&bull; user - имя пользователя, от имени которого будут запущены Xwayland и окружение. Лучше, чтоб это был не root.<br>
@@ -22,13 +22,13 @@
 Тут сложность только в том, что редактировать скрипт нужно от рута. Если редактировать его сможет не только рут, то это создаст адскую дыру в безопасности. Для редактирования можно использовать встроенный в busybox редактор vi.<br>
 <div class="code">
 su<br>
-busybox vi /data/data/com.sion.sparkle/user.lua<br>
+busybox vi /data/data/com.sion.sparkle/files/user.lua<br>
 </div>
 vi - не самая простая и понятная программа. Если не знаете, как им пользоваться, минимальная инструкция <a href="vi.html">тут</a>.<br>
 <br>
 Если что-то не работает, можно посмотреть лог:<br>
 <div class="code">
-cat /data/data/com.sion.sparkle/log.txt<br>
+cat /data/data/com.sion.sparkle/files/log.txt<br>
 </div>
 </div>
 </body>

@@ -10,7 +10,7 @@
 <div class="text">
 <h2>Подробности</h2>
 
-&nbsp;&nbsp;&nbsp;&nbsp;1. Sparkle создает сокет (файл) <span class="file">/data/data/com.sion.sparkle/wayland-0</span>. Если вы используете chroot, необходимо сделать этот файл доступным изнутри директории с дистрибутивом. Самый простой способ - это смонтировать <span class="file">/data</span> в директорию дистрибутива:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;1. Sparkle создает сокет (файл) <span class="file">/data/data/com.sion.sparkle/files/wayland-0</span>. Если вы используете chroot, необходимо сделать этот файл доступным изнутри директории с дистрибутивом. Самый простой способ - это смонтировать <span class="file">/data</span> в директорию дистрибутива:<br>
 <div class="code">
 # в андроиде, от рута<br>
 mkdir -p путь_к_директории_дистрибутива/data<br>
@@ -35,7 +35,7 @@ mkdir /tmp/runtime<br>
 <br>
 &nbsp;&nbsp;&nbsp;&nbsp;3. Создайте симлинк на <span class="file">data/data/com.sion.sparkle/wayland-0</span> в вашей XDG_RUNTIME_DIR:<br>
 <div class="code">
-ln -s /data/data/com.sion.sparkle/wayland-0 /tmp/runtime/<br>
+ln -s /data/data/com.sion.sparkle/files/wayland-0 /tmp/runtime/<br>
 </div>
 <br>
 &nbsp;&nbsp;&nbsp;&nbsp;4. Теперь нужно либо отключить SELinux:<br>
@@ -58,7 +58,7 @@ chcon "u:object_r:app_data_file:s0" путь_к_директории_дистр�
 А если и это не сработает, то можно посмотреть контекст на директории sparkle и установить для XDG_RUNTIME_DIR такой же:<br>
 <div class="code">
 # в андроиде, от рута<br>
-ls -Z /data/data/com.sion.sparkle<br>
+ls -Z /data/data/com.sion.sparkle/files<br>
 </div>
 <br>
 &nbsp;&nbsp;&nbsp;&nbsp;5. Попробуйте запустить xwayland (или другой клиент):<br>

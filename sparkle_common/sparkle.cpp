@@ -30,11 +30,14 @@ sparkle::~sparkle()
     settings_.collapse();
 }
 
-sparkle::sparkle()
+sparkle::sparkle(const std::string &home_dir)
 {
     MAKE_THIS_WOP
 
-    settings_ = were_object_pointer<sparkle_settings>(new sparkle_settings());
+    if (!home_dir.empty())
+        settings_ = were_object_pointer<sparkle_settings>(new sparkle_settings(home_dir + "/settings.lua"));
+    else
+        settings_ = were_object_pointer<sparkle_settings>(new sparkle_settings("settings.lua"));
 
     display_ = were_object_pointer<sparkle_display>(new sparkle_display(wl_display_create()));
     display_->set_destructor([](struct wl_display *&display)
@@ -43,12 +46,19 @@ sparkle::sparkle()
     });
 
     wl_display_init_shm(display_->get());
+
+    if (!home_dir.empty())
+        setenv("XDG_RUNTIME_DIR", home_dir.c_str(), 1);
+
+    if (wl_display_add_socket(display_->get(), "wayland-0") == -1)
+        throw were_exception(WE_SIMPLE);
+
 #ifdef __ANDROID__
-    setenv("XDG_RUNTIME_DIR", "/data/data/com.sion.sparkle", 1);
-#endif
-    wl_display_add_socket_auto(display_->get());
-#ifdef __ANDROID__
-    chmod("/data/data/com.sion.sparkle/wayland-0", 0666);
+    if (!home_dir.empty())
+    {
+        std::string path = home_dir + "/wayland-0";
+        chmod(path.c_str(), 0666);
+    }
 #endif
 
     output_ = were_object_pointer<sparkle_global<sparkle_output>>(new sparkle_global<sparkle_output>(display_, &wl_output_interface, 3));

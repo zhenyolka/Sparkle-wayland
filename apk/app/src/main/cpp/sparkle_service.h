@@ -32,6 +32,8 @@ public:
     ~sparkle_service();
     sparkle_service(JNIEnv *env, jobject instance);
 
+    std::string files_dir() const {return files_dir_;}
+
     void add_fd_listener(int fd, sparkle_service_fd_listener *listener);
     void remove_fd_listener(int fd);
     void add_idle_handler(sparkle_service_idle_handler *handler);
@@ -49,6 +51,7 @@ private:
 #endif
 
 private:
+    std::string files_dir_;
     were_object_pointer<were_thread> thread_;
     were_object_pointer<sparkle> sparkle_;
     were_object_pointer<sparkle_android> sparkle_android_;

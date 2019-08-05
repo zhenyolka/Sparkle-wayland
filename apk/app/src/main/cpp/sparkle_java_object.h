@@ -3,6 +3,7 @@
 
 #include "were_object_2.h"
 #include <jni.h>
+#include <string>
 
 extern JavaVM *javaVM;
 
@@ -20,6 +21,7 @@ public:
     jmethodID get_method_id(const char *name, const char *signature);
     void call_void_method(const char *name, const char *signature, ...);
     int call_int_method(const char *name, const char *signature, ...);
+    std::string call_string_method(const char *name, const char *signature, ...);
 
 private:
     jclass class_;

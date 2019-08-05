@@ -23,19 +23,21 @@ sparkle_main_activity::~sparkle_main_activity()
 sparkle_main_activity::sparkle_main_activity(JNIEnv *env, jobject instance) :
     sparkle_java_object(env, instance), lua_done_(true)
 {
-    sparkle_android_logger::redirect();
+    files_dir_ = call_string_method("files_dir", "()Ljava/lang/String;");
+    sparkle_android_logger::redirect_output(files_dir_ + "/log.txt");
 }
 
 void sparkle_main_activity::lua()
 {
     int status;
 
-    chdir("/data/data/com.sion.sparkle/");
+    if (chdir(files_dir_.c_str()) == -1)
+        throw were_exception(WE_SIMPLE);
 
     lua_State *L = luaL_newstate();
     luaL_openlibs(L);
 
-    status = luaL_loadfile(L, "/data/data/com.sion.sparkle/user.lua");
+    status = luaL_loadfile(L, "user.lua");
     if (status)
     {
         fprintf(stderr, "Failed to load script: %s\n", lua_tostring(L, -1));
@@ -79,8 +81,6 @@ void sparkle_main_activity::start()
 void sparkle_main_activity::stop()
 {
 }
-
-
 
 extern "C" JNIEXPORT jlong JNICALL
 Java_com_sion_sparkle_MainActivity_native_1create(JNIEnv *env, jobject instance)

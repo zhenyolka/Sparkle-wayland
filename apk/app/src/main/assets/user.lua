@@ -34,7 +34,7 @@ function start_generic_container(args)
     end
 
     if (not s.exists("tmp/sparkle/wayland-0")) then
-        s.critical("busybox ln -s /data/data/com.sion.sparkle/wayland-0 tmp/sparkle/wayland-0");
+        s.critical("busybox ln -s /data/data/com.sion.sparkle/files/wayland-0 tmp/sparkle/wayland-0");
     end
 
     --if (not s.running("sshd")) then

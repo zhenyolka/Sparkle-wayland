@@ -87,3 +87,24 @@ int sparkle_java_object::call_int_method(const char *name, const char *signature
 
     return r;
 }
+
+std::string sparkle_java_object::call_string_method(const char *name, const char *signature, ...)
+{
+    va_list ap;
+    va_start(ap, signature);
+    jobject java_string__ = env()->CallObjectMethodV(object1(), get_method_id(name, signature), ap);
+    jstring java_string = reinterpret_cast<jstring>(java_string__);
+    va_end(ap);
+
+    const char *chars = env()->GetStringUTFChars(java_string, NULL);
+    if (!chars)
+        throw were_exception(WE_SIMPLE);
+
+    std::string r(chars);
+
+    env()->ReleaseStringUTFChars(java_string, chars);
+
+    env()->DeleteLocalRef(java_string);
+
+    return r;
+}

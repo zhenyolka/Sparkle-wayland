@@ -17,7 +17,6 @@
 
 
 
-
 sparkle_service::~sparkle_service()
 {
     remove_idle_handler(this);
@@ -29,15 +28,16 @@ sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
 {
     MAKE_THIS_WOP
 
-    sparkle_android_logger::redirect();
+    files_dir_ = call_string_method("files_dir", "()Ljava/lang/String;");
+    sparkle_android_logger::redirect_output(files_dir_ + "/log.txt");
 
     thread_ = were_object_pointer<were_thread>(new were_thread());
 
-    sparkle_ = were_object_pointer<sparkle>(new sparkle());
+    sparkle_ = were_object_pointer<sparkle>(new sparkle(files_dir_));
     sparkle_android_ = were_object_pointer<sparkle_android>(new sparkle_android(sparkle_, this_wop));
 
 #ifndef SOUND_THREAD
-    audio_ = were_object_pointer<sparkle_audio>(new sparkle_audio());
+    audio_ = were_object_pointer<sparkle_audio>(new sparkle_audio(files_dir_ + "/audio-0"));
 #endif
 
     debug_ = were_object_pointer<were_debug>(new were_debug());
@@ -95,11 +95,10 @@ void sparkle_service::idle()
 void sparkle_service::sound()
 {
     sound_thread_ = were_object_pointer<were_thread>(new were_thread());
-    audio_ = were_object_pointer<sparkle_audio>(new sparkle_audio());
+    audio_ = were_object_pointer<sparkle_audio>(new sparkle_audio(files_dir_ + "/audio-0"));
     sound_thread_->run();
 }
 #endif
-
 
 extern "C" JNIEXPORT jlong JNICALL
 Java_com_sion_sparkle_SparkleService_native_1create(JNIEnv *env, jobject instance)

@@ -16,6 +16,7 @@
 
 #include <queue>
 #include <memory>
+#include <string>
 
 
 #ifdef USE_ANDROID_SIMPLE_BUFFER_QUEUE
@@ -52,7 +53,7 @@ class sparkle_audio : public were_object_2
 {
 public:
     ~sparkle_audio();
-    sparkle_audio();
+    sparkle_audio(const std::string &path);
 
 private:
     static void callback(BufferQueueItf playerBufferqueue, void *data);

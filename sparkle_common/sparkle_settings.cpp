@@ -13,7 +13,8 @@ sparkle_settings::~sparkle_settings()
 {
 }
 
-sparkle_settings::sparkle_settings()
+sparkle_settings::sparkle_settings(const std::string &file) :
+    file_(file)
 {
     load();
 }
@@ -49,18 +50,13 @@ static void lua_stack(lua_State *L)
 
 void sparkle_settings::load()
 {
-#ifdef __ANDROID__
-    const char *file = "/data/data/com.sion.sparkle/settings.lua";
-#else
-    const char *file = "settings.lua";
-#endif
     int status;
 
 
     lua_State *L = luaL_newstate();
     luaL_openlibs(L);
 
-    status = luaL_loadfile(L, file);
+    status = luaL_loadfile(L, file_.c_str());
     if (status)
     {
         fprintf(stdout, "Failed to load script: %s\n", lua_tostring(L, -1));

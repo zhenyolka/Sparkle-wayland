@@ -14,7 +14,7 @@ sparkle_audio::~sparkle_audio()
     (*engineObject)->Destroy(engineObject);
 }
 
-sparkle_audio::sparkle_audio()
+sparkle_audio::sparkle_audio(const std::string &path)
 {
     SLresult result;
 
@@ -82,8 +82,8 @@ sparkle_audio::sparkle_audio()
 
     MAKE_THIS_WOP
 
-    server_ = were_object_pointer<were_unix_server>(new were_unix_server("/data/data/com.sion.sparkle/audio"));
-    chmod("/data/data/com.sion.sparkle/audio", 0666);
+    server_ = were_object_pointer<were_unix_server>(new were_unix_server(path));
+    chmod(path.c_str(), 0666);
 
     were::connect(server_, &were_unix_server::new_connection, this_wop, [this_wop]()
     {

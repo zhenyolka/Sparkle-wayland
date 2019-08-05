@@ -10,7 +10,7 @@ class sparkle_settings : public were_object_2
 {
 public:
     ~sparkle_settings();
-    sparkle_settings();
+    sparkle_settings(const std::string &file);
 
     std::string get_string(const std::string &key, const std::string &default_value);
     bool get_bool(const std::string &key, bool default_value);
@@ -21,6 +21,7 @@ private:
     void load();
 
 private:
+    std::string file_;
     std::map<std::string, std::string> settings_;
 };
 
