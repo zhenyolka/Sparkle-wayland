@@ -2,6 +2,7 @@ package com.sion.sparkle;
 
 // Basic
 import androidx.annotation.Keep;
+import android.os.Build;
 import android.app.Activity;
 import android.os.Bundle;
 
@@ -17,16 +18,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.view.View; // Button callback
 
-// Check version
-import android.os.Build; // XXX3 Basic
-
-// Assets
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.FileOutputStream;
-
+// Log
 import android.util.Log;
 
 
@@ -44,8 +36,6 @@ public class MainActivity extends Activity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-
-        setup();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this))
         {
@@ -95,65 +85,19 @@ public class MainActivity extends Activity
         setContentView(layout);
 
         native_ = native_create();
-    }
-
-    private void setup()
-    {
-        setPermissions(getApplicationInfo().dataDir, true, true, true, true, false, true);
-        setPermissions(files_dir(), true, true, true, true, false, true);
-
-        copyAsset("settings.lua", "settings.lua");
-        setPermissions(files_dir() + "/settings.lua", true, true, false, true, true, false);
-
-        copyAsset("sparkle.lua", "sparkle.lua");
-        setPermissions(files_dir() + "/sparkle.lua", true, true, false, true, false, false);
-
-        copyAsset("user.lua", "user.lua");
-        setPermissions(files_dir() + "/user.lua", true, true, false, true, false, false);
-    }
-
-    private void copyAsset(String source, String destination)
-    {
-        File file = new File(files_dir(), destination);
-
-        if (file.exists())
-            return;
-
-        try
-        {
-            InputStream in = getAssets().open(source);
-            OutputStream out = new FileOutputStream(file);
-
-            byte[] buffer = new byte[1024];
-
-            int read = in.read(buffer);
-            while (read != -1)
-            {
-                out.write(buffer, 0, read);
-                read = in.read(buffer);
-            }
-
-            out.close();
-            in.close();
-        }
-        catch (IOException e)
-        {
-            Log.e("Sparkle", e.getMessage());
-        }
-    }
-
-    private void setPermissions(String path, boolean r, boolean w, boolean x, boolean r1, boolean w1, boolean x1)
-    {
-        File file = new File(path);
-        file.setReadable(r, !r1);
-        file.setWritable(w, !w1);
-        file.setExecutable(x, !x1);
+        native_setup(native_);
     }
 
     @Keep
     public String files_dir()
     {
         return getFilesDir().getAbsolutePath();
+    }
+
+    @Keep
+    public String home_dir()
+    {
+        return getApplicationInfo().dataDir;
     }
 
     static
@@ -163,6 +107,7 @@ public class MainActivity extends Activity
 
     private native long native_create();
     private native void native_destroy(long native__);
+    private native void native_setup(long native__);
     private native void native_start(long native__);
     private native void native_stop(long native__);
 

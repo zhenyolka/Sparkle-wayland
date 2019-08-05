@@ -108,3 +108,13 @@ std::string sparkle_java_object::call_string_method(const char *name, const char
 
     return r;
 }
+
+jobject sparkle_java_object::call_object_method(const char *name, const char *signature, ...)
+{
+    va_list ap;
+    va_start(ap, signature);
+    jobject r = env()->CallObjectMethodV(object1(), get_method_id(name, signature), ap);
+    va_end(ap);
+
+    return r;
+}

@@ -22,6 +22,7 @@ public:
     void call_void_method(const char *name, const char *signature, ...);
     int call_int_method(const char *name, const char *signature, ...);
     std::string call_string_method(const char *name, const char *signature, ...);
+    jobject call_object_method(const char *name, const char *signature, ...);
 
 private:
     jclass class_;
