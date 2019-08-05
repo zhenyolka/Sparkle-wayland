@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+<title>Sparkle</title>
+<meta charset="UTF-8">
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+<h1>Sparkle</h1>
+<div class="text">
+<h2>Звук</h2>
+
+&nbsp;&nbsp;&nbsp;&nbsp;1. Скомпилируйте и установите драйвер из архива <span class="file">pcm_sparkle.tar.gz</span>:<br>
+<div class="code">
+# в контейнере<br>
+make<br>
+sudo make install<br>
+</div>
+Кроме компилятора, наверняка понадобится установить пакет с заголовками alsa. В debian он называется <span class="file">libasound2-dev</span>, в fedora - <span class="file">alsa-lib-devel</span>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;2. Переименуйте файл <span class="file">1.asoundrc</span> в <span class="file">.asoundrc</span> и поместите в домашнюю директорию пользователя (<span class="file">~/</span>).<br>
+&nbsp;&nbsp;&nbsp;&nbsp;3. Для проверки запустите mplayer или mpv как-то так:<br>
+<div class="code">
+mplayer -vo x11 -ao alsa -lavdopts threads=4 anime.mkv<br>
+</div>
+Есть вероятность (если не установлено pkg-config, то стопроцентная), что драйвер установится не в ту директорию. Тогда проигрыватель выбьет ошибку и покажет, в какой директории должен быть драйвер. Скопируйте его туда вручную.<br>
+</div>
+</body>
+</html>

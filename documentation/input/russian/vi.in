@@ -1,22 +1,22 @@
-[title]Использование vi[/title]
-
+<h2>Использование vi</h2>\
+\
 Открыть файл:
-[code]
+<code>\
 busybox vi /path/to/file
-[/code]
+</code>\
 Перейти в режим редактирования:
-[code]
+<code>\
 a
-[/code]
+</code>\
 Выйти из режима редактирования:
-[code]
+<code>\
 ESC
-[/code]
+</code>\
 Выйти без сохранения файла:
-[code]
+<code>\
 :q!
-[/code]
+</code>\
 Выйти с сохранением файла:
-[code]
+<code>\
 :wq
-[/code]
+</code>\
