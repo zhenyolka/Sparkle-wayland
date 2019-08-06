@@ -106,7 +106,6 @@ void sparkle_main_activity::setup()
 
 
     jobject java_assets = call_object_method("getAssets", "()Landroid/content/res/AssetManager;");
-    fprintf(stdout, "java_assets %p\n", java_assets);
 
     AAssetManager *assets = AAssetManager_fromJava(env(), java_assets);
     if (assets == nullptr)

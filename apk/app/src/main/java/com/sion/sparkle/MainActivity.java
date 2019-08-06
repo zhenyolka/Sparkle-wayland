@@ -106,12 +106,27 @@ public class MainActivity extends Activity
             }
         });
 
+        Button button5 = new Button(this);
+        button5.setText("Check log");
+        button5.setOnClickListener(new Button.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                Intent intent = new Intent(MainActivity.this, SparkleEditorActivity.class);
+                String file = "log.txt";
+                intent.putExtra(EXTRA_FILE, file);
+                startActivity(intent);
+            }
+        });
+
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.addView(button1);
         layout.addView(button2);
         layout.addView(button3);
         layout.addView(button4);
+        layout.addView(button5);
 
 
         setContentView(layout);
