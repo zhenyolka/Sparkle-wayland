@@ -22,6 +22,11 @@
         <service android:name=".SparkleService">
         </service>
 
+        <activity
+            android:name=".SparkleEditorActivity"
+            android:parentActivityName=".MainActivity">
+        </activity>
+
     </application>
 
 </manifest>

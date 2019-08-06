@@ -7,7 +7,7 @@ import android.app.Activity;
 import android.os.Bundle;
 
 // Start/Stop service
-import android.content.Intent;
+import android.content.Intent; // XXX3 Basic
 
 // Request permissions
 import android.provider.Settings;
@@ -24,6 +24,8 @@ import android.util.Log;
 
 public class MainActivity extends Activity
 {
+    public static final String EXTRA_FILE = "com.sion.sparkle.FILE";
+
     @Override
     protected void onDestroy()
     {
@@ -76,10 +78,40 @@ public class MainActivity extends Activity
             }
         });
 
+        Button button3 = new Button(this);
+        button3.setText("Edit settings.lua");
+        button3.setOnClickListener(new Button.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                Intent intent = new Intent(MainActivity.this, SparkleEditorActivity.class);
+                String file = "settings.lua";
+                intent.putExtra(EXTRA_FILE, file);
+                startActivity(intent);
+            }
+        });
+
+        Button button4 = new Button(this);
+        button4.setText("Edit user.lua");
+        button4.setOnClickListener(new Button.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                Intent intent = new Intent(MainActivity.this, SparkleEditorActivity.class);
+                String file = "user.lua";
+                intent.putExtra(EXTRA_FILE, file);
+                startActivity(intent);
+            }
+        });
+
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.addView(button1);
         layout.addView(button2);
+        layout.addView(button3);
+        layout.addView(button4);
 
 
         setContentView(layout);

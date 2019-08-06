@@ -112,7 +112,7 @@ void sparkle_main_activity::setup()
     if (assets == nullptr)
         throw were_exception(WE_SIMPLE);
 
-    copy_asset(assets, "settings.lua", "settings.lua", 0666);
+    copy_asset(assets, "settings.lua", "settings.lua", 0644);
     copy_asset(assets, "sparkle.lua", "sparkle.lua", 0644);
     copy_asset(assets, "user.lua", "user.lua", 0644);
 
