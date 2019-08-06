@@ -98,23 +98,39 @@ void sparkle_settings::load()
 
     while (lua_next(L, -2) != 0)
     {
-        const char *key = nullptr;
-        const char *value = nullptr;
+        int key_type = lua_type(L, -2);
+        int value_type = lua_type(L, -1);
 
-        if (lua_isstring(L, -2))
-            key = lua_tostring(L, -2);
-        else
-            fprintf(stdout, "type %s\n", lua_typename(L, lua_type(L, -1)));
-
-        if (lua_isstring(L, -1))
-            value = lua_tostring(L, -1);
-        else
-            fprintf(stdout, "value %s\n", lua_typename(L, lua_type(L, -1)));
-
-        if (key != nullptr && value != nullptr)
+        if (key_type == LUA_TSTRING)
         {
-            fprintf(stdout, "%s = %s\n", key, value);
-            settings_.insert(std::make_pair(std::string(key), std::string(value)));
+            const char *key = lua_tostring(L, -2);
+
+            if (value_type == LUA_TSTRING)
+            {
+                const char *value = lua_tostring(L, -1);
+                fprintf(stdout, "%s = %s\n", key, value);
+                settings_.insert(std::make_pair(std::string(key), were_variant(1)));
+            }
+            else if (value_type == LUA_TBOOLEAN)
+            {
+                bool value = lua_toboolean(L, -1);
+                fprintf(stdout, "%s = %d\n", key, value);
+                settings_.insert(std::make_pair(std::string(key), were_variant(value)));
+            }
+            else if (value_type == LUA_TNUMBER)
+            {
+                double value = lua_tonumber(L, -1);
+                fprintf(stdout, "%s = %f\n", key, value);
+                settings_.insert(std::make_pair(std::string(key), were_variant(value)));
+            }
+            else
+            {
+                fprintf(stdout, "value type: %s\n", lua_typename(L, value_type));
+            }
+        }
+        else
+        {
+            fprintf(stdout, "key type: %s\n", lua_typename(L, key_type));
         }
 
         lua_pop(L, 1);
@@ -135,7 +151,7 @@ std::string sparkle_settings::get_string(const std::string &key, const std::stri
     if (it == settings_.end())
         return default_value;
 
-    return it->second;
+    return it->second.get<std::string>();
 }
 
 bool sparkle_settings::get_bool(const std::string &key, bool default_value)
@@ -144,12 +160,7 @@ bool sparkle_settings::get_bool(const std::string &key, bool default_value)
     if (it == settings_.end())
         return default_value;
 
-    if (it->second == "true")
-        return true;
-    else if (it->second == "false")
-        return false;
-    else
-        throw were_exception(WE_SIMPLE);
+    return it->second.get<bool>();
 }
 
 int sparkle_settings::get_int(const std::string &key, int default_value)
@@ -158,14 +169,14 @@ int sparkle_settings::get_int(const std::string &key, int default_value)
     if (it == settings_.end())
         return default_value;
 
-    return std::stoi(it->second);
+    return it->second.get<double>();
 }
 
-float sparkle_settings::get_float(const std::string &key, float default_value)
+double sparkle_settings::get_float(const std::string &key, double default_value)
 {
     auto it = settings_.find(key);
     if (it == settings_.end())
         return default_value;
 
-    return std::stof(it->second);
+    return it->second.get<double>();
 }
