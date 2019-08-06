@@ -8,7 +8,13 @@ sparkle.create = function()
     os.execute("su < shell_stdin > shell_stdout &");
 
     local stdin = io.open("shell_stdin", "w");
+    if (stdin == nil) then
+        error();
+    end
     local stdout = io.open("shell_stdout", "r");
+    if (stdout == nil) then
+        error();
+    end
 
     function self.destroy()
         stdout.close(stdout);
@@ -28,7 +34,7 @@ sparkle.create = function()
                 local rc = tonumber(string.sub(line, 4, -1));
                 return rc, text;
             elseif (line == nil) then
-                return 127, "";
+                exit();
             else
                 text = text .. line;
             end
