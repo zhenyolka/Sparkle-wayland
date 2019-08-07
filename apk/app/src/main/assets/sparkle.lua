@@ -3,8 +3,8 @@ local sparkle = {};
 sparkle.create = function()
     local self = {};
 
-    os.execute("busybox mkfifo -m 0600 shell_stdin > /dev/null 2>&1");
-    os.execute("busybox mkfifo -m 0600 shell_stdout > /dev/null 2>&1");
+    os.execute("busybox mkfifo -m 0600 shell_stdin");
+    os.execute("busybox mkfifo -m 0600 shell_stdout");
     os.execute("su < shell_stdin > shell_stdout &");
 
     local stdin = io.open("shell_stdin", "w");

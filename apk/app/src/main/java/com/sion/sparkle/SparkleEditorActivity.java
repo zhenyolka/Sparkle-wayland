@@ -17,6 +17,7 @@ import android.view.View; // Button callback
 import android.view.Gravity;
 import android.widget.EditText;
 import android.text.InputType;
+import android.graphics.Color;
 
 // File R/W
 import java.io.File;
@@ -66,8 +67,11 @@ public class SparkleEditorActivity extends Activity
         editText_ = new EditText(this);
         editText_.setGravity(Gravity.LEFT | Gravity.TOP);
         editText_.setHorizontallyScrolling(true);
-        editText_.setTextSize(10.0f);
         editText_.setInputType(editText_.getInputType() | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+
+        editText_.setTextSize(10.0f);
+        editText_.setBackgroundColor(Color.BLACK);
+        editText_.setTextColor(Color.WHITE);
 
         try
         {
