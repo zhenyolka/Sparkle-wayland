@@ -30,11 +30,11 @@ sparkle.create = function()
         local text = "";
         while (true) do
             local line = stdout.read(stdout, "*l");
-            if (string.sub(line, 1, 3) == "RC=") then
+            if (line == nil) then
+                exit();
+            elseif (string.sub(line, 1, 3) == "RC=") then
                 local rc = tonumber(string.sub(line, 4, -1));
                 return rc, text;
-            elseif (line == nil) then
-                exit();
             else
                 text = text .. line;
             end

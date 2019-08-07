@@ -108,19 +108,19 @@ void sparkle_settings::load()
             if (value_type == LUA_TSTRING)
             {
                 const char *value = lua_tostring(L, -1);
-                fprintf(stdout, "%s = %s\n", key, value);
+                fprintf(stdout, "string %s = %s\n", key, value);
                 settings_.insert(std::make_pair(std::string(key), were_variant(1)));
             }
             else if (value_type == LUA_TBOOLEAN)
             {
                 bool value = lua_toboolean(L, -1);
-                fprintf(stdout, "%s = %d\n", key, value);
+                fprintf(stdout, "boolean %s = %d\n", key, value);
                 settings_.insert(std::make_pair(std::string(key), were_variant(value)));
             }
             else if (value_type == LUA_TNUMBER)
             {
                 double value = lua_tonumber(L, -1);
-                fprintf(stdout, "%s = %f\n", key, value);
+                fprintf(stdout, "number %s = %f\n", key, value);
                 settings_.insert(std::make_pair(std::string(key), were_variant(value)));
             }
             else
