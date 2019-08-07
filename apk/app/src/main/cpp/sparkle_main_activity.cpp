@@ -78,6 +78,8 @@ void sparkle_main_activity::copy_asset(AAssetManager *assets, const char *source
         return;
 
     AAsset *asset = AAssetManager_open(assets, source, AASSET_MODE_STREAMING);
+    if (asset == nullptr)
+        throw were_exception(WE_SIMPLE);
 
     char buffer[BUFSIZ];
     int n = 0;
@@ -114,6 +116,8 @@ void sparkle_main_activity::setup()
     copy_asset(assets, "settings.lua", "settings.lua", 0644);
     copy_asset(assets, "sparkle.lua", "sparkle.lua", 0644);
     copy_asset(assets, "user.lua", "user.lua", 0644);
+    copy_asset(assets, "sparkle.sh", "sparkle.sh", 0644);
+    copy_asset(assets, "user.sh", "user.sh", 0644);
 
     env()->DeleteLocalRef(java_assets);
 }

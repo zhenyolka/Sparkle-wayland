@@ -93,14 +93,14 @@ public class MainActivity extends Activity
         });
 
         Button button4 = new Button(this);
-        button4.setText("Edit user.lua");
+        button4.setText("Edit user.sh");
         button4.setOnClickListener(new Button.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
                 Intent intent = new Intent(MainActivity.this, SparkleEditorActivity.class);
-                String file = "user.lua";
+                String file = "user.sh";
                 intent.putExtra(EXTRA_FILE, file);
                 startActivity(intent);
             }
