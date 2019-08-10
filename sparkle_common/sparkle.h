@@ -1,7 +1,7 @@
 #ifndef SPARKLE_H
 #define SPARKLE_H
 
-#include "were_object_2.h"
+#include "were_object.h"
 #include "were_thread.h" // XXX3
 #include "were_object_wrapper.h" // XXX3
 #include <wayland-server.h>
@@ -22,7 +22,7 @@ class sparkle_seat;
 class sparkle_shell;
 
 
-class sparkle : public were_object_2, public were_thread_fd_listener, public were_thread_idle_handler
+class sparkle : public were_object, public were_thread_fd_listener, public were_thread_idle_handler
 {
 public:
     ~sparkle();

@@ -1,12 +1,12 @@
 #ifndef WERE_DEBUG_H
 #define WERE_DEBUG_H
 
-#include "were_object_2.h"
+#include "were_object.h"
 #include <ctime>
 
 class were_timer;
 
-class were_debug : public were_object_2
+class were_debug : public were_object
 {
 public:
     ~were_debug();

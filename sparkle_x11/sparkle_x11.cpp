@@ -83,7 +83,7 @@ sparkle_x11::sparkle_x11(were_object_pointer<sparkle> sparkle)
         were::connect(shell, &sparkle_shell::shell_surface_created, this_wop, [this_wop](were_object_pointer<sparkle_shell_surface> shell_surface, were_object_pointer<sparkle_surface> surface)
         {
             were_object_pointer<sparkle_x11_surface> x11_surface(new sparkle_x11_surface(this_wop, surface));
-            x11_surface->add_dependency(surface); // XXX2
+            //x11_surface->add_dependency(surface); // XXX2
 
             were::connect(this_wop, &sparkle_x11::keyboard_created, x11_surface, [x11_surface](were_object_pointer<sparkle_keyboard> keyboard)
             {

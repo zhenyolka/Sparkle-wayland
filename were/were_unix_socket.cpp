@@ -34,8 +34,10 @@ were_unix_socket::were_unix_socket(const std::string &path) :
 
 were_unix_socket::were_unix_socket(int fd)
 {
+    MAKE_THIS_WOP
+
     fd_ = fd;
-    thread()->add_fd_listener(fd_, EPOLLIN | EPOLLET, this);
+    thread()->add_fd_listener(fd_, EPOLLIN | EPOLLET, this_wop);
 }
 
 void were_unix_socket::disconnect(bool signal)
@@ -49,7 +51,7 @@ void were_unix_socket::disconnect(bool signal)
         were::emit(this_wop, &were_unix_socket::disconnected);
     }
 
-    thread()->remove_fd_listener(fd_);
+    //thread()->remove_fd_listener(fd_); //XXX1
     shutdown(fd_, SHUT_RDWR);
     close(fd_);
     fd_ = -1;

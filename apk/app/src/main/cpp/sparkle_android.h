@@ -9,7 +9,7 @@ class sparkle_keyboard;
 class sparkle_pointer;
 class sparkle_touch;
 
-class sparkle_android : public were_object_2
+class sparkle_android : public were_object
 {
 public:
     ~sparkle_android();

@@ -12,7 +12,7 @@ class sparkle_pointer;
 
 typedef were_object_wrapper<were_object_wrapper_primitive<Display *>> x11_display;
 
-class sparkle_x11 : public were_object_2
+class sparkle_x11 : public were_object
 {
 public:
     ~sparkle_x11();

@@ -6,18 +6,20 @@
 
 were_timer::~were_timer()
 {
-    thread()->remove_fd_listener(fd_);
+    //thread()->remove_fd_listener(fd_); // XXX1
     close(fd_);
 }
 
 were_timer::were_timer(int interval, bool single_shot) :
     interval_(interval), single_shot_(single_shot)
 {
+    MAKE_THIS_WOP
+
     fd_ = timerfd_create(CLOCK_MONOTONIC, 0);
     if (fd_ == -1)
         throw were_exception(WE_SIMPLE);
 
-    thread()->add_fd_listener(fd_, EPOLLIN | EPOLLET, this);
+    thread()->add_fd_listener(fd_, EPOLLIN | EPOLLET, this_wop);
 }
 
 void were_timer::start()

@@ -2,13 +2,13 @@
 #define SPARKLE_GLOBAL_H
 
 #include "sparkle.h"
-#include "were_object_2.h"
+#include "were_object.h"
 #include "wayland-server.h"
 #include "were_object_wrapper.h"
 
 
 template <typename T>
-class sparkle_global : public were_object_2
+class sparkle_global : public were_object
 {
 public:
 

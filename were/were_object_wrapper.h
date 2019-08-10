@@ -1,7 +1,7 @@
 #ifndef WERE_OBJECT_WRAPPER_H
 #define WERE_OBJECT_WRAPPER_H
 
-#include "were_object_2.h"
+#include "were_object.h"
 
 template <typename T>
 class were_object_wrapper_primitive
@@ -38,7 +38,7 @@ private:
 };
 
 template <typename T>
-class were_object_wrapper : public were_object_2, public T
+class were_object_wrapper : public were_object, public T
 {
     using T::T;
 };

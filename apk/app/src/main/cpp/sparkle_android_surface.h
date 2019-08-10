@@ -80,7 +80,7 @@ private:
     bool damaged_;
 };
 
-class sparkle_android_surface : public were_object_2
+class sparkle_android_surface : public were_object
 {
 public:
     ~sparkle_android_surface();

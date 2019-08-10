@@ -1,7 +1,7 @@
 #ifndef WERE_UNIX_SERVER_H
 #define WERE_UNIX_SERVER_H
 
-#include "were_object_2.h"
+#include "were_object.h"
 #include "were_thread.h" // XXX3
 #include <string>
 
@@ -9,7 +9,7 @@
 class were_unix_socket;
 
 
-class were_unix_server : public were_object_2, public were_thread_fd_listener
+class were_unix_server : public were_object, public were_thread_fd_listener
 {
 public:
     ~were_unix_server();

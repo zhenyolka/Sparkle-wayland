@@ -11,7 +11,7 @@
 
 were_unix_server::~were_unix_server()
 {
-    thread()->remove_fd_listener(fd_);
+    //thread()->remove_fd_listener(fd_); // XXX1
     shutdown(fd_, SHUT_RDWR);
     close(fd_);
     unlink(path_.c_str());
@@ -20,6 +20,8 @@ were_unix_server::~were_unix_server()
 were_unix_server::were_unix_server(const std::string &path) :
     path_(path)
 {
+    MAKE_THIS_WOP
+
     unlink(path_.c_str());
 
     fd_ = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -36,7 +38,7 @@ were_unix_server::were_unix_server(const std::string &path) :
     if (listen(fd_, 4) == -1)
         throw were_exception(WE_SIMPLE);
 
-    thread()->add_fd_listener(fd_, EPOLLIN | EPOLLET, this);
+    thread()->add_fd_listener(fd_, EPOLLIN | EPOLLET, this_wop);
 }
 
 void were_unix_server::event(uint32_t events)

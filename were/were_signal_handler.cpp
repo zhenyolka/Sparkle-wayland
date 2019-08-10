@@ -6,12 +6,14 @@
 
 were_signal_handler::~were_signal_handler()
 {
-    thread()->remove_fd_listener(fd_);
+    //thread()->remove_fd_listener(fd_); // XXX1
     close(fd_);
 }
 
 were_signal_handler::were_signal_handler()
 {
+    MAKE_THIS_WOP
+
     sigset_t mask;
     sigemptyset(&mask);
     //sigaddset(&mask, SIGTERM);
@@ -22,7 +24,7 @@ were_signal_handler::were_signal_handler()
     if (fd_ == -1)
         throw were_exception(WE_SIMPLE);
 
-    thread()->add_fd_listener(fd_, EPOLLIN | EPOLLET, this);
+    thread()->add_fd_listener(fd_, EPOLLIN | EPOLLET, this_wop);
 }
 
 void were_signal_handler::event(uint32_t events)

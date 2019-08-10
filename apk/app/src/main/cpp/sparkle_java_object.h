@@ -1,13 +1,13 @@
 #ifndef SPARKLE_JAVA_OBJECT_H
 #define SPARKLE_JAVA_OBJECT_H
 
-#include "were_object_2.h"
+#include "were_object.h"
 #include <jni.h>
 #include <string>
 
 extern JavaVM *javaVM;
 
-class sparkle_java_object : public were_object_2
+class sparkle_java_object : public were_object
 {
 public:
     ~sparkle_java_object();

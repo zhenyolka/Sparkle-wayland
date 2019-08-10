@@ -16,10 +16,10 @@
 
 sparkle::~sparkle()
 {
-    thread()->remove_idle_handler(this);
-    struct wl_event_loop *loop = wl_display_get_event_loop(display_->get());
-    int fd = wl_event_loop_get_fd(loop);
-    thread()->remove_fd_listener(fd);
+    //thread()->remove_idle_handler(this); // XXX1
+    //struct wl_event_loop *loop = wl_display_get_event_loop(display_->get());
+    //int fd = wl_event_loop_get_fd(loop);
+    //thread()->remove_fd_listener(fd); // XXX1
 
     shell_.collapse();
     seat_.collapse();
@@ -68,8 +68,8 @@ sparkle::sparkle(const std::string &home_dir)
 
     struct wl_event_loop *loop = wl_display_get_event_loop(display_->get());
     int fd = wl_event_loop_get_fd(loop);
-    thread()->add_fd_listener(fd, EPOLLIN | EPOLLET, this);
-    thread()->add_idle_handler(this);
+    thread()->add_fd_listener(fd, EPOLLIN | EPOLLET, this_wop);
+    thread()->add_idle_handler(this_wop);
 }
 
 void sparkle::event(uint32_t events)

@@ -1,9 +1,11 @@
 #include "were_object.h"
+
 #include <set>
 #include <mutex>
 #include <cstdio>
 #include <typeinfo>
 #include "were_exception.h"
+#include "were_thread.h"
 
 int object_count_ = 0;
 
@@ -83,4 +85,26 @@ void were_debug_print_objects()
 
     object_set_mutex_.unlock();
 #endif
+}
+
+were_object::~were_object()
+{
+    were_debug_remove_object(this);
+}
+
+were_object::were_object() :
+    reference_count_(0), collapsed_(false)
+{
+    thread_ = were_thread::current_thread();
+    destroyed.set_single_shot(true);
+
+    were_debug_add_object(this);
+}
+
+void were_object::collapse()
+{
+    MAKE_THIS_WOP
+
+    were::emit(this_wop, &were_object::destroyed);
+    collapsed_ = true;
 }

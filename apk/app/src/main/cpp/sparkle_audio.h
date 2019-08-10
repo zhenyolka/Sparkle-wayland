@@ -1,7 +1,7 @@
 #ifndef SPARKLE_AUDIO_H
 #define SPARKLE_AUDIO_H
 
-#include "were_object_2.h"
+#include "were_object.h"
 #include "were_exception.h"
 
 #include <SLES/OpenSLES.h>
@@ -49,7 +49,7 @@ public:
 };
 
 
-class sparkle_audio : public were_object_2
+class sparkle_audio : public were_object
 {
 public:
     ~sparkle_audio();

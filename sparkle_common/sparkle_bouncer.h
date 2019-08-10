@@ -1,7 +1,7 @@
 #ifndef SPARKLE_BOUNCER_H
 #define SPARKLE_BOUNCER_H
 
-#include "were_object_2.h"
+#include "were_object.h"
 #include <wayland-server.h>
 
 #include <cstdio>

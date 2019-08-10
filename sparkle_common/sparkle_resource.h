@@ -1,10 +1,10 @@
 #ifndef SPARKLE_RESOURCE_H
 #define SPARKLE_RESOURCE_H
 
-#include "were_object_2.h"
+#include "were_object.h"
 #include <wayland-server.h>
 
-class sparkle_resource : public were_object_2
+class sparkle_resource : public were_object
 {
 public:
     ~sparkle_resource();
