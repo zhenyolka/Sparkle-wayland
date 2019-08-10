@@ -48,7 +48,7 @@ sparkle_android::sparkle_android(were_object_pointer<sparkle> sparkle, were_obje
         were::connect(shell, &sparkle_shell::shell_surface_created, this_wop, [this_wop](were_object_pointer<sparkle_shell_surface> shell_surface, were_object_pointer<sparkle_surface> surface)
         {
             were_object_pointer<sparkle_android_surface> android_surface(new sparkle_android_surface(this_wop, surface));
-            //android_surface->add_dependency(surface); // XXX1
+            android_surface->add_dependency(surface); // XXX2
 
             were::connect(this_wop, &sparkle_android::keyboard_created, android_surface, [android_surface](were_object_pointer<sparkle_keyboard> keyboard)
             {

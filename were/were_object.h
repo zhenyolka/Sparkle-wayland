@@ -8,6 +8,9 @@
 #include <cstdio>
 #include <typeinfo>
 
+#define MAKE_THIS_WOP \
+were_object_pointer<std::remove_pointer<decltype(this)>::type> this_wop(this);
+
 class were_object;
 
 void were_debug_add_object(were_object *object__);
@@ -78,6 +81,16 @@ public:
     were_object_pointer<were_thread> thread() const
     {
         return thread_;
+    }
+
+    void add_dependency(were_object_pointer<were_object> dependency)
+    {
+        MAKE_THIS_WOP
+
+        were::connect(dependency, &were_object::destroyed, this_wop, [this_wop]() mutable
+        {
+            this_wop.collapse();
+        });
     }
 
 signals:
@@ -230,7 +243,5 @@ void were_object_pointer<T>::decrement_reference_count()
     object_->decrement_reference_count();
 }
 
-#define MAKE_THIS_WOP \
-were_object_pointer<std::remove_pointer<decltype(this)>::type> this_wop(this);
 
 #endif // WERE_OBJECT_H
