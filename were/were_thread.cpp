@@ -49,13 +49,11 @@ void were_thread::add_fd_listener(int fd, uint32_t events, were_object_pointer<w
     if (epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, fd, &event) == -1)
         throw were_exception(WE_SIMPLE);
 
-#if 0
-    were::connect(listener, &were_object_2::destroyed, this_wop, [this_wop, fd, listener]() mutable
+    were::connect_x(listener, this_wop, [this_wop, fd, listener]() mutable
     {
         this_wop->remove_fd_listener(fd);
         listener.decrement_reference_count();
     });
-#endif
 }
 
 void were_thread::remove_fd_listener(int fd)
@@ -89,7 +87,14 @@ void were_thread::run()
 
 void were_thread::add_idle_handler(were_object_pointer<were_thread_idle_handler> handler)
 {
+    MAKE_THIS_WOP
+
     idle_handlers_.insert(handler);
+
+    were::connect_x(handler, this_wop, [this_wop, handler]() mutable
+    {
+        this_wop->remove_idle_handler(handler);
+    });
 }
 
 void were_thread::remove_idle_handler(were_object_pointer<were_thread_idle_handler> handler)
