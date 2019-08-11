@@ -19,8 +19,8 @@
 
 sparkle_service::~sparkle_service()
 {
-    remove_idle_handler(this);
-    remove_fd_listener(thread_->fd());
+    //remove_idle_handler(this);
+    //remove_fd_listener(thread_->fd());
 }
 
 sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
@@ -42,32 +42,42 @@ sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
 
     debug_ = were_object_pointer<were_debug>(new were_debug());
 
-    add_fd_listener(thread_->fd(), this);
-    add_idle_handler(this);
+    add_fd_listener(thread_->fd(), this_wop);
+    add_idle_handler(this_wop);
+
+    were_object::connect_x(this_wop, this_wop, [this_wop]()
+    {
+        this_wop->remove_fd_listener(this_wop->thread_->fd(), this_wop);
+        this_wop->remove_idle_handler(this_wop);
+    });
 
 #ifdef SOUND_THREAD
     sound_thread_c_ = std::thread(&sparkle_service::sound, this);
 #endif
 }
 
-void sparkle_service::add_fd_listener(int fd, sparkle_service_fd_listener *listener)
+void sparkle_service::add_fd_listener(int fd, were_object_pointer<sparkle_service_fd_listener> listener)
 {
-    call_void_method("add_fd_listener", "(IJ)V", jint(fd), jlong(listener));
+    listener.increment_reference_count();
+    call_void_method("add_fd_listener", "(IJ)V", jint(fd), jlong(listener.get()));
 }
 
-void sparkle_service::remove_fd_listener(int fd)
+void sparkle_service::remove_fd_listener(int fd, were_object_pointer<sparkle_service_fd_listener> listener)
 {
     call_void_method("remove_fd_listener", "(I)V", jint(fd));
+    listener.decrement_reference_count();
 }
 
-void sparkle_service::add_idle_handler(sparkle_service_idle_handler *handler)
+void sparkle_service::add_idle_handler(were_object_pointer<sparkle_service_idle_handler> handler)
 {
-    call_void_method("add_idle_handler", "(J)V", jlong(handler));
+    handler.increment_reference_count();
+    call_void_method("add_idle_handler", "(J)V", jlong(handler.get()));
 }
 
-void sparkle_service::remove_idle_handler(sparkle_service_idle_handler *handler)
+void sparkle_service::remove_idle_handler(were_object_pointer<sparkle_service_idle_handler> handler)
 {
-    call_void_method("remove_idle_handler", "(J)V", jlong(handler));
+    call_void_method("remove_idle_handler", "(J)V", jlong(handler.get()));
+    handler.decrement_reference_count();
 }
 
 int sparkle_service::display_width()
