@@ -9,6 +9,8 @@ sparkle_audio::~sparkle_audio()
 {
     stop();
 
+    server_.collapse();
+
     (*playerObject)->Destroy(playerObject);
     (*outputmixObject)->Destroy(outputmixObject);
     (*engineObject)->Destroy(engineObject);

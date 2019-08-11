@@ -10,13 +10,6 @@
 
 
 
-int seconds()
-{
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return ts.tv_sec;
-}
-
 class test
 {
 public:
@@ -49,30 +42,21 @@ public:
 
     void run()
     {
-        int prev_debug = 0;
-
         for (int i = 0; ; ++i)
         {
-            were_thread::current_thread()->process(2000);
+            were_thread::current_thread()->process(1000);
 
 #if 0
             if (were_thread::current_thread().reference_count() == 2)
                 break;
 #endif
-
-            int now = seconds();
-            if (now > prev_debug)
-            {
-                printf("\033[2J"); // Clear screen
-                printf("\033[0;0H"); // Move cursor
-                were_debug_print_objects();
-                prev_debug = now;
-            }
+            debug_.process();
         }
     }
 
 private:
     //were_object_pointer<were_thread> thread_;
+    were_debug debug_;
     were_object_pointer<sparkle> sparkle_;
     were_object_pointer<sparkle_x11> sparkle_x11_;
     were_object_pointer<were_signal_handler> sig_;

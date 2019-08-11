@@ -1,29 +1,25 @@
 #include "were_debug.h"
-#include "were_timer.h"
+#include "were_object.h"
 #include <cstdio>
 
-const int PERIOD = 5000;
 
 were_debug::~were_debug()
 {
-    timer_.collapse();
 }
 
 were_debug::were_debug()
 {
-    MAKE_THIS_WOP
-
-    timer_ = were_object_pointer<were_timer>(new were_timer(PERIOD));
-    were_object::connect(timer_, &were_timer::timeout, this_wop, [this_wop](){this_wop->timeout();});
-    timer_->start();
-
     clock_gettime(CLOCK_MONOTONIC, &real1_);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &cpu1_);
 }
 
-void were_debug::timeout()
+void were_debug::process()
 {
     clock_gettime(CLOCK_MONOTONIC, &real2_);
+
+    if (real2_.tv_sec < real1_.tv_sec + 5)
+        return;
+
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &cpu2_);
 
     uint64_t elapsed_real = 0;

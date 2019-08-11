@@ -40,8 +40,6 @@ sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
     audio_ = were_object_pointer<sparkle_audio>(new sparkle_audio(files_dir_ + "/audio-0"));
 #endif
 
-    debug_ = were_object_pointer<were_debug>(new were_debug());
-
     add_fd_listener(thread_->fd(), this_wop);
     add_idle_handler(this_wop);
 
@@ -90,9 +88,23 @@ int sparkle_service::display_height()
     return call_int_method("display_height", "()I");
 }
 
+void sparkle_service::finish()
+{
+    audio_.collapse();
+    sparkle_android_.collapse();
+    sparkle_.collapse();
+
+    for (int i = 0; i < 100; ++i)
+    {
+        thread_->process(10);
+        debug_.process();
+    }
+}
+
 void sparkle_service::event()
 {
     thread_->process(0);
+    debug_.process();
 }
 
 void sparkle_service::idle()
@@ -122,12 +134,16 @@ Java_com_sion_sparkle_SparkleService_native_1create(JNIEnv *env, jobject instanc
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleService_native_1destroy(JNIEnv *env, jobject instance, jlong native)
 {
+#if 0
     // XXX1
     raise(SIGINT); /* That is how we deal with program termination and proper resource deallocation! Yeah! */
+#else
+    were_object_pointer<sparkle_service> native__(reinterpret_cast<sparkle_service *>(native));
+    native__->decrement_reference_count();
+    native__->finish();
 
-    //were_object_pointer<sparkle_service> native__(reinterpret_cast<sparkle_service *>(native));
-    //native__->decrement_reference_count();
-    //native__.collapse();
+    raise(SIGINT);
+#endif
 }
 
 extern "C" JNIEXPORT void JNICALL

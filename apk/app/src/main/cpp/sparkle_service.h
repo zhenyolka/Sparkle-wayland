@@ -2,6 +2,7 @@
 #define SPARKLE_SERVICE_H
 
 #include "sparkle_java_object.h"
+#include "were_debug.h"
 
 #define SOUND_THREAD
 
@@ -42,6 +43,8 @@ public:
     int display_width();
     int display_height();
 
+    void finish();
+
 private:
     void event();
     void idle();
@@ -56,7 +59,7 @@ private:
     were_object_pointer<sparkle> sparkle_;
     were_object_pointer<sparkle_android> sparkle_android_;
     were_object_pointer<sparkle_audio> audio_;
-    were_object_pointer<were_debug> debug_;
+    were_debug debug_;
 #ifdef SOUND_THREAD
     std::thread sound_thread_c_;
     were_object_pointer<were_thread> sound_thread_;
