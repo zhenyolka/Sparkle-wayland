@@ -16,16 +16,16 @@ public:
     {
         MAKE_THIS_WOP
 
-        were::connect(this_wop, &sparkle_compositor::create_surface, this_wop, [this_wop](uint32_t id)
+        were_object::connect(this_wop, &sparkle_compositor::create_surface, this_wop, [this_wop](uint32_t id)
         {
             were_object_pointer<sparkle_surface> surface(new sparkle_surface(this_wop->client(), this_wop->version(), id));
-            were::emit(this_wop, &sparkle_compositor::surface_created, surface);
+            were_object::emit(this_wop, &sparkle_compositor::surface_created, surface);
         });
 
-        were::connect(this_wop, &sparkle_compositor::create_region, this_wop, [this_wop](uint32_t id)
+        were_object::connect(this_wop, &sparkle_compositor::create_region, this_wop, [this_wop](uint32_t id)
         {
             were_object_pointer<sparkle_region> region(new sparkle_region(this_wop->client(), this_wop->version(), id));
-            were::emit(this_wop, &sparkle_compositor::region_created, region);
+            were_object::emit(this_wop, &sparkle_compositor::region_created, region);
         });
     }
 

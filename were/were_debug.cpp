@@ -14,7 +14,7 @@ were_debug::were_debug()
     MAKE_THIS_WOP
 
     timer_ = were_object_pointer<were_timer>(new were_timer(PERIOD));
-    were::connect(timer_, &were_timer::timeout, this_wop, [this_wop](){this_wop->timeout();});
+    were_object::connect(timer_, &were_timer::timeout, this_wop, [this_wop](){this_wop->timeout();});
     timer_->start();
 
     clock_gettime(CLOCK_MONOTONIC, &real1_);

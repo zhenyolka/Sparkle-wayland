@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.6.0)
 project(sparkle_x11)
 
+add_definitions(-DX_DEBUG)
+
 get_filename_component(SPARKLE_ROOT "${CMAKE_CURRENT_LIST_DIR}/.." ABSOLUTE)
 
 #add_subdirectory(${SPARKLE_ROOT}/were were)

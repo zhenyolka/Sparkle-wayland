@@ -34,7 +34,7 @@ public:
     int fd() const {return epoll_fd_;}
 
     void add_fd_listener(int fd, uint32_t events, were_object_pointer<were_thread_fd_listener> listener);
-    void remove_fd_listener(int fd);
+    void remove_fd_listener(int fd, were_object_pointer<were_thread_fd_listener> listener);
     void add_idle_handler(were_object_pointer<were_thread_idle_handler> handler);
     void remove_idle_handler(were_object_pointer<were_thread_idle_handler> handler);
 

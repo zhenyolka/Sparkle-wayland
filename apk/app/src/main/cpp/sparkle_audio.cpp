@@ -85,7 +85,7 @@ sparkle_audio::sparkle_audio(const std::string &path)
     server_ = were_object_pointer<were_unix_server>(new were_unix_server(path));
     chmod(path.c_str(), 0666);
 
-    were::connect(server_, &were_unix_server::new_connection, this_wop, [this_wop]()
+    were_object::connect(server_, &were_unix_server::new_connection, this_wop, [this_wop]()
     {
         were_log("audio connection\n");
 
@@ -97,12 +97,12 @@ sparkle_audio::sparkle_audio(const std::string &path)
 
             this_wop->stop();
 
-            were::connect(this_wop->socket_, &were_unix_socket::ready_read, this_wop, [this_wop]()
+            were_object::connect(this_wop->socket_, &were_unix_socket::ready_read, this_wop, [this_wop]()
             {
                 this_wop->read();
             });
 
-            were::connect(this_wop->socket_, &were_unix_socket::disconnected, this_wop, [this_wop]()
+            were_object::connect(this_wop->socket_, &were_unix_socket::disconnected, this_wop, [this_wop]()
             {
                 were_log("audio disconnected\n");
                 this_wop->stop();

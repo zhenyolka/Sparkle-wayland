@@ -6,7 +6,7 @@
 
 were_timer::~were_timer()
 {
-    //thread()->remove_fd_listener(fd_); // XXX1
+    //thread()->remove_fd_listener(fd_);
     close(fd_);
 }
 
@@ -20,6 +20,10 @@ were_timer::were_timer(int interval, bool single_shot) :
         throw were_exception(WE_SIMPLE);
 
     thread()->add_fd_listener(fd_, EPOLLIN | EPOLLET, this_wop);
+    were_object::connect_x(this_wop, this_wop, [this_wop]()
+    {
+        this_wop->thread()->remove_fd_listener(this_wop->fd_, this_wop);
+    });
 }
 
 void were_timer::start()
@@ -66,7 +70,7 @@ void were_timer::event(uint32_t events)
         if (read(fd_, &expirations, sizeof(uint64_t)) != sizeof(uint64_t))
             throw were_exception(WE_SIMPLE);
 
-        were::emit(were_object_pointer<were_timer>(this), &were_timer::timeout);
+        were_object::emit(were_object_pointer<were_timer>(this), &were_timer::timeout);
     }
     else
         throw were_exception(WE_SIMPLE);

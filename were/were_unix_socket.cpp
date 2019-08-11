@@ -10,7 +10,6 @@
 
 were_unix_socket::~were_unix_socket()
 {
-    disconnect(false);
 }
 
 #if 0
@@ -38,20 +37,23 @@ were_unix_socket::were_unix_socket(int fd)
 
     fd_ = fd;
     thread()->add_fd_listener(fd_, EPOLLIN | EPOLLET, this_wop);
+
+    were_object::connect_x(this_wop, this_wop, [this_wop]()
+    {
+        this_wop->disconnect();
+    });
 }
 
-void were_unix_socket::disconnect(bool signal)
+void were_unix_socket::disconnect()
 {
     if (fd_ == -1)
         return;
 
-    if (signal)
-    {
-        MAKE_THIS_WOP
-        were::emit(this_wop, &were_unix_socket::disconnected);
-    }
+    MAKE_THIS_WOP
 
-    //thread()->remove_fd_listener(fd_); //XXX1
+    were_object::emit(this_wop, &were_unix_socket::disconnected);
+
+    thread()->remove_fd_listener(fd_, this_wop);
     shutdown(fd_, SHUT_RDWR);
     close(fd_);
     fd_ = -1;
@@ -62,7 +64,7 @@ void were_unix_socket::event(uint32_t events)
     MAKE_THIS_WOP
 
     if (events == EPOLLIN)
-        were::emit(this_wop, &were_unix_socket::ready_read);
+        were_object::emit(this_wop, &were_unix_socket::ready_read);
     else
         disconnect();
 

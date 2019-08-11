@@ -36,9 +36,9 @@ sparkle_x11_surface::sparkle_x11_surface(were_object_pointer<sparkle_x11> x11, w
     else
         XUnmapWindow(display_->get(), window_);
 
-    were::connect(x11, &sparkle_x11::event, this_wop, [this_wop](XEvent event){this_wop->process(event);});
+    were_object::connect(x11, &sparkle_x11::event, this_wop, [this_wop](XEvent event){this_wop->process(event);});
 
-    were::connect(surface, &sparkle_surface::attach, this_wop, [this_wop](struct wl_resource *buffer, int32_t x, int32_t y)
+    were_object::connect(surface, &sparkle_surface::attach, this_wop, [this_wop](struct wl_resource *buffer, int32_t x, int32_t y)
     {
         if (this_wop->buffer_ != nullptr)
             wl_buffer_send_release(this_wop->buffer_);
@@ -46,12 +46,12 @@ sparkle_x11_surface::sparkle_x11_surface(were_object_pointer<sparkle_x11> x11, w
         this_wop->buffer_ = buffer;
     });
 
-    were::connect(surface, &sparkle_surface::commit, this_wop, [this_wop]()
+    were_object::connect(surface, &sparkle_surface::commit, this_wop, [this_wop]()
     {
         this_wop->commit();
     });
 
-    were::connect(surface, &sparkle_surface::frame, this_wop, [this_wop](uint32_t callback)
+    were_object::connect(surface, &sparkle_surface::frame, this_wop, [this_wop](uint32_t callback)
     {
         if (this_wop->callback_ != nullptr)
         {
@@ -82,26 +82,26 @@ void sparkle_x11_surface::process(XEvent event)
             break;
         case ButtonPress:
             if (event.xbutton.type == ButtonPress)
-                were::emit(this_wop, &sparkle_x11_surface::pointer_button_press, button_map[event.xbutton.button]);
+                were_object::emit(this_wop, &sparkle_x11_surface::pointer_button_press, button_map[event.xbutton.button]);
             break;
         case ButtonRelease:
             if (event.xbutton.type == ButtonRelease)
-                were::emit(this_wop, &sparkle_x11_surface::pointer_button_release, button_map[event.xbutton.button]);
+                were_object::emit(this_wop, &sparkle_x11_surface::pointer_button_release, button_map[event.xbutton.button]);
             break;
         case MotionNotify:
-            were::emit(this_wop, &sparkle_x11_surface::pointer_motion, event.xbutton.x, event.xbutton.y);
+            were_object::emit(this_wop, &sparkle_x11_surface::pointer_motion, event.xbutton.x, event.xbutton.y);
             break;
         case KeyPress:
-            were::emit(this_wop, &sparkle_x11_surface::key_press, event.xkey.keycode);
+            were_object::emit(this_wop, &sparkle_x11_surface::key_press, event.xkey.keycode);
             break;
         case KeyRelease:
-            were::emit(this_wop, &sparkle_x11_surface::key_release, event.xkey.keycode);
+            were_object::emit(this_wop, &sparkle_x11_surface::key_release, event.xkey.keycode);
             break;
         case EnterNotify:
-            were::emit(this_wop, &sparkle_x11_surface::pointer_enter);
+            were_object::emit(this_wop, &sparkle_x11_surface::pointer_enter);
             break;
         case LeaveNotify:
-            were::emit(this_wop, &sparkle_x11_surface::pointer_leave);
+            were_object::emit(this_wop, &sparkle_x11_surface::pointer_leave);
             break;
         default:
             break;

@@ -6,7 +6,7 @@
 
 were_signal_handler::~were_signal_handler()
 {
-    //thread()->remove_fd_listener(fd_); // XXX1
+    //thread()->remove_fd_listener(fd_);
     close(fd_);
 }
 
@@ -25,6 +25,10 @@ were_signal_handler::were_signal_handler()
         throw were_exception(WE_SIMPLE);
 
     thread()->add_fd_listener(fd_, EPOLLIN | EPOLLET, this_wop);
+    were_object::connect_x(this_wop, this_wop, [this_wop]()
+    {
+        this_wop->thread()->remove_fd_listener(this_wop->fd_, this_wop);
+    });
 }
 
 void were_signal_handler::event(uint32_t events)
@@ -36,7 +40,7 @@ void were_signal_handler::event(uint32_t events)
         if (read(fd_, &si, sizeof(struct signalfd_siginfo)) != sizeof(struct signalfd_siginfo))
             throw were_exception(WE_SIMPLE);
 
-        were::emit(were_object_pointer<were_signal_handler>(this), &were_signal_handler::signal, si.ssi_signo);
+        were_object::emit(were_object_pointer<were_signal_handler>(this), &were_signal_handler::signal, si.ssi_signo);
     }
     else
         throw were_exception(WE_SIMPLE);

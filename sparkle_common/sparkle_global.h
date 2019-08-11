@@ -36,7 +36,7 @@ private:
 
         were_object_pointer<T> object__(new T(client, version, id, instance__->display_));
 
-        were::emit(instance__, &sparkle_global::instance, object__);
+        were_object::emit(instance__, &sparkle_global::instance, object__);
     }
 
 private:

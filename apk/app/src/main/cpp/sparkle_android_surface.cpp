@@ -44,7 +44,7 @@ sparkle_android_surface::sparkle_android_surface(were_object_pointer<sparkle_and
     view_ = were_object_pointer<sparkle_view>(new sparkle_view(android->service()->env(), android->service()));
     view_->set_enabled(true);
 
-    were::connect(view_, &sparkle_view::surface_changed, this_wop, [this_wop](ANativeWindow *window)
+    were_object::connect(view_, &sparkle_view::surface_changed, this_wop, [this_wop](ANativeWindow *window)
     {
         if (this_wop->window_ != nullptr)
             ANativeWindow_release(this_wop->window_);
@@ -76,7 +76,7 @@ sparkle_android_surface::sparkle_android_surface(were_object_pointer<sparkle_and
         }
     });
 
-    were::connect(surface, &sparkle_surface::attach, this_wop, [this_wop](struct wl_resource *buffer, int32_t x, int32_t y)
+    were_object::connect(surface, &sparkle_surface::attach, this_wop, [this_wop](struct wl_resource *buffer, int32_t x, int32_t y)
     {
         if (this_wop->buffer_ != nullptr)
             wl_buffer_send_release(this_wop->buffer_);
@@ -84,12 +84,12 @@ sparkle_android_surface::sparkle_android_surface(were_object_pointer<sparkle_and
         this_wop->buffer_ = buffer;
     });
 
-    were::connect(surface, &sparkle_surface::commit, this_wop, [this_wop]()
+    were_object::connect(surface, &sparkle_surface::commit, this_wop, [this_wop]()
     {
         this_wop->commit();
     });
 
-    were::connect(surface, &sparkle_surface::frame, this_wop, [this_wop](uint32_t callback)
+    were_object::connect(surface, &sparkle_surface::frame, this_wop, [this_wop](uint32_t callback)
     {
         if (this_wop->callback_ != nullptr)
         {
@@ -102,7 +102,7 @@ sparkle_android_surface::sparkle_android_surface(were_object_pointer<sparkle_and
         this_wop->callback_ = wl_resource_create(this_wop->surface_->client(), &wl_callback_interface, 1, callback);
     });
 
-    were::connect(surface, &sparkle_surface::damage, this_wop, [this_wop](int32_t x, int32_t y, int32_t width, int32_t height)
+    were_object::connect(surface, &sparkle_surface::damage, this_wop, [this_wop](int32_t x, int32_t y, int32_t width, int32_t height)
     {
         this_wop->damage_.add(x, y, x + width, y + height);
     });
@@ -236,13 +236,13 @@ void sparkle_android_surface::register_keyboard(were_object_pointer<sparkle_keyb
     //if (wl_resource_get_client(keyboard->resource()) != wl_resource_get_client(surface_->resource()))
     //    return; // XXX2
 
-    were::connect(view_, &sparkle_view::key_down, keyboard, [keyboard, surface](int code)
+    were_object::connect(view_, &sparkle_view::key_down, keyboard, [keyboard, surface](int code)
     {
         keyboard->key_press(code);
         keyboard->thread()->idle();
     });
 
-    were::connect(view_, &sparkle_view::key_up, keyboard, [keyboard, surface](int code)
+    were_object::connect(view_, &sparkle_view::key_up, keyboard, [keyboard, surface](int code)
     {
         keyboard->key_release(code);
         keyboard->thread()->idle();
@@ -260,27 +260,27 @@ void sparkle_android_surface::register_pointer(were_object_pointer<sparkle_point
     //if (wl_resource_get_client(keyboard->resource()) != wl_resource_get_client(surface_->resource()))
     //    return; // XXX2
 
-    were::connect(view_, &sparkle_view::pointer_button_down, pointer, [pointer](int button)
+    were_object::connect(view_, &sparkle_view::pointer_button_down, pointer, [pointer](int button)
     {
         pointer->button_down(button);
     });
 
-    were::connect(view_, &sparkle_view::pointer_button_up, pointer, [pointer](int button)
+    were_object::connect(view_, &sparkle_view::pointer_button_up, pointer, [pointer](int button)
     {
         pointer->button_up(button);
     });
 
-    were::connect(view_, &sparkle_view::pointer_motion, pointer, [pointer](int x, int y)
+    were_object::connect(view_, &sparkle_view::pointer_motion, pointer, [pointer](int x, int y)
     {
         pointer->motion(x, y);
     });
 
-    were::connect(view_, &sparkle_view::pointer_enter, pointer, [pointer, surface]()
+    were_object::connect(view_, &sparkle_view::pointer_enter, pointer, [pointer, surface]()
     {
         pointer->enter(surface);
     });
 
-    were::connect(view_, &sparkle_view::pointer_leave, pointer, [pointer, surface]()
+    were_object::connect(view_, &sparkle_view::pointer_leave, pointer, [pointer, surface]()
     {
         pointer->leave(surface);
     });
@@ -294,17 +294,17 @@ void sparkle_android_surface::register_touch(were_object_pointer<sparkle_touch> 
 {
     were_object_pointer<sparkle_surface> surface(surface_);
 
-    were::connect(view_, &sparkle_view::touch_down, touch, [touch, surface](int id, int x, int y)
+    were_object::connect(view_, &sparkle_view::touch_down, touch, [touch, surface](int id, int x, int y)
     {
         touch->down(surface, id, x, y);
     });
 
-    were::connect(view_, &sparkle_view::touch_up, touch, [touch, surface](int id, int x, int y)
+    were_object::connect(view_, &sparkle_view::touch_up, touch, [touch, surface](int id, int x, int y)
     {
         touch->up(surface, id, x, y);
     });
 
-    were::connect(view_, &sparkle_view::touch_motion, touch, [touch, surface](int id, int x, int y)
+    were_object::connect(view_, &sparkle_view::touch_motion, touch, [touch, surface](int id, int x, int y)
     {
         touch->motion(surface, id, x, y);
     });

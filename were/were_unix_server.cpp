@@ -11,7 +11,7 @@
 
 were_unix_server::~were_unix_server()
 {
-    //thread()->remove_fd_listener(fd_); // XXX1
+    //thread()->remove_fd_listener(fd_);
     shutdown(fd_, SHUT_RDWR);
     close(fd_);
     unlink(path_.c_str());
@@ -39,6 +39,10 @@ were_unix_server::were_unix_server(const std::string &path) :
         throw were_exception(WE_SIMPLE);
 
     thread()->add_fd_listener(fd_, EPOLLIN | EPOLLET, this_wop);
+    were_object::connect_x(this_wop, this_wop, [this_wop]()
+    {
+        this_wop->thread()->remove_fd_listener(this_wop->fd_, this_wop);
+    });
 }
 
 void were_unix_server::event(uint32_t events)
@@ -46,7 +50,7 @@ void were_unix_server::event(uint32_t events)
     MAKE_THIS_WOP
 
     if (events == EPOLLIN)
-        were::emit(this_wop, &were_unix_server::new_connection);
+        were_object::emit(this_wop, &were_unix_server::new_connection);
     else
         throw were_exception(WE_SIMPLE);
 }

@@ -358,6 +358,7 @@ void were_object::connect_x(    were_object_pointer<were_object> source,
     }, cb_id);
 };
 
+#if 0
 void were_object::break_x_(were_object_pointer<were_object> source, were_object_pointer<were_object> context, uint64_t pc_id, uint64_t sb_id, uint64_t cb_id)
 {
     auto signal__ = &((source.were())->destroyed);
@@ -369,6 +370,7 @@ void were_object::break_x_(were_object_pointer<were_object> source, were_object_
     auto signal2__ = &((context.were())->destroyed);
     signal2__->remove_connection(cb_id);
 }
+#endif
 
 template <typename SourceType, typename SignalType, typename ...Args>
 void were_object::emit( were_object_pointer<SourceType> source,

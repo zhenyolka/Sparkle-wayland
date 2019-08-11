@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 
     were_object_pointer<were_signal_handler> sig(new were_signal_handler());
 
-    were::connect(sig, &were_signal_handler::signal, sig, [&sparkle__, &sparkle_x11__, &debug, &sig](uint32_t number) mutable
+    were_object::connect(sig, &were_signal_handler::signal, sig, [&sparkle__, &sparkle_x11__, &debug, &sig](uint32_t number) mutable
     {
         if (number == SIGINT)
         {
