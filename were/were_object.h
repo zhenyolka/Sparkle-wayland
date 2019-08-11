@@ -41,6 +41,7 @@ public:
     bool operator!=(const were_object_pointer &other) const;
     void increment_reference_count();
     void decrement_reference_count();
+    int reference_count();
     were_object *were() const;
     operator were_object_pointer<were_object>();
 
@@ -266,6 +267,12 @@ template <typename T>
 void were_object_pointer<T>::decrement_reference_count()
 {
     object_->decrement_reference_count();
+}
+
+template <typename T>
+int were_object_pointer<T>::reference_count()
+{
+    return object_->reference_count();
 }
 
 template <typename T>

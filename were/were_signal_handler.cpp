@@ -7,6 +7,14 @@
 were_signal_handler::~were_signal_handler()
 {
     //thread()->remove_fd_listener(fd_);
+
+    sigset_t mask;
+    sigemptyset(&mask);
+    //sigaddset(&mask, SIGTERM);
+    sigaddset(&mask, SIGINT);
+    sigprocmask(SIG_UNBLOCK, &mask, NULL);
+    fprintf(stdout, "SIGINT unblocked\n");
+
     close(fd_);
 }
 
@@ -19,6 +27,7 @@ were_signal_handler::were_signal_handler()
     //sigaddset(&mask, SIGTERM);
     sigaddset(&mask, SIGINT);
     sigprocmask(SIG_BLOCK, &mask, NULL);
+    fprintf(stdout, "SIGINT blocked\n");
 
     fd_ = signalfd(-1, &mask, 0);
     if (fd_ == -1)
