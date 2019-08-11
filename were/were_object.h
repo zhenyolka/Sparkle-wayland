@@ -3,8 +3,6 @@
 
 #include "were_exception.h"
 #include "were_signal.h"
-//#include "were_connect.h"
-//#include "were_object.h"
 #include <cstdio>
 #include <typeinfo>
 
@@ -17,6 +15,8 @@ void were_debug_add_object(were_object *object__);
 void were_debug_remove_object(were_object *object__);
 int were_debug_object_count();
 void were_debug_print_objects();
+
+/* ================================================================================================================== */
 
 template <typename T>
 class were_object_pointer
@@ -49,7 +49,7 @@ private:
     T *pointer_;
 };
 
-
+/* ================================================================================================================== */
 
 class were_thread;
 
@@ -89,6 +89,32 @@ public:
 
     void add_dependency(were_object_pointer<were_object> dependency);
 
+    static uint64_t next_id()
+    {
+        return next_id_++;
+    }
+
+    template <typename SourceType, typename SignalType, typename ContextType, typename Functor>
+    static void connect(    were_object_pointer<SourceType> source,
+                            SignalType signal,
+                            were_object_pointer<ContextType> context,
+                            Functor call);
+
+    template <typename SourceType, typename SignalType, typename ContextType>
+    static void break_(SourceType source, SignalType signal, ContextType context, uint64_t pc_id, uint64_t sb_id, uint64_t cb_id);
+
+    template <typename Functor>
+    static void connect_x(    were_object_pointer<were_object> source,
+                                    were_object_pointer<were_object> context,
+                                    Functor call);
+
+    static void break_x_(were_object_pointer<were_object> source, were_object_pointer<were_object> context, uint64_t pc_id, uint64_t sb_id, uint64_t cb_id);
+
+    template <typename SourceType, typename SignalType, typename ...Args>
+    static void emit(   were_object_pointer<SourceType> source,
+                        SignalType signal,
+                        Args... args);
+
 signals:
     were_signal<void ()> destroyed;
 
@@ -96,7 +122,10 @@ private:
     int reference_count_;
     bool collapsed_;
     were_object_pointer<were_thread> thread_;
+    static uint64_t next_id_;
 };
+
+/* ================================================================================================================== */
 
 template <typename T>
 were_object_pointer<T>::~were_object_pointer()
@@ -257,29 +286,13 @@ were_object_pointer<T>::operator were_object_pointer<were_object>()
     return were_object_pointer<were_object>(object_);
 }
 
-namespace were
-{
-
-uint64_t next_id();
-
-template <typename SourceType, typename SignalType, typename ContextType>
-void break_(SourceType source, SignalType signal, ContextType context, uint64_t pc_id, uint64_t sb_id, uint64_t cb_id)
-{
-    auto signal__ = &((source.operator->())->*signal);
-    signal__->remove_connection(pc_id);
-
-    auto signal1__ = &((source.operator->())->destroyed);
-    signal1__->remove_connection(sb_id);
-
-    auto signal2__ = &((context.operator->())->destroyed);
-    signal2__->remove_connection(cb_id);
-}
+/* ================================================================================================================== */
 
 template <typename SourceType, typename SignalType, typename ContextType, typename Functor>
-void connect(   were_object_pointer<SourceType> source,
-                SignalType signal,
-                were_object_pointer<ContextType> context,
-                Functor call
+void were_object::connect(  were_object_pointer<SourceType> source,
+                            SignalType signal,
+                            were_object_pointer<ContextType> context,
+                            Functor call
 )
 {
     // XXXT Thread.
@@ -304,22 +317,23 @@ void connect(   were_object_pointer<SourceType> source,
     }, cb_id);
 };
 
-static void break_x_(were_object_pointer<were_object> source, were_object_pointer<were_object> context, uint64_t pc_id, uint64_t sb_id, uint64_t cb_id)
+template <typename SourceType, typename SignalType, typename ContextType>
+void were_object::break_(SourceType source, SignalType signal, ContextType context, uint64_t pc_id, uint64_t sb_id, uint64_t cb_id)
 {
-    auto signal__ = &((source.were())->destroyed);
+    auto signal__ = &((source.operator->())->*signal);
     signal__->remove_connection(pc_id);
 
-    auto signal1__ = &((source.were())->destroyed);
+    auto signal1__ = &((source.operator->())->destroyed);
     signal1__->remove_connection(sb_id);
 
-    auto signal2__ = &((context.were())->destroyed);
+    auto signal2__ = &((context.operator->())->destroyed);
     signal2__->remove_connection(cb_id);
 }
 
 template <typename Functor>
-void connect_x( were_object_pointer<were_object> source,
-                were_object_pointer<were_object> context,
-                Functor call
+void were_object::connect_x(    were_object_pointer<were_object> source,
+                                were_object_pointer<were_object> context,
+                                Functor call
 )
 {
     // XXXT Thread.
@@ -344,16 +358,28 @@ void connect_x( were_object_pointer<were_object> source,
     }, cb_id);
 };
 
+void were_object::break_x_(were_object_pointer<were_object> source, were_object_pointer<were_object> context, uint64_t pc_id, uint64_t sb_id, uint64_t cb_id)
+{
+    auto signal__ = &((source.were())->destroyed);
+    signal__->remove_connection(pc_id);
+
+    auto signal1__ = &((source.were())->destroyed);
+    signal1__->remove_connection(sb_id);
+
+    auto signal2__ = &((context.were())->destroyed);
+    signal2__->remove_connection(cb_id);
+}
+
 template <typename SourceType, typename SignalType, typename ...Args>
-void emit(  were_object_pointer<SourceType> source,
-            SignalType signal,
-            Args... args
+void were_object::emit( were_object_pointer<SourceType> source,
+                        SignalType signal,
+                        Args... args
 )
 {
     auto signal__ = &((source.operator->())->*signal);
     signal__->emit(args...);
 };
 
-};
+/* ================================================================================================================== */
 
 #endif // WERE_OBJECT_H

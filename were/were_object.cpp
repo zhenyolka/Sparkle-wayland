@@ -87,6 +87,10 @@ void were_debug_print_objects()
 #endif
 }
 
+/* ================================================================================================================== */
+
+uint64_t were_object::next_id_ = 0;
+
 were_object::~were_object()
 {
     were_debug_remove_object(this);
@@ -108,18 +112,6 @@ void were_object::collapse()
     were::emit(this_wop, &were_object::destroyed);
     collapsed_ = true;
 }
-
-namespace were
-{
-
-uint64_t next_id_ = 0;
-
-uint64_t next_id()
-{
-    return next_id_++;
-}
-
-};
 
 void were_object::add_dependency(were_object_pointer<were_object> dependency)
 {
