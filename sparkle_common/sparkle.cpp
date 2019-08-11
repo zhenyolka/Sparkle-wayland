@@ -77,6 +77,8 @@ sparkle::sparkle(const std::string &home_dir)
         int fd = wl_event_loop_get_fd(loop);
         this_wop->thread()->remove_fd_listener(fd, this_wop);
         this_wop->thread()->remove_idle_handler(this_wop);
+
+        wl_display_destroy_clients(this_wop->display_->get()); // XXX2
     });
 }
 
