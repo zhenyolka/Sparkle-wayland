@@ -33,11 +33,14 @@ sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
     sparkle_android_logger::redirect_output(files_dir_ + "/log.txt");
 
     sparkle_ = were_object_pointer<sparkle>(new sparkle(files_dir_));
+    sparkle_->add_dependency(this_wop);
+
     were_object_pointer<sparkle_android> sparkle_android__(new sparkle_android(sparkle_, this_wop));
     sparkle_android__->add_dependency(this_wop);
 
 #ifndef SOUND_THREAD
     audio_ = were_object_pointer<sparkle_audio>(new sparkle_audio(files_dir_ + "/audio-0"));
+    audio_->add_dependency(this_wop);
 #endif
 
     //int fd = were_thread::current_thread()->fd();
@@ -93,13 +96,13 @@ Java_com_sion_sparkle_SparkleService_native_1create(JNIEnv *env, jobject instanc
 {
     were_backtrace::enable();
 
-    were_debug *debug = new were_debug();
+    were_debug *debug = new were_debug(); // XXX1 stop
     debug->start();
 
     were_object_pointer<were_thread> thread(new were_thread());
 
     were_object_pointer<sparkle_service> native__(new sparkle_service(env, instance));
-    native__->add_fd_listener(thread->fd());
+    native__->add_fd_listener(dup(thread->fd()));
     native__->add_idle_handler();
 
     return jlong(native__.get());
@@ -119,6 +122,10 @@ Java_com_sion_sparkle_SparkleService_native_1destroy(JNIEnv *env, jobject instan
     for (int i = 0; i < 100; ++i)
         were_thread::current_thread()->process(10);
 
+    int x = were_thread::current_thread().reference_count();
+    fprintf(stdout, "rc %d\n", x);
+
+    fprintf(stdout, "SIGINT\n");
     raise(SIGINT);
 #endif
 }

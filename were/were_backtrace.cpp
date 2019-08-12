@@ -1,5 +1,5 @@
 #include "were_backtrace.h"
-#include <cstdlib>
+//#include <cstdlib>
 #include <csignal>
 #include <cstdio>
 #include <exception>
@@ -28,6 +28,20 @@ void were_backtrace::enable()
     // XXX2
     std::set_terminate([]()
     {
+        auto e = std::current_exception();
+
+        try
+        {
+            std::rethrow_exception(e);
+        }
+        catch (const std::exception &e)
+        {
+            fprintf(stderr, "%s\n", e.what());
+        }
+        catch (...)
+        {
+        }
+
         raise(SIGABRT);
     });
 
@@ -51,7 +65,7 @@ void were_backtrace::handler(int n)
 
     print_backtrace();
 
-    exit(-1);
+    std::_Exit(-1);
 }
 
 #ifdef __ANDROID__
