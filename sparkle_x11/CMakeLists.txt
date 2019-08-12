@@ -31,4 +31,5 @@ target_link_libraries(sparkle LINK_PUBLIC
     wayland-server
     X11
     lua
+    pthread
 )

@@ -9,18 +9,17 @@
 #include <ctime>
 
 
-
 class test
 {
 public:
 
     ~test()
     {
+        debug_.stop();
     }
 
     test()
     {
-        were_object_pointer<were_thread> thread(new were_thread());
         sparkle_ = were_object_pointer<sparkle>(new sparkle());
         sparkle_x11_ = were_object_pointer<sparkle_x11>(new sparkle_x11(sparkle_));
 
@@ -38,6 +37,8 @@ public:
             }
         });
 #endif
+
+        debug_.start();
     }
 
     void run()
@@ -50,20 +51,25 @@ public:
             if (were_thread::current_thread().reference_count() == 2)
                 break;
 #endif
-            debug_.process();
         }
     }
 
 private:
-    //were_object_pointer<were_thread> thread_;
     were_debug debug_;
     were_object_pointer<sparkle> sparkle_;
     were_object_pointer<sparkle_x11> sparkle_x11_;
     were_object_pointer<were_signal_handler> sig_;
 };
 
+void prepare()
+{
+    were_object_pointer<were_thread> thread(new were_thread());
+}
+
 int main(int argc, char *argv[])
 {
+    prepare();
+
     test t;
     t.run();
 

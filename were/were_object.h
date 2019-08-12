@@ -9,14 +9,9 @@
 #define MAKE_THIS_WOP \
 were_object_pointer<std::remove_pointer<decltype(this)>::type> this_wop(this);
 
-class were_object;
-
-void were_debug_add_object(were_object *object__);
-void were_debug_remove_object(were_object *object__);
-int were_debug_object_count();
-void were_debug_print_objects();
-
 /* ================================================================================================================== */
+
+class were_object;
 
 template <typename T>
 class were_object_pointer
