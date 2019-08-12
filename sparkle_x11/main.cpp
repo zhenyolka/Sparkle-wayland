@@ -7,6 +7,7 @@
 #include "were_signal_handler.h"
 #include <csignal>
 #include <ctime>
+#include "were_backtrace.h"
 
 
 class test
@@ -68,6 +69,8 @@ void prepare()
 
 int main(int argc, char *argv[])
 {
+    were_backtrace::enable();
+
     prepare();
 
     test t;

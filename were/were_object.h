@@ -197,7 +197,7 @@ void were_object_pointer<T>::reset()
         object_->decrement_reference_count();
 
         if (object_->reference_count() == 0 && object_->collapsed())
-                delete object_;
+            delete object_;
 
         object_ = nullptr;
         pointer_ = nullptr;

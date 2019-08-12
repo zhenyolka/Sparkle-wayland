@@ -6,6 +6,7 @@
 #include "sparkle_android.h"
 #include "sparkle_audio.h"
 #include "were_debug.h"
+#include "were_backtrace.h"
 
 #include <csignal>
 #include "were_timer.h"
@@ -31,51 +32,41 @@ sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
     files_dir_ = call_string_method("files_dir", "()Ljava/lang/String;");
     sparkle_android_logger::redirect_output(files_dir_ + "/log.txt");
 
-    thread_ = were_object_pointer<were_thread>(new were_thread());
-
     sparkle_ = were_object_pointer<sparkle>(new sparkle(files_dir_));
-    sparkle_android_ = were_object_pointer<sparkle_android>(new sparkle_android(sparkle_, this_wop));
+    were_object_pointer<sparkle_android> sparkle_android__(new sparkle_android(sparkle_, this_wop));
+    sparkle_android__->add_dependency(this_wop);
 
 #ifndef SOUND_THREAD
     audio_ = were_object_pointer<sparkle_audio>(new sparkle_audio(files_dir_ + "/audio-0"));
 #endif
 
-    add_fd_listener(thread_->fd(), this_wop);
-    add_idle_handler(this_wop);
+    //int fd = were_thread::current_thread()->fd();
 
-    were_object::connect_x(this_wop, this_wop, [this_wop]()
+    //add_fd_listener(fd, this_wop);
+    //add_idle_handler(this_wop);
+
+#if 0
+    were_object::connect_x(this_wop, this_wop, [this_wop, fd]()
     {
-        this_wop->remove_fd_listener(this_wop->thread_->fd(), this_wop);
+        this_wop->remove_fd_listener(fd, this_wop);
         this_wop->remove_idle_handler(this_wop);
     });
+#endif
 
 #ifdef SOUND_THREAD
     sound_thread_c_ = std::thread(&sparkle_service::sound, this);
+    sound_thread_c_.detach(); // XXX1
 #endif
 }
 
-void sparkle_service::add_fd_listener(int fd, were_object_pointer<sparkle_service_fd_listener> listener)
+void sparkle_service::add_fd_listener(int fd)
 {
-    listener.increment_reference_count();
-    call_void_method("add_fd_listener", "(IJ)V", jint(fd), jlong(listener.get()));
+    call_void_method("add_fd_listener", "(IJ)V", jint(fd), jlong(nullptr));
 }
 
-void sparkle_service::remove_fd_listener(int fd, were_object_pointer<sparkle_service_fd_listener> listener)
+void sparkle_service::add_idle_handler()
 {
-    call_void_method("remove_fd_listener", "(I)V", jint(fd));
-    listener.decrement_reference_count();
-}
-
-void sparkle_service::add_idle_handler(were_object_pointer<sparkle_service_idle_handler> handler)
-{
-    handler.increment_reference_count();
-    call_void_method("add_idle_handler", "(J)V", jlong(handler.get()));
-}
-
-void sparkle_service::remove_idle_handler(were_object_pointer<sparkle_service_idle_handler> handler)
-{
-    call_void_method("remove_idle_handler", "(J)V", jlong(handler.get()));
-    handler.decrement_reference_count();
+    call_void_method("add_idle_handler", "(J)V", jlong(nullptr));
 }
 
 int sparkle_service::display_width()
@@ -87,31 +78,6 @@ int sparkle_service::display_height()
 {
     return call_int_method("display_height", "()I");
 }
-
-void sparkle_service::finish()
-{
-    audio_.collapse();
-    sparkle_android_.collapse();
-    sparkle_.collapse();
-
-    for (int i = 0; i < 100; ++i)
-    {
-        thread_->process(10);
-        debug_.process();
-    }
-}
-
-void sparkle_service::event()
-{
-    thread_->process(0);
-    debug_.process();
-}
-
-void sparkle_service::idle()
-{
-    thread_->idle();
-}
-
 
 #ifdef SOUND_THREAD
 void sparkle_service::sound()
@@ -125,8 +91,16 @@ void sparkle_service::sound()
 extern "C" JNIEXPORT jlong JNICALL
 Java_com_sion_sparkle_SparkleService_native_1create(JNIEnv *env, jobject instance)
 {
+    were_backtrace::enable();
+
+    were_debug *debug = new were_debug();
+    debug->start();
+
+    were_object_pointer<were_thread> thread(new were_thread());
+
     were_object_pointer<sparkle_service> native__(new sparkle_service(env, instance));
-    native__->increment_reference_count();
+    native__->add_fd_listener(thread->fd());
+    native__->add_idle_handler();
 
     return jlong(native__.get());
 }
@@ -139,8 +113,11 @@ Java_com_sion_sparkle_SparkleService_native_1destroy(JNIEnv *env, jobject instan
     raise(SIGINT); /* That is how we deal with program termination and proper resource deallocation! Yeah! */
 #else
     were_object_pointer<sparkle_service> native__(reinterpret_cast<sparkle_service *>(native));
-    native__->decrement_reference_count();
-    native__->finish();
+
+    native__.collapse();
+
+    for (int i = 0; i < 100; ++i)
+        were_thread::current_thread()->process(10);
 
     raise(SIGINT);
 #endif
@@ -149,13 +126,21 @@ Java_com_sion_sparkle_SparkleService_native_1destroy(JNIEnv *env, jobject instan
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleService_fd_1event(JNIEnv *env, jobject instance, jlong user)
 {
+#if 0
     sparkle_service_fd_listener *listener__ = reinterpret_cast<sparkle_service_fd_listener *>(user);
     listener__->event();
+#endif
+    // XXX1
+    were_thread::current_thread()->process(0);
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleService_idle_1event(JNIEnv *env, jobject instance, jlong user)
 {
+#if 0
     sparkle_service_idle_handler *handler__ = reinterpret_cast<sparkle_service_idle_handler *>(user);
     handler__->idle();
+#endif
+    // XXX1
+    were_thread::current_thread()->idle();
 }

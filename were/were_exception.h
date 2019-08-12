@@ -3,9 +3,7 @@
 
 #include <exception>
 #include <cerrno>
-#include <cstring>
 
-void dump_stack();
 
 class were_exception : public std::exception
 {
