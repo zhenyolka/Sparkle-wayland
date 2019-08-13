@@ -1,5 +1,4 @@
 #include "were_backtrace.h"
-//#include <cstdlib>
 #include <csignal>
 #include <cstdio>
 #include <exception>
@@ -10,13 +9,13 @@
 #include <cxxabi.h>
 #endif
 
-bool were_backtrace::enabled_ = false;
 
 were_backtrace::~were_backtrace()
 {
 }
 
-were_backtrace::were_backtrace()
+were_backtrace::were_backtrace() :
+    enabled_(false)
 {
 }
 

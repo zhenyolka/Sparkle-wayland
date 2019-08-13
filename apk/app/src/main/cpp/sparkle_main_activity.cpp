@@ -5,6 +5,7 @@
 #include <android/asset_manager_jni.h>
 
 #include "sparkle_android_logger.h"
+#include "were_backtrace.h"
 
 extern "C"
 {
@@ -29,7 +30,6 @@ sparkle_main_activity::sparkle_main_activity(JNIEnv *env, jobject instance) :
 {
     files_dir_ = call_string_method("files_dir", "()Ljava/lang/String;");
     home_dir_ = call_string_method("home_dir", "()Ljava/lang/String;");
-    sparkle_android_logger::instance().redirect_output(files_dir_ + "/log.txt");
 }
 
 void sparkle_main_activity::lua()
@@ -142,8 +142,11 @@ void sparkle_main_activity::stop()
 extern "C" JNIEXPORT jlong JNICALL
 Java_com_sion_sparkle_MainActivity_native_1create(JNIEnv *env, jobject instance)
 {
+    were_backtrace::instance().enable();
+
     were_object_pointer<sparkle_main_activity> native__(new sparkle_main_activity(env, instance));
     native__->increment_reference_count();
+    sparkle_android_logger::instance().redirect_output(native__->files_dir() + "/log.txt");
 
     return jlong(native__.get());
 }

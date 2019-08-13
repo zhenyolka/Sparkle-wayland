@@ -28,7 +28,6 @@ sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
     MAKE_THIS_WOP
 
     files_dir_ = call_string_method("files_dir", "()Ljava/lang/String;");
-    sparkle_android_logger::instance().redirect_output(files_dir_ + "/log.txt");
 
     sparkle_ = were_object_pointer<sparkle>(new sparkle(files_dir_));
     sparkle_->add_dependency(this_wop);
@@ -79,13 +78,14 @@ void sparkle_service::sound()
 extern "C" JNIEXPORT jlong JNICALL
 Java_com_sion_sparkle_SparkleService_native_1create(JNIEnv *env, jobject instance)
 {
-    were_backtrace::enable();
+    were_backtrace::instance().enable();
 
     were_debug::instance().start();
 
     were_object_pointer<were_thread> thread(new were_thread());
 
     were_object_pointer<sparkle_service> native__(new sparkle_service(env, instance));
+    sparkle_android_logger::instance().redirect_output(native__->files_dir() + "/log.txt");
     native__->enable_native_loop(dup(thread->fd()));
 
     return jlong(native__.get());
