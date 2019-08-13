@@ -35,8 +35,11 @@ import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
 
 // Map
-import java.util.Map;
-import java.util.HashMap;
+//import java.util.Map;
+//import java.util.HashMap;
+//map.put(k, v);
+//map.remove(k);
+//Map<Long, MyIdleHandler> idle_handlers_ = new HashMap<Long, MyIdleHandler>();
 
 // Check version
 import android.os.Build;
@@ -45,7 +48,7 @@ import android.os.Build;
 import android.util.Log;
 
 
-// Temporary
+// Timer
 //import java.util.Timer;
 //import java.util.TimerTask;
 
@@ -98,10 +101,15 @@ public class SparkleService extends Service
         };
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(ACTION_HIDE);
-        filter.addAction(ACTION_SHOW);
+        //filter.addAction(ACTION_HIDE);
+        //filter.addAction(ACTION_SHOW);
         filter.addAction(ACTION_STOP);
         registerReceiver(receiver_, filter);
+
+
+        fd_listener_ = new MyOnFileDescriptorEventListener(0);
+        idle_handler_ = new MyIdleHandler(0);
+
 
         native_ = native_create();
 
@@ -183,41 +191,20 @@ public class SparkleService extends Service
     }
 
     @Keep
-    public void add_fd_listener(int fd, long user)
+    public void enable_native_loop(int fd)
     {
-        ParcelFileDescriptor pfd = ParcelFileDescriptor.adoptFd(fd);
-        FileDescriptor fd__ = pfd.getFileDescriptor();
-        queue_.addOnFileDescriptorEventListener(fd__, MessageQueue.OnFileDescriptorEventListener.EVENT_INPUT, new MyOnFileDescriptorEventListener(user));
-        Log.i("Sparkle", "fd listener added");
+        ParcelFileDescriptor parcel_fd = ParcelFileDescriptor.adoptFd(fd);
+        fd_listener_fd_ = parcel_fd.getFileDescriptor();
+        queue_.addOnFileDescriptorEventListener(fd_listener_fd_, MessageQueue.OnFileDescriptorEventListener.EVENT_INPUT, fd_listener_);
+        queue_.addIdleHandler(idle_handler_);
     }
 
     @Keep
-    public void remove_fd_listener(int fd)
+    public void disable_native_loop()
     {
-        ParcelFileDescriptor pfd = ParcelFileDescriptor.adoptFd(fd);
-        FileDescriptor fd__ = pfd.getFileDescriptor();
-        queue_.removeOnFileDescriptorEventListener(fd__);
-        Log.i("Sparkle", "fd listener removed");
-    }
-
-    @Keep
-    public void add_idle_handler(long user)
-    {
-        MyIdleHandler handler = new MyIdleHandler(user);
-        queue_.addIdleHandler(handler);
-        idle_handlers_.put(user, handler);
-
-        Log.i("Sparkle", "idle handler added");
-    }
-
-    @Keep
-    public void remove_idle_handler(long user)
-    {
-        MyIdleHandler handler = idle_handlers_.get(user);
-        queue_.removeIdleHandler(handler);
-        idle_handlers_.remove(user);
-
-        Log.i("Sparkle", "idle handler removed");
+        queue_.removeIdleHandler(idle_handler_);
+        queue_.removeOnFileDescriptorEventListener(fd_listener_fd_);
+        fd_listener_fd_ = null;
     }
 
     @Keep
@@ -246,18 +233,18 @@ public class SparkleService extends Service
 
     private native long native_create();
     private native void native_destroy(long native__);
-    public native void fd_event(long user);
-    public native void idle_event(long user);
+    public native void native_loop_fd_event();
+    public native void native_loop_idle_event();
 
     MessageQueue queue_;
     //NotificationManager notificationManager;
-    //Notification notification;
     long native_;
     WindowManager window_manager_;
     BroadcastReceiver receiver_;
-    //Map<long, MyOnFileDescriptorEventListener> on_file_descriptor_event_listeners_;
-    Map<Long, MyIdleHandler> idle_handlers_ = new HashMap<Long, MyIdleHandler>();
 
+    MyOnFileDescriptorEventListener fd_listener_ = null;
+    FileDescriptor fd_listener_fd_ = null;
+    MyIdleHandler idle_handler_ = null;
 
     static
     {
@@ -274,7 +261,7 @@ public class SparkleService extends Service
         @Override
         public int onFileDescriptorEvents(FileDescriptor fd, int events)
         {
-            fd_event(user_);
+            native_loop_fd_event();
             return EVENT_INPUT;
         }
 
@@ -291,7 +278,7 @@ public class SparkleService extends Service
         @Override
         public boolean queueIdle()
         {
-            idle_event(user_);
+            native_loop_idle_event();
             return true;
         }
 

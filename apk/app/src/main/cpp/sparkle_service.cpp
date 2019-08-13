@@ -20,8 +20,6 @@
 
 sparkle_service::~sparkle_service()
 {
-    //remove_idle_handler(this);
-    //remove_fd_listener(thread_->fd());
 }
 
 sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
@@ -43,33 +41,20 @@ sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
     audio_->add_dependency(this_wop);
 #endif
 
-    //int fd = were_thread::current_thread()->fd();
-
-    //add_fd_listener(fd, this_wop);
-    //add_idle_handler(this_wop);
-
-#if 0
-    were_object::connect_x(this_wop, this_wop, [this_wop, fd]()
-    {
-        this_wop->remove_fd_listener(fd, this_wop);
-        this_wop->remove_idle_handler(this_wop);
-    });
-#endif
-
 #ifdef SOUND_THREAD
     sound_thread_c_ = std::thread(&sparkle_service::sound, this);
     sound_thread_c_.detach(); // XXX1
 #endif
 }
 
-void sparkle_service::add_fd_listener(int fd)
+void sparkle_service::enable_native_loop(int fd)
 {
-    call_void_method("add_fd_listener", "(IJ)V", jint(fd), jlong(nullptr));
+    call_void_method("enable_native_loop", "(I)V", jint(fd));
 }
 
-void sparkle_service::add_idle_handler()
+void sparkle_service::disable_native_loop()
 {
-    call_void_method("add_idle_handler", "(J)V", jlong(nullptr));
+    call_void_method("disable_native_loop", "()V");
 }
 
 int sparkle_service::display_width()
@@ -102,8 +87,7 @@ Java_com_sion_sparkle_SparkleService_native_1create(JNIEnv *env, jobject instanc
     were_object_pointer<were_thread> thread(new were_thread());
 
     were_object_pointer<sparkle_service> native__(new sparkle_service(env, instance));
-    native__->add_fd_listener(dup(thread->fd()));
-    native__->add_idle_handler();
+    native__->enable_native_loop(dup(thread->fd()));
 
     return jlong(native__.get());
 }
@@ -116,6 +100,8 @@ Java_com_sion_sparkle_SparkleService_native_1destroy(JNIEnv *env, jobject instan
     raise(SIGINT); /* That is how we deal with program termination and proper resource deallocation! Yeah! */
 #else
     were_object_pointer<sparkle_service> native__(reinterpret_cast<sparkle_service *>(native));
+    native__->disable_native_loop();
+
 
     native__.collapse();
 
@@ -131,23 +117,13 @@ Java_com_sion_sparkle_SparkleService_native_1destroy(JNIEnv *env, jobject instan
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_sion_sparkle_SparkleService_fd_1event(JNIEnv *env, jobject instance, jlong user)
+Java_com_sion_sparkle_SparkleService_native_1loop_1fd_1event(JNIEnv *env, jobject instance, jlong user)
 {
-#if 0
-    sparkle_service_fd_listener *listener__ = reinterpret_cast<sparkle_service_fd_listener *>(user);
-    listener__->event();
-#endif
-    // XXX1
     were_thread::current_thread()->process(0);
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_sion_sparkle_SparkleService_idle_1event(JNIEnv *env, jobject instance, jlong user)
+Java_com_sion_sparkle_SparkleService_native_1loop_1idle_1event(JNIEnv *env, jobject instance, jlong user)
 {
-#if 0
-    sparkle_service_idle_handler *handler__ = reinterpret_cast<sparkle_service_idle_handler *>(user);
-    handler__->idle();
-#endif
-    // XXX1
     were_thread::current_thread()->idle();
 }
