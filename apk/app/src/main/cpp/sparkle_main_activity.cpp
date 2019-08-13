@@ -29,7 +29,7 @@ sparkle_main_activity::sparkle_main_activity(JNIEnv *env, jobject instance) :
 {
     files_dir_ = call_string_method("files_dir", "()Ljava/lang/String;");
     home_dir_ = call_string_method("home_dir", "()Ljava/lang/String;");
-    sparkle_android_logger::redirect_output(files_dir_ + "/log.txt");
+    sparkle_android_logger::instance().redirect_output(files_dir_ + "/log.txt");
 }
 
 void sparkle_main_activity::lua()

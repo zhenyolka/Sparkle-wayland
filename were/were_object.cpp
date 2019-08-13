@@ -12,7 +12,7 @@ uint64_t were_object::next_id_ = 0;
 
 were_object::~were_object()
 {
-    were_debug::remove_object(this);
+    were_debug::instance().remove_object(this);
 }
 
 were_object::were_object() :
@@ -21,7 +21,7 @@ were_object::were_object() :
     thread_ = were_thread::current_thread();
     destroyed.set_single_shot(true);
 
-    were_debug::add_object(this);
+    were_debug::instance().add_object(this);
 }
 
 void were_object::collapse()

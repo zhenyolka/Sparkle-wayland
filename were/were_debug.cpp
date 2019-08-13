@@ -5,87 +5,90 @@
 #include <chrono>
 
 
+#if X_DEBUG
+const char *state_normal = "NORMAL";
+const char *state_collapsed = "COLLAPSED";
+const char *state_lost = "LOST";
+#endif
+
+
 were_debug::~were_debug()
 {
-    stop();
 }
 
 were_debug::were_debug() :
-    stop_(false)
+    run_(false), object_count_(0)
 {
 }
 
 void were_debug::start()
 {
-    stop_ = false;
-    thread_ = std::thread(&were_debug::loop, this);
+    if (!run_)
+    {
+        clock_gettime(CLOCK_MONOTONIC, &real1_);
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &cpu1_);
+
+        run_ = true;
+        thread_ = std::thread(&were_debug::loop, this);
+    }
 }
 
 void were_debug::stop()
 {
-    stop_ = true;
-    if (thread_.joinable())
-        thread_.join();
+    if (run_)
+    {
+        run_ = false;
+        if (thread_.joinable())
+            thread_.join();
+    }
+}
+
+void were_debug::print_now()
+{
+    clock_gettime(CLOCK_MONOTONIC, &real2_);
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &cpu2_);
+
+    uint64_t elapsed_real = 0;
+    elapsed_real += 1000000000LL * (real2_.tv_sec - real1_.tv_sec);
+    elapsed_real += real2_.tv_nsec - real1_.tv_nsec;
+
+    uint64_t elapsed_cpu = 0;
+    elapsed_cpu += 1000000000LL * (cpu2_.tv_sec - cpu1_.tv_sec);
+    elapsed_cpu += cpu2_.tv_nsec - cpu1_.tv_nsec;
+
+    float cpu_load = 100.0 * (elapsed_cpu / 1000) / (elapsed_real / 1000);
+
+    real1_ = real2_;
+    cpu1_ = cpu2_;
+
+#ifdef X_DEBUG
+    printf("\033[2J"); // Clear screen
+    printf("\033[0;0H"); // Move cursor
+#endif
+
+    fprintf(stdout, "CPU: %.1f%%, Object count: %d.\n", cpu_load, object_count_);
+#ifdef X_DEBUG
+    print_objects();
+    fprintf(stdout, "\n");
+#endif
 }
 
 void were_debug::loop()
 {
-    struct timespec real1, real2;
-    struct timespec cpu1, cpu2;
     int i = 0;
 
-    clock_gettime(CLOCK_MONOTONIC, &real1);
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &cpu1);
-
-    while (!stop_)
+    while (run_)
     {
         if (i % 5 == 0)
-        {
-            clock_gettime(CLOCK_MONOTONIC, &real2);
-            clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &cpu2);
-
-            uint64_t elapsed_real = 0;
-            elapsed_real += 1000000000LL * (real2.tv_sec - real1.tv_sec);
-            elapsed_real += real2.tv_nsec - real1.tv_nsec;
-
-            uint64_t elapsed_cpu = 0;
-            elapsed_cpu += 1000000000LL * (cpu2.tv_sec - cpu1.tv_sec);
-            elapsed_cpu += cpu2.tv_nsec - cpu1.tv_nsec;
-
-            float cpu_load = 100.0 * (elapsed_cpu / 1000) / (elapsed_real / 1000);
-
-            real1 = real2;
-            cpu1 = cpu2;
-
-#ifdef X_DEBUG
-            printf("\033[2J"); // Clear screen
-            printf("\033[0;0H"); // Move cursor
-#endif
-
-            fprintf(stdout, "CPU: %.1f%%, Object count: %d.\n", cpu_load, object_count_);
-#ifdef X_DEBUG
-            print_objects();
-            fprintf(stdout, "\n");
-#endif
-        }
+            print_now();
 
         i += 1;
 
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
+
+    print_now();
 }
-
-#if X_DEBUG
-    std::set<were_object *> were_debug::object_set_;
-    std::mutex were_debug::object_set_mutex_;
-    int were_debug::object_count_ = 0;
-#endif
-
-#ifdef X_DEBUG
-const char *state_normal = "NORMAL";
-const char *state_collapsed = "COLLAPSED";
-const char *state_lost = "LOST";
-#endif
 
 void were_debug::add_object(were_object *object__)
 {

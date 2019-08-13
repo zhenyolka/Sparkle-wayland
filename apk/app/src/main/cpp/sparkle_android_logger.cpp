@@ -5,13 +5,12 @@
 #include <sys/stat.h>
 
 
-bool sparkle_android_logger::redirected_ = false;
-
 sparkle_android_logger::~sparkle_android_logger()
 {
 }
 
-sparkle_android_logger::sparkle_android_logger()
+sparkle_android_logger::sparkle_android_logger() :
+    redirected_(false)
 {
 }
 

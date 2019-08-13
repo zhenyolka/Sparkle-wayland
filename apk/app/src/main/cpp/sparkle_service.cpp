@@ -28,7 +28,7 @@ sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
     MAKE_THIS_WOP
 
     files_dir_ = call_string_method("files_dir", "()Ljava/lang/String;");
-    sparkle_android_logger::redirect_output(files_dir_ + "/log.txt");
+    sparkle_android_logger::instance().redirect_output(files_dir_ + "/log.txt");
 
     sparkle_ = were_object_pointer<sparkle>(new sparkle(files_dir_));
     sparkle_->add_dependency(this_wop);
@@ -81,8 +81,7 @@ Java_com_sion_sparkle_SparkleService_native_1create(JNIEnv *env, jobject instanc
 {
     were_backtrace::enable();
 
-    were_debug *debug = new were_debug(); // XXX1 stop
-    debug->start();
+    were_debug::instance().start();
 
     were_object_pointer<were_thread> thread(new were_thread());
 
@@ -110,6 +109,8 @@ Java_com_sion_sparkle_SparkleService_native_1destroy(JNIEnv *env, jobject instan
 
     int x = were_thread::current_thread().reference_count();
     fprintf(stdout, "rc %d\n", x);
+
+    were_debug::instance().stop();
 
     fprintf(stdout, "SIGINT\n");
     raise(SIGINT);
