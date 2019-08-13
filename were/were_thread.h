@@ -30,7 +30,7 @@ public:
     ~were_thread();
     were_thread();
 
-    static were_object_pointer<were_thread> current_thread() {return current_thread_;}
+    static were_object_pointer<were_thread> &current_thread() {return current_thread_;}
     int fd() const {return epoll_fd_;}
 
     void add_fd_listener(int fd, uint32_t events, were_object_pointer<were_thread_fd_listener> listener);
@@ -47,6 +47,8 @@ public:
 
 private:
     void event(uint32_t events);
+    void add_fd_listener_(int fd, uint32_t events, were_thread_fd_listener *listener);
+    void remove_fd_listener_(int fd);
 
 private:
     static thread_local were_object_pointer<were_thread> current_thread_;

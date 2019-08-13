@@ -69,9 +69,26 @@ int sparkle_service::display_height()
 #ifdef SOUND_THREAD
 void sparkle_service::sound()
 {
-    sound_thread_ = were_object_pointer<were_thread>(new were_thread());
-    audio_ = were_object_pointer<sparkle_audio>(new sparkle_audio(files_dir_ + "/audio-0"));
-    sound_thread_->run();
+    {
+        were_object_pointer<were_thread> thread(new were_thread());
+    }
+
+    {
+        MAKE_THIS_WOP
+
+        //sound_thread_ = were_object_pointer<were_thread>(new were_thread());
+
+        were_object_pointer<sparkle_audio> audio(new sparkle_audio(files_dir_ + "/audio-0"));
+
+        were_object::connect_x(this_wop, audio, [audio]()
+        {
+            audio->thread()->post([audio]() mutable {audio.collapse();}); // XXXT
+        });
+    }
+
+    were_thread::current_thread()->run();
+
+    were_thread::current_thread().collapse();
 }
 #endif
 
@@ -94,10 +111,6 @@ Java_com_sion_sparkle_SparkleService_native_1create(JNIEnv *env, jobject instanc
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleService_native_1destroy(JNIEnv *env, jobject instance, jlong native)
 {
-#if 0
-    // XXX1
-    raise(SIGINT); /* That is how we deal with program termination and proper resource deallocation! Yeah! */
-#else
     were_object_pointer<sparkle_service> native__(reinterpret_cast<sparkle_service *>(native));
     native__->disable_native_loop();
 
@@ -107,14 +120,20 @@ Java_com_sion_sparkle_SparkleService_native_1destroy(JNIEnv *env, jobject instan
     for (int i = 0; i < 100; ++i)
         were_thread::current_thread()->process(10);
 
-    int x = were_thread::current_thread().reference_count();
-    fprintf(stdout, "rc %d\n", x);
+    if (were_thread::current_thread().reference_count() == 1)
+    {
+        were_thread::current_thread().collapse();
+        fprintf(stdout, "exit good\n");
+    }
+    else
+    {
+        fprintf(stdout, "exit bad");
+    }
 
     were_debug::instance().stop();
 
     fprintf(stdout, "SIGINT\n");
-    raise(SIGINT);
-#endif
+    raise(SIGINT); /* That is how we deal with program termination and proper resource deallocation! Yeah! */
 }
 
 extern "C" JNIEXPORT void JNICALL

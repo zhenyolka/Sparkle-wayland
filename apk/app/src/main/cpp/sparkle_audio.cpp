@@ -9,6 +9,9 @@ sparkle_audio::~sparkle_audio()
 {
     stop();
 
+    if (socket_)
+        socket_.collapse();
+
     server_.collapse();
 
     (*playerObject)->Destroy(playerObject);

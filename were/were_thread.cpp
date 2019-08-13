@@ -10,7 +10,7 @@ thread_local were_object_pointer<were_thread> were_thread::current_thread_;
 
 were_thread::~were_thread()
 {
-    //remove_fd_listener(event_fd_);
+    remove_fd_listener_(event_fd_);
 
     close(event_fd_);
     close(epoll_fd_);
@@ -28,11 +28,7 @@ were_thread::were_thread()
     if (event_fd_ == -1)
         throw were_exception(WE_SIMPLE);
 
-    add_fd_listener(event_fd_, EPOLLIN | EPOLLET, this_wop);
-    were_object::connect_x(this_wop, this_wop, [this_wop]()
-    {
-        this_wop->remove_fd_listener(this_wop->event_fd_, this_wop);
-    });
+    add_fd_listener_(event_fd_, EPOLLIN | EPOLLET, this);
 
     if (!current_thread_)
         current_thread_ = were_object_pointer<were_thread>(this);
@@ -62,6 +58,22 @@ void were_thread::remove_fd_listener(int fd, were_object_pointer<were_thread_fd_
     listener.decrement_reference_count();
 }
 
+void were_thread::add_fd_listener_(int fd, uint32_t events, were_thread_fd_listener *listener)
+{
+    struct epoll_event event;
+    event.events = events;
+    event.data.ptr = listener;
+
+    if (epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, fd, &event) == -1)
+        throw were_exception(WE_SIMPLE);
+}
+
+void were_thread::remove_fd_listener_(int fd)
+{
+    if (epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, fd, NULL) == -1)
+        throw were_exception(WE_SIMPLE);
+}
+
 void were_thread::process(int timeout)
 {
     struct epoll_event events[MAX_EVENTS];
@@ -82,7 +94,12 @@ void were_thread::process(int timeout)
 void were_thread::run()
 {
     for (;;)
-        process(-1);
+    {
+        process(1000);
+
+        if (reference_count() == 1) // XXX2
+            break;
+    }
 }
 
 void were_thread::add_idle_handler(were_object_pointer<were_thread_idle_handler> handler)
