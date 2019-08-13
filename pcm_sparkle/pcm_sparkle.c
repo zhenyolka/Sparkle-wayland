@@ -53,7 +53,43 @@ static int fd_set_blocking(int fd, int blocking)
 }
 #endif
 
-void send_all(int fd, const char *data, int size)
+static int send_fd(int destination, int *fd, int n)
+{
+    char payload[1];
+
+    struct iovec iov[1];
+    iov[0].iov_base = payload;
+    iov[0].iov_len = sizeof(payload);
+
+    int controllen = CMSG_SPACE(sizeof(int) * n);
+    char *control = malloc(controllen);
+
+    struct msghdr msg = {0};
+    msg.msg_iov = iov;
+    msg.msg_iovlen = 1;
+    msg.msg_control = control;
+    msg.msg_controllen = controllen;
+
+    struct cmsghdr *cmsg;
+    cmsg = CMSG_FIRSTHDR(&msg);
+    cmsg->cmsg_level = SOL_SOCKET;
+    cmsg->cmsg_type = SCM_RIGHTS;
+    cmsg->cmsg_len = CMSG_LEN(sizeof(int) * n);
+    memcpy(CMSG_DATA(cmsg), fd, sizeof(int) * n);
+
+    if (sendmsg(destination, &msg, 0) != 1)
+    {
+        free(control);
+        abort();
+        return -1;
+    }
+
+    free(control);
+
+    return 0;
+}
+
+static void send_all(int fd, const char *data, int size)
 {
     int sent = 0;
 
@@ -67,7 +103,7 @@ void send_all(int fd, const char *data, int size)
     }
 }
 
-void receive_all(int fd, char *data, int size)
+static void receive_all(int fd, char *data, int size)
 {
     int received = 0;
 
@@ -142,6 +178,17 @@ static int sparkle_send_data(snd_pcm_sparkle_t *sparkle, const void *data, int s
     send_all(sparkle->fd, (char *)&code, sizeof(uint64_t));
     send_all(sparkle->fd, (char *)&size__, sizeof(uint64_t));
     send_all(sparkle->fd, (char *)data, size);
+
+    return 0;
+}
+
+static int sparkle_send_buffer(snd_pcm_sparkle_t *sparkle)
+{
+    int fd = open("test", O_RDWR | O_CREAT, 0666);
+
+    uint64_t code = 10;
+    send_all(sparkle->fd, (char *)&code, sizeof(uint64_t));
+    send_fd(sparkle->fd, &fd, 1);
 
     return 0;
 }
@@ -533,6 +580,8 @@ SND_PCM_PLUGIN_DEFINE_FUNC(sparkle)
         SNDERR("cannot connect");
         goto error;
     }
+
+    sparkle_send_buffer(sparkle); // XXX1 Temp
 
     sparkle->io.version = SND_PCM_IOPLUG_VERSION;
     sparkle->io.name = "Sparkle PCM I/O Plugin";

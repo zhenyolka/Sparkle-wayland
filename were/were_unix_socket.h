@@ -17,11 +17,14 @@ public:
 
     void disconnect();
 
-    void send(const char *data, int size);
-    void receive(char *data, int size);
+    bool send(const char *data, int size);
+    bool receive(char *data, int size);
 
     int bytes_available() const;
     bool connected() const;
+
+    bool send_fd(int *fd, int n);
+    bool receive_fd(int *fd, int n);
 
 signals:
     were_signal<void ()> ready_read;

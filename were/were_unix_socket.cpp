@@ -75,10 +75,10 @@ void were_unix_socket::event(uint32_t events)
     */
 }
 
-void were_unix_socket::send(const char *data, int size)
+bool were_unix_socket::send(const char *data, int size)
 {
     if (fd_ == -1)
-        return;
+        return false;
 
     int sent = 0;
 
@@ -88,19 +88,21 @@ void were_unix_socket::send(const char *data, int size)
         if (r == -1)
         {
             disconnect();
-            break;
+            return false;
         }
         else
         {
             sent += r;
         }
     }
+
+    return true;
 }
 
-void were_unix_socket::receive(char *data, int size)
+bool were_unix_socket::receive(char *data, int size)
 {
     if (fd_ == -1)
-        return;
+        return false;
 
     int received = 0;
 
@@ -110,13 +112,15 @@ void were_unix_socket::receive(char *data, int size)
         if (r == -1)
         {
             disconnect();
-            break;
+            return false;
         }
         else
         {
             received += r;
         }
     }
+
+    return true;
 }
 
 int were_unix_socket::bytes_available() const
@@ -134,4 +138,79 @@ int were_unix_socket::bytes_available() const
 bool were_unix_socket::connected() const
 {
     return fd_ != -1;
+}
+
+bool were_unix_socket::send_fd(int *fd, int n)
+{
+    if (fd_ == -1)
+        return false;
+
+    char payload[1];
+
+    struct iovec iov[1];
+    iov[0].iov_base = payload;
+    iov[0].iov_len = sizeof(payload);
+
+    int controllen = CMSG_SPACE(sizeof(int) * n);
+    char *control = new char[controllen];
+
+    struct msghdr msg = {};
+    msg.msg_iov = iov;
+    msg.msg_iovlen = 1;
+    msg.msg_control = control;
+    msg.msg_controllen = controllen;
+
+    struct cmsghdr *cmsg;
+    cmsg = CMSG_FIRSTHDR(&msg);
+    cmsg->cmsg_level = SOL_SOCKET;
+    cmsg->cmsg_type = SCM_RIGHTS;
+    cmsg->cmsg_len = CMSG_LEN(sizeof(int) * n);
+    std::memcpy(CMSG_DATA(cmsg), fd, sizeof(int) * n);
+
+    if (sendmsg(fd_, &msg, 0) != 1)
+    {
+        disconnect();
+        delete[] control;
+        return false;
+    }
+
+    delete[] control;
+
+    return true;
+}
+
+bool were_unix_socket::receive_fd(int *fd, int n)
+{
+    if (fd_ == -1)
+        return false;
+
+    char payload[1];
+
+    struct iovec iov[1];
+    iov[0].iov_base = payload;
+    iov[0].iov_len = sizeof(payload);
+
+    int controllen = CMSG_SPACE(sizeof(int) * n);
+    char *control = new char[controllen];
+
+    struct msghdr msg = {};
+    msg.msg_iov = iov;
+    msg.msg_iovlen = 1;
+    msg.msg_control = control;
+    msg.msg_controllen = controllen;
+
+    if (recvmsg(fd_, &msg, 0) != 1)
+    {
+        disconnect();
+        delete[] control;
+        return false;
+    }
+
+    struct cmsghdr *cmsg;
+    cmsg = CMSG_FIRSTHDR(&msg);
+    std::memcpy(fd, CMSG_DATA(cmsg), sizeof(int) * n);
+
+    delete[] control;
+
+    return true;
 }
