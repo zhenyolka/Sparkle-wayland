@@ -581,8 +581,6 @@ SND_PCM_PLUGIN_DEFINE_FUNC(sparkle)
         goto error;
     }
 
-    sparkle_send_buffer(sparkle); // XXX1 Temp
-
     sparkle->io.version = SND_PCM_IOPLUG_VERSION;
     sparkle->io.name = "Sparkle PCM I/O Plugin";
     sparkle->io.poll_fd = sparkle->fd;
