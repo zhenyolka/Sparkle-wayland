@@ -15,7 +15,10 @@ import android.widget.LinearLayout;
 import android.view.ViewGroup;
 import android.view.View; // Button callback
 import android.view.Gravity;
+import android.text.method.ScrollingMovementMethod;
+import android.widget.TextView;
 import android.widget.EditText;
+import android.graphics.Typeface;
 import android.text.InputType;
 import android.graphics.Color;
 
@@ -44,6 +47,7 @@ public class SparkleEditorActivity extends Activity
 
         Intent intent = getIntent();
         file_ = intent.getStringExtra(MainActivity.EXTRA_FILE);
+        boolean read_only = intent.getBooleanExtra(MainActivity.EXTRA_FILE_RO, true);
 
 
         Button button1 = new Button(this);
@@ -64,11 +68,21 @@ public class SparkleEditorActivity extends Activity
             }
         });
 
-        editText_ = new EditText(this);
-        editText_.setGravity(Gravity.LEFT | Gravity.TOP);
-        editText_.setHorizontallyScrolling(true);
-        editText_.setInputType(editText_.getInputType() | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        if (read_only)
+        {
+            editText_ = new TextView(this);
+            editText_.setMovementMethod(new ScrollingMovementMethod());
+            editText_.setTextIsSelectable(true);
+        }
+        else
+        {
+            editText_ = new EditText(this);
+            editText_.setGravity(Gravity.LEFT | Gravity.TOP);
+            editText_.setHorizontallyScrolling(true);
+            editText_.setInputType(editText_.getInputType() | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        }
 
+        editText_.setTypeface(Typeface.MONOSPACE, Typeface.NORMAL);
         editText_.setTextSize(10.0f);
         editText_.setBackgroundColor(Color.BLACK);
         editText_.setTextColor(Color.WHITE);
@@ -90,10 +104,11 @@ public class SparkleEditorActivity extends Activity
         LinearLayout.LayoutParams params2 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 
         layout.addView(editText_, params1);
-        layout.addView(button1, params2);
+        if (!read_only)
+            layout.addView(button1, params2);
 
 
-
+        layout.setBackgroundColor(Color.BLACK);
         setContentView(layout);
     }
 
@@ -117,6 +132,6 @@ public class SparkleEditorActivity extends Activity
         stream.close();
     }
 
-    private EditText editText_;
+    private TextView editText_;
     private String file_;
 }

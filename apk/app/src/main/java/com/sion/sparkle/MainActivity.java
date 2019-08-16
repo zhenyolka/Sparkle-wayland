@@ -17,6 +17,7 @@ import android.net.Uri;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.view.View; // Button callback
+import android.graphics.Color;
 
 // Log
 import android.util.Log;
@@ -25,6 +26,7 @@ import android.util.Log;
 public class MainActivity extends Activity
 {
     public static final String EXTRA_FILE = "com.sion.sparkle.FILE";
+    public static final String EXTRA_FILE_RO = "com.sion.sparkle.FILE_RO";
 
     @Override
     protected void onDestroy()
@@ -88,6 +90,7 @@ public class MainActivity extends Activity
                 Intent intent = new Intent(MainActivity.this, SparkleEditorActivity.class);
                 String file = "settings.lua";
                 intent.putExtra(EXTRA_FILE, file);
+                intent.putExtra(EXTRA_FILE_RO, false);
                 startActivity(intent);
             }
         });
@@ -102,6 +105,7 @@ public class MainActivity extends Activity
                 Intent intent = new Intent(MainActivity.this, SparkleEditorActivity.class);
                 String file = "user.sh";
                 intent.putExtra(EXTRA_FILE, file);
+                intent.putExtra(EXTRA_FILE_RO, false);
                 startActivity(intent);
             }
         });
@@ -116,6 +120,7 @@ public class MainActivity extends Activity
                 Intent intent = new Intent(MainActivity.this, SparkleEditorActivity.class);
                 String file = "log.txt";
                 intent.putExtra(EXTRA_FILE, file);
+                intent.putExtra(EXTRA_FILE_RO, true);
                 startActivity(intent);
             }
         });
@@ -129,6 +134,7 @@ public class MainActivity extends Activity
         layout.addView(button5);
 
 
+        layout.setBackgroundColor(Color.BLACK);
         setContentView(layout);
 
         native_ = native_create();
