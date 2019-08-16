@@ -16,7 +16,7 @@ public:
 
     ~test()
     {
-        debug_.stop();
+        were_debug::instance().stop();
     }
 
     test()
@@ -27,6 +27,8 @@ public:
 #if 1
         sig_ = were_object_pointer<were_signal_handler>(new were_signal_handler());
 
+        were_debug::instance().start();
+
         were_object::connect(sig_, &were_signal_handler::signal, sig_, [this](uint32_t number)
         {
             if (number == SIGINT)
@@ -34,12 +36,9 @@ public:
                 sig_.collapse();
                 sparkle_x11_.collapse();
                 sparkle_.collapse();
-                were_thread::current_thread().collapse();
             }
         });
 #endif
-
-        debug_.start();
     }
 
     void run()
@@ -48,15 +47,12 @@ public:
         {
             were_thread::current_thread()->process(1000);
 
-#if 0
-            if (were_thread::current_thread().reference_count() == 2)
+            if (were_thread::current_thread().reference_count() == 1)
                 break;
-#endif
         }
     }
 
 private:
-    were_debug debug_;
     were_object_pointer<sparkle> sparkle_;
     were_object_pointer<sparkle_x11> sparkle_x11_;
     were_object_pointer<were_signal_handler> sig_;
@@ -69,12 +65,14 @@ void prepare()
 
 int main(int argc, char *argv[])
 {
-    were_backtrace::enable();
+    were_backtrace::instance().enable();
 
     prepare();
 
     test t;
     t.run();
+
+    were_thread::current_thread().collapse();
 
     fprintf(stdout, "Done.\n");
 

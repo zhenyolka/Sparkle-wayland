@@ -1,4 +1,5 @@
 #include "were_backtrace.h"
+#include <cstdlib>
 #include <csignal>
 #include <cstdio>
 #include <exception>

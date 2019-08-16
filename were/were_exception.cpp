@@ -1,5 +1,6 @@
 #include "were_exception.h"
 #include <cstdarg>
+#include <cstdio>
 
 
 were_exception::~were_exception()
