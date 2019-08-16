@@ -1,20 +1,13 @@
 #include "were_unix_server.h"
 #include "were_exception.h"
+#include "were1_unix_socket.h"
 #include "were_unix_socket.h"
-#include <unistd.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <cstring>
 
-#include <cstdio>
 
 
 were_unix_server::~were_unix_server()
 {
-    //thread()->remove_fd_listener(fd_);
-    shutdown(fd_, SHUT_RDWR);
-    close(fd_);
-    unlink(path_.c_str());
+    were1_unix_server_destroy(path_.c_str(), fd_);
 }
 
 were_unix_server::were_unix_server(const std::string &path) :
@@ -22,20 +15,8 @@ were_unix_server::were_unix_server(const std::string &path) :
 {
     MAKE_THIS_WOP
 
-    unlink(path_.c_str());
-
-    fd_ = socket(AF_UNIX, SOCK_STREAM, 0);
+    fd_ = were1_unix_server_create(path_.c_str());
     if (fd_ == -1)
-        throw were_exception(WE_SIMPLE);
-
-    struct sockaddr_un name = {};
-    name.sun_family = AF_UNIX;
-    strncpy(name.sun_path, path_.c_str(), sizeof(name.sun_path) - 1);
-
-    if (bind(fd_, (const struct sockaddr *)&name, sizeof(struct sockaddr_un)) == -1)
-        throw were_exception(WE_SIMPLE);
-
-    if (listen(fd_, 4) == -1)
         throw were_exception(WE_SIMPLE);
 
     thread()->add_fd_listener(fd_, EPOLLIN | EPOLLET, this_wop);
@@ -57,7 +38,7 @@ void were_unix_server::event(uint32_t events)
 
 were_object_pointer<were_unix_socket> were_unix_server::accept()
 {
-    int fd = ::accept(fd_, NULL, NULL);
+    int fd = were1_unix_server_accept(fd_);
     if (fd == -1)
         throw were_exception(WE_SIMPLE);
 

@@ -23,5 +23,5 @@ uninstall:
 	rm $(INSTALL_DIR)/alsa-lib/$(OUTPUT)
 
 pack: clean
-	cd ..; tar -czf upload/pcm_sparkle.tar.gz ./pcm_sparkle
+	cd ..; tar -czhf upload/pcm_sparkle.tar.gz ./pcm_sparkle
 

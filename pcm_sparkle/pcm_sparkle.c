@@ -1,3 +1,4 @@
+#include "were1_unix_socket.h"
 #include <stdio.h>
 #include <sys/ioctl.h>
 #include <alsa/asoundlib.h>
@@ -33,112 +34,21 @@ typedef struct snd_pcm_sparkle {
     uint64_t pointer;
 } snd_pcm_sparkle_t;
 
-#if 0
-static int fd_set_blocking(int fd, int blocking)
+
+
+
+
+
+static void critical(int ret)
 {
-    int flags = fcntl(fd, F_GETFL, 0);
-    if (flags == -1)
-        return -1;
-
-    if (blocking)
-        flags &= ~O_NONBLOCK;
-    else
-        flags |= O_NONBLOCK;
-
-    int ret = fcntl(fd, F_SETFL, flags);
     if (ret == -1)
-        return -1;
-
-    return 0;
-}
-#endif
-
-static int send_fd(int destination, int *fd, int n)
-{
-    char payload[1];
-
-    struct iovec iov[1];
-    iov[0].iov_base = payload;
-    iov[0].iov_len = sizeof(payload);
-
-    int controllen = CMSG_SPACE(sizeof(int) * n);
-    char *control = malloc(controllen);
-
-    struct msghdr msg = {0};
-    msg.msg_iov = iov;
-    msg.msg_iovlen = 1;
-    msg.msg_control = control;
-    msg.msg_controllen = controllen;
-
-    struct cmsghdr *cmsg;
-    cmsg = CMSG_FIRSTHDR(&msg);
-    cmsg->cmsg_level = SOL_SOCKET;
-    cmsg->cmsg_type = SCM_RIGHTS;
-    cmsg->cmsg_len = CMSG_LEN(sizeof(int) * n);
-    memcpy(CMSG_DATA(cmsg), fd, sizeof(int) * n);
-
-    if (sendmsg(destination, &msg, 0) != 1)
-    {
-        free(control);
         abort();
-        return -1;
-    }
-
-    free(control);
-
-    return 0;
-}
-
-static void send_all(int fd, const char *data, int size)
-{
-    int sent = 0;
-
-    while (sent != size)
-    {
-        int r = send(fd, data + sent, size - sent, 0);
-        if (r == -1)
-            abort();
-        else
-            sent += r;
-    }
-}
-
-static void receive_all(int fd, char *data, int size)
-{
-    int received = 0;
-
-    while (received != size)
-    {
-        int r = recv(fd, data + received, size - received, 0);
-        if (r == -1)
-            abort();
-        else
-            received += r;
-    }
-}
-
-unsigned int bytes_available(int fd)
-{
-    int bytes = 0;
-
-    if (ioctl(fd, FIONREAD, &bytes) == -1)
-        abort();
-
-    return bytes;
 }
 
 static int sparkle_connect(snd_pcm_sparkle_t *sparkle)
 {
-    int fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    int fd = were1_unix_socket_connect(sparkle_server);
     if (fd == -1)
-        return -1;
-
-    struct sockaddr_un name;
-    memset(&name, 0, sizeof(struct sockaddr_un));
-    name.sun_family = AF_UNIX;
-    strncpy(name.sun_path, sparkle_server, sizeof(name.sun_path) - 1);
-
-    if (connect(fd, (const struct sockaddr *)&name, sizeof(struct sockaddr_un)) == -1)
         return -1;
 
     sparkle->fd = fd;
@@ -148,62 +58,43 @@ static int sparkle_connect(snd_pcm_sparkle_t *sparkle)
 
 static int sparkle_disconnect(snd_pcm_sparkle_t *sparkle)
 {
-    shutdown(sparkle->fd, SHUT_RDWR);
-    close(sparkle->fd);
+    were1_unix_socket_destroy(sparkle->fd);
+
     sparkle->fd = -1;
 
     return 0;
 }
 
-static int sparkle_send_start(snd_pcm_sparkle_t *sparkle)
+static void sparkle_send_start(snd_pcm_sparkle_t *sparkle)
 {
     uint64_t code = 1;
-    send_all(sparkle->fd, (char *)&code, sizeof(uint64_t));
-
-    return 0;
+    critical(were1_unix_socket_send_all(sparkle->fd, &code, sizeof(uint64_t)));
 }
 
-static int sparkle_send_stop(snd_pcm_sparkle_t *sparkle)
+static void sparkle_send_stop(snd_pcm_sparkle_t *sparkle)
 {
     uint64_t code = 2;
-    send_all(sparkle->fd, (char *)&code, sizeof(uint64_t));
-
-    return 0;
+    critical(were1_unix_socket_send_all(sparkle->fd, &code, sizeof(uint64_t)));
 }
 
-static int sparkle_send_data(snd_pcm_sparkle_t *sparkle, const void *data, int size)
+static void sparkle_send_data(snd_pcm_sparkle_t *sparkle, const void *data, int size)
 {
     uint64_t code = 3;
     uint64_t size__ = size;
-    send_all(sparkle->fd, (char *)&code, sizeof(uint64_t));
-    send_all(sparkle->fd, (char *)&size__, sizeof(uint64_t));
-    send_all(sparkle->fd, (char *)data, size);
-
-    return 0;
+    critical(were1_unix_socket_send_all(sparkle->fd, &code, sizeof(uint64_t)));
+    critical(were1_unix_socket_send_all(sparkle->fd, &size__, sizeof(uint64_t)));
+    critical(were1_unix_socket_send_all(sparkle->fd, data, size));
 }
 
-static int sparkle_send_buffer(snd_pcm_sparkle_t *sparkle)
-{
-    int fd = open("test", O_RDWR | O_CREAT, 0666);
-
-    uint64_t code = 10;
-    send_all(sparkle->fd, (char *)&code, sizeof(uint64_t));
-    send_fd(sparkle->fd, &fd, 1);
-
-    return 0;
-}
-
-static int sparkle_receive_pointer(snd_pcm_sparkle_t *sparkle)
+static void sparkle_receive_pointer(snd_pcm_sparkle_t *sparkle)
 {
     uint64_t data;
 
-    while (bytes_available(sparkle->fd) >= sizeof(uint64_t))
+    while (were1_unix_socket_bytes_available(sparkle->fd) >= sizeof(uint64_t))
     {
-        receive_all(sparkle->fd, (char *)&data, sizeof(uint64_t));
+        critical(were1_unix_socket_receive_all(sparkle->fd, &data, sizeof(uint64_t)));
         sparkle->pointer = data;
     }
-
-    return 0;
 }
 
 static int sparkle_poll_revents(snd_pcm_ioplug_t *io,
@@ -249,8 +140,7 @@ static snd_pcm_sframes_t sparkle_write(snd_pcm_ioplug_t *io,
     if (size_bytes > sparkle_period_size)
         size_bytes = sparkle_period_size;
 
-    if (sparkle_send_data(sparkle, data, size_bytes) == -1)
-        return -1;
+    sparkle_send_data(sparkle, data, size_bytes);
 
     return size_bytes / sparkle->frame_bytes;
 }
@@ -320,8 +210,7 @@ static int sparkle_start(snd_pcm_ioplug_t *io)
 
     sparkle->pointer = 0;
 
-    if (sparkle_send_start(sparkle) == -1)
-        return -1;
+    sparkle_send_start(sparkle);
 
     return 0;
 }
@@ -340,8 +229,7 @@ static int sparkle_stop(snd_pcm_ioplug_t *io)
 
     sparkle->pointer = 0;
 
-    if (sparkle_send_stop(sparkle) == -1)
-        return -1;
+    sparkle_send_stop(sparkle);
 
     return 0;
 }

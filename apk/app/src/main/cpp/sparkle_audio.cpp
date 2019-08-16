@@ -153,7 +153,7 @@ void sparkle_audio::callback()
     queue_.pop();
 
     if (socket_)
-        socket_->send((char *)&pointer_, sizeof(uint64_t));
+        socket_->send_all((char *)&pointer_, sizeof(uint64_t));
 }
 
 void sparkle_audio::read()
@@ -161,7 +161,7 @@ void sparkle_audio::read()
     while (socket_->bytes_available() > 0)
     {
         uint64_t code;
-        socket_->receive((char *)&code, sizeof(uint64_t)); // XXX2 check
+        socket_->receive_all((char *)&code, sizeof(uint64_t)); // XXX2 check
 
         if (code == 1)
         {
@@ -174,26 +174,19 @@ void sparkle_audio::read()
         else if (code == 3)
         {
             uint64_t size;
-            socket_->receive((char *)&size, sizeof(uint64_t)); // XXX2 check
+            socket_->receive_all((char *)&size, sizeof(uint64_t)); // XXX2 check
 
             if (size > sparkle_audio_buffer_size)
                 throw were_exception(WE_SIMPLE);
 
             std::shared_ptr<sparkle_audio_buffer> buffer(new sparkle_audio_buffer());
-            socket_->receive(buffer->data_, size); // XXX2 check
+            socket_->receive_all(buffer->data_, size); // XXX2 check
             buffer->size_ = size;
 
 
             SLresult result = (*playerBufferqueue)->Enqueue(playerBufferqueue, buffer->data_, buffer->size_);
             check_result(result);
             queue_.push(buffer);
-        }
-        else if (code == 10)
-        {
-            int fd = -1;
-            socket_->receive_fd(&fd, 1); // XXX2 check
-            fprintf(stdout, "got fd %d\n", fd);
-            close(fd);
         }
         else
         {
