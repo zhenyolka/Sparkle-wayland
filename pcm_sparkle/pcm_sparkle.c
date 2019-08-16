@@ -1,4 +1,6 @@
 #include "were1_unix_socket.h"
+#include "were1_tmpfile.h"
+#include "were1_ring_buffer.h"
 #include <stdio.h>
 #include <sys/ioctl.h>
 #include <alsa/asoundlib.h>
@@ -21,6 +23,13 @@
 #define sparkle_max_data_size sparkle_period_size
 
 
+
+struct sparkle_audio_buffer
+{
+    struct were1_ring_buffer were;
+    char data[65536];
+};
+
 typedef struct snd_pcm_sparkle {
     snd_pcm_ioplug_t io;
     //char *device;
@@ -32,6 +41,13 @@ typedef struct snd_pcm_sparkle {
     //unsigned int periods;
     unsigned int frame_bytes;
     uint64_t pointer;
+
+    int buffer_fd;
+    struct sparkle_audio_buffer *buffer;
+
+    int started;
+    struct timespec start_time;
+
 } snd_pcm_sparkle_t;
 
 
@@ -45,45 +61,61 @@ static void critical(int ret)
         abort();
 }
 
-static int sparkle_connect(snd_pcm_sparkle_t *sparkle)
+static int sparkle_initialize(snd_pcm_sparkle_t *sparkle)
 {
-    int fd = were1_unix_socket_connect(sparkle_server);
-    if (fd == -1)
+    sparkle->buffer_fd = were1_tmpfile_create(sizeof(struct sparkle_audio_buffer));
+    if (sparkle->buffer_fd == -1)
         return -1;
 
-    sparkle->fd = fd;
+    if (were1_tmpfile_map((void **)&sparkle->buffer, sizeof(struct sparkle_audio_buffer), sparkle->buffer_fd) == -1)
+        return -1;
+
+    were1_ring_buffer_initialize(&sparkle->buffer->were, 65536);
+
+    sparkle->fd = were1_unix_socket_connect(sparkle_server);
+    if (sparkle->fd == -1)
+        return -1;
+
+    uint64_t code = 1;
+    critical(were1_unix_socket_send_all(sparkle->fd, &code, sizeof(uint64_t)));
+    critical(were1_unix_socket_send_fds(sparkle->fd, &sparkle->buffer_fd, 1));
 
     return 0;
 }
 
-static int sparkle_disconnect(snd_pcm_sparkle_t *sparkle)
+static int sparkle_finish(snd_pcm_sparkle_t *sparkle)
 {
-    were1_unix_socket_destroy(sparkle->fd);
+    if (sparkle->fd != -1)
+    {
+        were1_unix_socket_destroy(sparkle->fd);
+        sparkle->fd = -1;
+    }
 
-    sparkle->fd = -1;
+    if (sparkle->buffer != NULL)
+    {
+        were1_tmpfile_unmap((void **)&sparkle->buffer, sizeof(struct sparkle_audio_buffer));
+        sparkle->buffer = NULL;
+    }
+
+    if (sparkle->buffer_fd != -1)
+    {
+        close(sparkle->buffer_fd);
+        sparkle->buffer_fd = -1;
+    }
 
     return 0;
 }
 
 static void sparkle_send_start(snd_pcm_sparkle_t *sparkle)
 {
-    uint64_t code = 1;
+    uint64_t code = 2;
     critical(were1_unix_socket_send_all(sparkle->fd, &code, sizeof(uint64_t)));
 }
 
 static void sparkle_send_stop(snd_pcm_sparkle_t *sparkle)
 {
-    uint64_t code = 2;
-    critical(were1_unix_socket_send_all(sparkle->fd, &code, sizeof(uint64_t)));
-}
-
-static void sparkle_send_data(snd_pcm_sparkle_t *sparkle, const void *data, int size)
-{
     uint64_t code = 3;
-    uint64_t size__ = size;
     critical(were1_unix_socket_send_all(sparkle->fd, &code, sizeof(uint64_t)));
-    critical(were1_unix_socket_send_all(sparkle->fd, &size__, sizeof(uint64_t)));
-    critical(were1_unix_socket_send_all(sparkle->fd, data, size));
 }
 
 static void sparkle_receive_pointer(snd_pcm_sparkle_t *sparkle)
@@ -140,9 +172,13 @@ static snd_pcm_sframes_t sparkle_write(snd_pcm_ioplug_t *io,
     if (size_bytes > sparkle_period_size)
         size_bytes = sparkle_period_size;
 
-    sparkle_send_data(sparkle, data, size_bytes);
+    //sparkle_send_data(sparkle, data, size_bytes);
+    char *buffer;
+    int n = were1_ring_buffer_write_start(&sparkle->buffer->were, &buffer, size_bytes);
+    memcpy(buffer, data, n);
+    were1_ring_buffer_write_finish(&sparkle->buffer->were, n);
 
-    return size_bytes / sparkle->frame_bytes;
+    return n / sparkle->frame_bytes;
 }
 
 static snd_pcm_sframes_t sparkle_read(snd_pcm_ioplug_t *io,
@@ -187,7 +223,22 @@ static snd_pcm_sframes_t sparkle_pointer(snd_pcm_ioplug_t *io)
 
     sparkle_receive_pointer(sparkle);
 
-    return sparkle->pointer / sparkle->frame_bytes;
+#if 0
+    struct timespec now;
+    clock_gettime(CLOCK_MONOTONIC, &now);
+    uint64_t elapsed = 0;
+    elapsed += 1000LL * (now.tv_sec - sparkle->start_time.tv_sec);
+    elapsed += (now.tv_nsec - sparkle->start_time.tv_nsec) / 1000000LL;
+
+    uint64_t frames = elapsed * 48000LL / 1000LL;
+
+    if (sparkle->started == 1)
+        return frames;
+    else
+        return 0;
+#endif
+
+    return sparkle->buffer->were.read_position / sparkle->frame_bytes;
 }
 
 static int sparkle_start(snd_pcm_ioplug_t *io)
@@ -209,6 +260,8 @@ static int sparkle_start(snd_pcm_ioplug_t *io)
     snd_pcm_sparkle_t *sparkle = io->private_data;
 
     sparkle->pointer = 0;
+    clock_gettime(CLOCK_MONOTONIC, &sparkle->start_time);
+    sparkle->started = 1;
 
     sparkle_send_start(sparkle);
 
@@ -228,6 +281,7 @@ static int sparkle_stop(snd_pcm_ioplug_t *io)
     snd_pcm_sparkle_t *sparkle = io->private_data;
 
     sparkle->pointer = 0;
+    sparkle->started = 0;
 
     sparkle_send_stop(sparkle);
 
@@ -374,7 +428,7 @@ static int sparkle_close(snd_pcm_ioplug_t *io)
 {
     snd_pcm_sparkle_t *sparkle = io->private_data;
 
-    sparkle_disconnect(sparkle);
+    sparkle_finish(sparkle);
     //free(oss->device);
     free(sparkle);
 
@@ -462,12 +516,22 @@ SND_PCM_PLUGIN_DEFINE_FUNC(sparkle)
     }
 #endif
 
+#if 0
     if (sparkle_connect(sparkle) == -1)
     {
         err = -errno;
         SNDERR("cannot connect");
         goto error;
     }
+#else
+    if (sparkle_initialize(sparkle) == -1)
+    {
+        //err = -errno;
+        err = -ENOENT;
+        SNDERR("failed to initialize sparkle");
+        goto error;
+    }
+#endif
 
     sparkle->io.version = SND_PCM_IOPLUG_VERSION;
     sparkle->io.name = "Sparkle PCM I/O Plugin";
@@ -493,9 +557,8 @@ SND_PCM_PLUGIN_DEFINE_FUNC(sparkle)
 
     return 0;
 
- error:
-    if (sparkle->fd != -1)
-        sparkle_disconnect(sparkle);
+error:
+    sparkle_finish(sparkle);
     //free(sparkle->device);
     free(sparkle);
 

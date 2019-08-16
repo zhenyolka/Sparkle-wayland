@@ -14,8 +14,6 @@
 #include <SLES/OpenSLES_Android.h>
 #endif
 
-#include <queue>
-#include <memory>
 #include <string>
 
 
@@ -39,14 +37,7 @@ const int sparkle_audio_buffer_size = 65536;
 
 class were_unix_server;
 class were_unix_socket;
-
-
-class sparkle_audio_buffer
-{
-public:
-    char data_[sparkle_audio_buffer_size];
-    int size_;
-};
+struct sparkle_audio_buffer;
 
 
 class sparkle_audio : public were_object
@@ -61,6 +52,7 @@ private:
     void read();
     void start();
     void stop();
+    void check();
 
 private:
     SLObjectItf engineObject;
@@ -78,8 +70,9 @@ private:
 
     were_object_pointer<were_unix_server> server_;
     were_object_pointer<were_unix_socket> socket_;
-    uint64_t pointer_;
-    std::queue< std::shared_ptr<sparkle_audio_buffer> > queue_;
+    int buffer_fd_;
+    struct sparkle_audio_buffer *buffer_;
+    int playing_;
 };
 
 #endif // SPARKLE_AUDIO_H

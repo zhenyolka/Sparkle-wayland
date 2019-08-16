@@ -16,6 +16,8 @@ public:
 
     bool send_all(const char *data, int size);
     bool receive_all(char *data, int size);
+    bool send_fds(const int *fds, int n);
+    bool receive_fds(int *fds, int n);
 
     int bytes_available() const;
     bool connected() const;

@@ -72,6 +72,28 @@ bool were_unix_socket::receive_all(char *data, int size)
     return true;
 }
 
+bool were_unix_socket::send_fds(const int *fds, int n)
+{
+    if (fd_ == -1)
+        return false;
+
+    if (were1_unix_socket_send_fds(fd_, fds, n) == -1)
+        return false;
+
+    return true;
+}
+
+bool were_unix_socket::receive_fds(int *fds, int n)
+{
+    if (fd_ == -1)
+        return false;
+
+    if (were1_unix_socket_receive_fds(fd_, fds, n) == -1)
+        return false;
+
+    return true;
+}
+
 int were_unix_socket::bytes_available() const
 {
     if (fd_ == -1)
