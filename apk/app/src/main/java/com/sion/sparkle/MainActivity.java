@@ -17,6 +17,7 @@ import android.net.Uri;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.view.View; // Button callback
+import android.widget.ImageView;
 import android.graphics.Color;
 
 // Log
@@ -125,13 +126,20 @@ public class MainActivity extends Activity
             }
         });
 
+        ImageView image = new ImageView(this);
+        image.setImageResource(R.drawable.sparkle);
+
+        LinearLayout.LayoutParams params1 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1);
+        LinearLayout.LayoutParams params2 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
-        layout.addView(button1);
-        layout.addView(button2);
-        layout.addView(button3);
-        layout.addView(button4);
-        layout.addView(button5);
+        layout.addView(image, params1);
+        layout.addView(button1, params2);
+        layout.addView(button2, params2);
+        layout.addView(button3, params2);
+        layout.addView(button4, params2);
+        layout.addView(button5, params2);
 
 
         layout.setBackgroundColor(Color.BLACK);
