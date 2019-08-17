@@ -17,11 +17,7 @@ struct sparkle_audio_buffer
 
 sparkle_audio::~sparkle_audio()
 {
-    stop();
-
-    if (socket_)
-        socket_.collapse();
-
+    disconnect_client();
     server_.collapse();
 
     (*playerObject)->Destroy(playerObject);
@@ -29,7 +25,8 @@ sparkle_audio::~sparkle_audio()
     (*engineObject)->Destroy(engineObject);
 }
 
-sparkle_audio::sparkle_audio(const std::string &path)
+sparkle_audio::sparkle_audio(const std::string &path) :
+    buffer_fd_(-1), buffer_(nullptr)
 {
     SLresult result;
 
@@ -94,7 +91,6 @@ sparkle_audio::sparkle_audio(const std::string &path)
     check_result(result);
 #endif
 
-
     MAKE_THIS_WOP
 
     server_ = were_object_pointer<were_unix_server>(new were_unix_server(path));
@@ -102,57 +98,8 @@ sparkle_audio::sparkle_audio(const std::string &path)
 
     were_object::connect(server_, &were_unix_server::new_connection, this_wop, [this_wop]()
     {
-        were_log("audio connection\n");
-
-        if (!this_wop->socket_)
-        {
-            this_wop->socket_ = this_wop->server_->accept();
-
-            were_log("audio connected\n");
-
-            this_wop->stop();
-
-            were_object::connect(this_wop->socket_, &were_unix_socket::ready_read, this_wop, [this_wop]()
-            {
-                this_wop->read();
-            });
-
-            were_object::connect(this_wop->socket_, &were_unix_socket::disconnected, this_wop, [this_wop]()
-            {
-                were_log("audio disconnected\n");
-                this_wop->stop();
-
-                if (this_wop->buffer_ != nullptr)
-                {
-                    were1_tmpfile_unmap((void **)&this_wop->buffer_, sizeof(struct sparkle_audio_buffer));
-                    this_wop->buffer_ = nullptr;
-                }
-
-                if (this_wop->buffer_fd_ != -1)
-                {
-                    close(this_wop->buffer_fd_);
-                    this_wop->buffer_fd_ = -1;
-                }
-
-                //this_wop->socket_.collapse();
-                // XXXT send -> error -> disconnect -> disconnect callback ->
-                // -> collapse -> unregister fd -> exception
-                // XXXT collapse -> epoll event -> make_this_wop -> exception
-
-
-
-                this_wop->thread()->post([this_wop]()
-                {
-                    this_wop->socket_.collapse();
-                });
-            });
-        }
-        else
-            were_log("can't accept audio connection\n");
+        this_wop->connect_client();
     });
-
-    buffer_fd_ = -1;
-    buffer_ = nullptr;
 }
 
 void sparkle_audio::callback(BufferQueueItf playerBufferqueue, void *data)
@@ -161,7 +108,7 @@ void sparkle_audio::callback(BufferQueueItf playerBufferqueue, void *data)
     were_object_pointer<sparkle_audio> instance__(instance);
 
 #if 1
-    instance__->callback();
+    instance__->callback(); /* Unsafe */
 #else
     instance__->thread()->post([instance__]()
     {
@@ -182,25 +129,87 @@ void sparkle_audio::callback()
 
 #if 1
     uint64_t data = 0;
-
-    if (socket_)
-        socket_->send_all((char *)&data, sizeof(uint64_t));
+    client_->send_all((char *)&data, sizeof(uint64_t));
 #endif
+}
+
+void sparkle_audio::connect_client()
+{
+    MAKE_THIS_WOP
+
+    if (client_)
+    {
+        were_log("can't accept audio connection\n");
+        return;
+    }
+
+    stop();
+
+    client_ = server_->accept();
+
+    were_log("audio connected\n");
+
+    were_object::connect(client_, &were_unix_socket::ready_read, this_wop, [this_wop]()
+    {
+        this_wop->read();
+    });
+
+    were_object::connect(client_, &were_unix_socket::disconnected, this_wop, [this_wop]()
+    {
+        this_wop->disconnect_client();
+    });
+}
+
+void sparkle_audio::disconnect_client()
+{
+    if (!client_)
+        return;
+
+    stop();
+    usleep(100000); /* Callback */
+
+    if (buffer_ != nullptr)
+    {
+        were1_tmpfile_unmap((void **)&buffer_, sizeof(struct sparkle_audio_buffer));
+        buffer_ = nullptr;
+    }
+
+    if (buffer_fd_ != -1)
+    {
+        close(buffer_fd_);
+        buffer_fd_ = -1;
+    }
+
+    client_.collapse();
+
+    were_log("audio disconnected\n");
 }
 
 void sparkle_audio::read()
 {
-    while (socket_->bytes_available() > 0)
+    bool r;
+
+    while (client_ && client_->bytes_available() > 0)
     {
         uint64_t code;
-        socket_->receive_all((char *)&code, sizeof(uint64_t)); // XXX2 check
+        r = client_->receive_all((char *)&code, sizeof(uint64_t));
+        if (!r)
+        {
+            disconnect_client();
+            return;
+        }
 
         if (code == 0)
         {
         }
         if (code == 1)
         {
-            socket_->receive_fds(&buffer_fd_, 1); // XXX2 check
+            r = client_->receive_fds(&buffer_fd_, 1);
+            if (!r)
+            {
+                disconnect_client();
+                return;
+            }
 
             if (were1_tmpfile_map((void **)&buffer_, sizeof(struct sparkle_audio_buffer), buffer_fd_) == -1)
                 throw were_exception(WE_SIMPLE);
@@ -222,7 +231,7 @@ void sparkle_audio::read()
 
 void sparkle_audio::start()
 {
-    if (state_ != SL_PLAYSTATE_PLAYING)
+    if (state_ != SL_PLAYSTATE_PLAYING && buffer_ != nullptr)
     {
         were_log("starting player\n");
 
@@ -256,7 +265,7 @@ void sparkle_audio::stop()
 
 void sparkle_audio::check()
 {
-    if (state_ == SL_PLAYSTATE_PLAYING && buffer_ && playing_ == 0)
+    if (state_ == SL_PLAYSTATE_PLAYING && playing_ == 0)
     {
         int n = were1_ring_buffer_bytes_available(&buffer_->were);
 

@@ -49,6 +49,10 @@ public:
 private:
     static void callback(BufferQueueItf playerBufferqueue, void *data);
     void callback();
+
+    void connect_client();
+    void disconnect_client();
+
     void read();
     void start();
     void stop();
@@ -69,7 +73,7 @@ private:
     SLuint32 state_;
 
     were_object_pointer<were_unix_server> server_;
-    were_object_pointer<were_unix_socket> socket_;
+    were_object_pointer<were_unix_socket> client_;
     int buffer_fd_;
     struct sparkle_audio_buffer *buffer_;
     int playing_;
