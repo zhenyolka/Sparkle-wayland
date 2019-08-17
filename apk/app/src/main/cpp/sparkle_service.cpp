@@ -127,7 +127,7 @@ Java_com_sion_sparkle_SparkleService_native_1destroy(JNIEnv *env, jobject instan
     }
     else
     {
-        fprintf(stdout, "exit bad");
+        fprintf(stdout, "exit bad\n");
     }
 
     were_debug::instance().stop();
