@@ -9,6 +9,14 @@
 #include <mutex>
 #endif
 
+struct cpu_state
+{
+    uint64_t user;
+    uint64_t nice;
+    uint64_t system;
+    uint64_t idle;
+};
+
 class were_object;
 
 class were_debug
@@ -45,6 +53,7 @@ private:
 private:
     struct timespec real1_, real2_;
     struct timespec cpu1_, cpu2_;
+    struct cpu_state state1_, state2_;
     std::thread thread_;
     bool run_;
     int object_count_;
