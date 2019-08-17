@@ -1,5 +1,5 @@
 pcm.!default
 {
     type sparkle
-    #server 123
+    path /data/data/com.sion.sparkle/files/audio-0
 }

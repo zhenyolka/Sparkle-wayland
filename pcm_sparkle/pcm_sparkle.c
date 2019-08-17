@@ -1,27 +1,17 @@
 #include "were1_unix_socket.h"
 #include "were1_tmpfile.h"
 #include "were1_ring_buffer.h"
-#include <stdio.h>
-#include <sys/ioctl.h>
 #include <alsa/asoundlib.h>
 #include <alsa/pcm_external.h>
-#include <linux/soundcard.h>
+#include <stdio.h>
 
 
-#include <unistd.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <string.h>
-#include <errno.h>
-#include <stdint.h>
-
-
-#define sparkle_server "/data/data/com.sion.sparkle/files/audio-0" //XXX2
+#define sparkle_path "/data/data/com.sion.sparkle/files/audio-0"
 #define sparkle_period_size (65536 / 8)
 #define sparkle_periods 8
 #define sparkle_buffer_size (sparkle_period_size * sparkle_periods)
-#define sparkle_max_data_size sparkle_period_size
 
+#define ARRAY_SIZE(ary)    (sizeof(ary)/sizeof(ary[0]))
 
 
 struct sparkle_audio_buffer
@@ -32,27 +22,11 @@ struct sparkle_audio_buffer
 
 typedef struct snd_pcm_sparkle {
     snd_pcm_ioplug_t io;
-    //char *device;
-    int fd;
-    //int fragment_set;
-    //int caps;
-    //int format;
-    //unsigned int period_shift;
-    //unsigned int periods;
     unsigned int frame_bytes;
-    uint64_t pointer;
-
+    int fd;
     int buffer_fd;
     struct sparkle_audio_buffer *buffer;
-
-    int started;
-    struct timespec start_time;
-
 } snd_pcm_sparkle_t;
-
-
-
-
 
 
 static void critical(int ret)
@@ -61,7 +35,7 @@ static void critical(int ret)
         abort();
 }
 
-static int sparkle_initialize(snd_pcm_sparkle_t *sparkle)
+static int sparkle_initialize(snd_pcm_sparkle_t *sparkle, const char *path)
 {
     sparkle->buffer_fd = were1_tmpfile_create(sizeof(struct sparkle_audio_buffer));
     if (sparkle->buffer_fd == -1)
@@ -72,7 +46,7 @@ static int sparkle_initialize(snd_pcm_sparkle_t *sparkle)
 
     were1_ring_buffer_initialize(&sparkle->buffer->were, 65536);
 
-    sparkle->fd = were1_unix_socket_connect(sparkle_server);
+    sparkle->fd = were1_unix_socket_connect(path);
     if (sparkle->fd == -1)
         return -1;
 
@@ -85,7 +59,7 @@ static int sparkle_initialize(snd_pcm_sparkle_t *sparkle)
 
 static int sparkle_finish(snd_pcm_sparkle_t *sparkle)
 {
-    if (sparkle->fd != -1)
+    if (sparkle->fd > 0)
     {
         were1_unix_socket_destroy(sparkle->fd);
         sparkle->fd = -1;
@@ -97,7 +71,7 @@ static int sparkle_finish(snd_pcm_sparkle_t *sparkle)
         sparkle->buffer = NULL;
     }
 
-    if (sparkle->buffer_fd != -1)
+    if (sparkle->buffer_fd > 0)
     {
         close(sparkle->buffer_fd);
         sparkle->buffer_fd = -1;
@@ -106,27 +80,12 @@ static int sparkle_finish(snd_pcm_sparkle_t *sparkle)
     return 0;
 }
 
-static void sparkle_send_start(snd_pcm_sparkle_t *sparkle)
-{
-    uint64_t code = 2;
-    critical(were1_unix_socket_send_all(sparkle->fd, &code, sizeof(uint64_t)));
-}
-
-static void sparkle_send_stop(snd_pcm_sparkle_t *sparkle)
-{
-    uint64_t code = 3;
-    critical(were1_unix_socket_send_all(sparkle->fd, &code, sizeof(uint64_t)));
-}
-
-static void sparkle_receive_pointer(snd_pcm_sparkle_t *sparkle)
+static void sparkle_receive(snd_pcm_sparkle_t *sparkle)
 {
     uint64_t data;
 
     while (were1_unix_socket_bytes_available(sparkle->fd) >= sizeof(uint64_t))
-    {
         critical(were1_unix_socket_receive_all(sparkle->fd, &data, sizeof(uint64_t)));
-        sparkle->pointer = data;
-    }
 }
 
 static int sparkle_poll_revents(snd_pcm_ioplug_t *io,
@@ -136,7 +95,7 @@ static int sparkle_poll_revents(snd_pcm_ioplug_t *io,
 {
     snd_pcm_sparkle_t *sparkle = io->private_data;
 
-    sparkle_receive_pointer(sparkle);
+    sparkle_receive(sparkle);
 
     //*revents = io->stream == SND_PCM_STREAM_PLAYBACK ? POLLOUT : POLLIN;
     *revents = POLLOUT;
@@ -165,6 +124,7 @@ static snd_pcm_sframes_t sparkle_write(snd_pcm_ioplug_t *io,
 
     snd_pcm_sparkle_t *sparkle = io->private_data;
 
+    /* we handle only an interleaved buffer */
     const char *data = (char *)areas->addr + (areas->first + areas->step * offset) / 8;
 
     int size_bytes = size * sparkle->frame_bytes;
@@ -172,7 +132,6 @@ static snd_pcm_sframes_t sparkle_write(snd_pcm_ioplug_t *io,
     if (size_bytes > sparkle_period_size)
         size_bytes = sparkle_period_size;
 
-    //sparkle_send_data(sparkle, data, size_bytes);
     char *buffer;
     int n = were1_ring_buffer_write_start(&sparkle->buffer->were, &buffer, size_bytes);
     memcpy(buffer, data, n);
@@ -221,7 +180,7 @@ static snd_pcm_sframes_t sparkle_pointer(snd_pcm_ioplug_t *io)
 
     snd_pcm_sparkle_t *sparkle = io->private_data;
 
-    sparkle_receive_pointer(sparkle);
+    sparkle_receive(sparkle);
 
 #if 0
     struct timespec now;
@@ -231,11 +190,6 @@ static snd_pcm_sframes_t sparkle_pointer(snd_pcm_ioplug_t *io)
     elapsed += (now.tv_nsec - sparkle->start_time.tv_nsec) / 1000000LL;
 
     uint64_t frames = elapsed * 48000LL / 1000LL;
-
-    if (sparkle->started == 1)
-        return frames;
-    else
-        return 0;
 #endif
 
     return sparkle->buffer->were.read_position / sparkle->frame_bytes;
@@ -243,47 +197,20 @@ static snd_pcm_sframes_t sparkle_pointer(snd_pcm_ioplug_t *io)
 
 static int sparkle_start(snd_pcm_ioplug_t *io)
 {
-#if 0
-    snd_pcm_oss_t *oss = io->private_data;
-    int tmp = io->stream == SND_PCM_STREAM_PLAYBACK ?
-        PCM_ENABLE_OUTPUT : PCM_ENABLE_INPUT;
-
-    if (ioctl(oss->fd, SNDCTL_DSP_SETTRIGGER, &tmp) < 0) {
-        fprintf(stderr, "*** OSS: trigger failed\n");
-        if (io->stream == SND_PCM_STREAM_CAPTURE)
-            /* fake read to trigger */
-            read(oss->fd, &tmp, 0);
-    }
-    return 0;
-#endif
-
     snd_pcm_sparkle_t *sparkle = io->private_data;
 
-    sparkle->pointer = 0;
-    clock_gettime(CLOCK_MONOTONIC, &sparkle->start_time);
-    sparkle->started = 1;
-
-    sparkle_send_start(sparkle);
+    uint64_t code = 2;
+    critical(were1_unix_socket_send_all(sparkle->fd, &code, sizeof(uint64_t)));
 
     return 0;
 }
 
 static int sparkle_stop(snd_pcm_ioplug_t *io)
 {
-#if 0
-    snd_pcm_oss_t *oss = io->private_data;
-    int tmp = 0;
-
-    ioctl(oss->fd, SNDCTL_DSP_SETTRIGGER, &tmp);
-    return 0;
-#endif
-
     snd_pcm_sparkle_t *sparkle = io->private_data;
 
-    sparkle->pointer = 0;
-    sparkle->started = 0;
-
-    sparkle_send_stop(sparkle);
+    uint64_t code = 3;
+    critical(were1_unix_socket_send_all(sparkle->fd, &code, sizeof(uint64_t)));
 
     return 0;
 }
@@ -327,7 +254,6 @@ static int oss_prepare(snd_pcm_ioplug_t *io)
 }
 #endif
 
-
 static int sparkle_hw_params(snd_pcm_ioplug_t *io,
              snd_pcm_hw_params_t *params ATTRIBUTE_UNUSED)
 {
@@ -350,9 +276,6 @@ static int sparkle_hw_params(snd_pcm_ioplug_t *io,
 
     return 0;
 }
-
-
-#define ARRAY_SIZE(ary)    (sizeof(ary)/sizeof(ary[0]))
 
 static int sparkle_hw_constraint(snd_pcm_sparkle_t *sparkle)
 {
@@ -423,13 +346,11 @@ static int sparkle_hw_constraint(snd_pcm_sparkle_t *sparkle)
     return 0;
 }
 
-
 static int sparkle_close(snd_pcm_ioplug_t *io)
 {
     snd_pcm_sparkle_t *sparkle = io->private_data;
 
     sparkle_finish(sparkle);
-    //free(oss->device);
     free(sparkle);
 
     return 0;
@@ -463,7 +384,7 @@ static const snd_pcm_ioplug_callback_t sparkle_capture_callback = {
 SND_PCM_PLUGIN_DEFINE_FUNC(sparkle)
 {
     snd_config_iterator_t i, next;
-    //const char *device = "/dev/dsp";
+    const char *path = sparkle_path;
     int err;
     snd_pcm_sparkle_t *sparkle;
 
@@ -477,17 +398,16 @@ SND_PCM_PLUGIN_DEFINE_FUNC(sparkle)
 
         if (strcmp(id, "comment") == 0 || strcmp(id, "type") == 0 || strcmp(id, "hint") == 0)
             continue;
-#if 0
-        if (strcmp(id, "device") == 0)
+
+        if (strcmp(id, "path") == 0)
         {
-            if (snd_config_get_string(n, &device) < 0)
+            if (snd_config_get_string(n, &path) < 0)
             {
                 SNDERR("Invalid type for %s", id);
                 return -EINVAL;
             }
             continue;
         }
-#endif
 
         SNDERR("Unknown field %s", id);
         return -EINVAL;
@@ -500,38 +420,13 @@ SND_PCM_PLUGIN_DEFINE_FUNC(sparkle)
         return -ENOMEM;
     }
 
-#if 0
-    oss->device = strdup(device);
-    if (oss->device == NULL) {
-        SNDERR("cannot allocate");
-        free(oss);
-        return -ENOMEM;
-    }
-    oss->fd = open(device, stream == SND_PCM_STREAM_PLAYBACK ?
-               O_WRONLY : O_RDONLY);
-    if (oss->fd < 0) {
-        err = -errno;
-        SNDERR("Cannot open device %s", device);
-        goto error;
-    }
-#endif
-
-#if 0
-    if (sparkle_connect(sparkle) == -1)
-    {
-        err = -errno;
-        SNDERR("cannot connect");
-        goto error;
-    }
-#else
-    if (sparkle_initialize(sparkle) == -1)
+    if (sparkle_initialize(sparkle, path) == -1)
     {
         //err = -errno;
         err = -ENOENT;
         SNDERR("failed to initialize sparkle");
         goto error;
     }
-#endif
 
     sparkle->io.version = SND_PCM_IOPLUG_VERSION;
     sparkle->io.name = "Sparkle PCM I/O Plugin";
@@ -559,7 +454,6 @@ SND_PCM_PLUGIN_DEFINE_FUNC(sparkle)
 
 error:
     sparkle_finish(sparkle);
-    //free(sparkle->device);
     free(sparkle);
 
     return err;
