@@ -19,7 +19,6 @@ were_object::were_object() :
     reference_count_(0), collapsed_(false)
 {
     thread_ = were_thread::current_thread();
-    destroyed.set_single_shot(true);
 
     were_debug::instance().add_object(this);
 }
@@ -48,4 +47,9 @@ bool were_object::same_thread() const
         return false;
     else
         return true;
+}
+
+void were_object::post(const std::function<void ()> &call)
+{
+    thread()->post(call);
 }

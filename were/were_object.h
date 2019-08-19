@@ -5,6 +5,7 @@
 #include "were_signal.h"
 #include <cstdio>
 #include <typeinfo>
+#include <functional>
 
 #define MAKE_THIS_WOP \
 were_object_pointer<std::remove_pointer<decltype(this)>::type> this_wop(this);
@@ -12,6 +13,7 @@ were_object_pointer<std::remove_pointer<decltype(this)>::type> this_wop(this);
 /* ================================================================================================================== */
 
 class were_object;
+class were_thread;
 
 template <typename T>
 class were_object_pointer
@@ -40,6 +42,8 @@ public:
     int reference_count();
     were_object_pointer<were_object> were() const;
     operator were_object_pointer<were_object>();
+    were_object_pointer<were_thread> thread() const;
+    void post(const std::function<void ()> &call);
 
 private:
     were_object *object_;
@@ -47,8 +51,6 @@ private:
 };
 
 /* ================================================================================================================== */
-
-class were_thread;
 
 class were_object
 {
@@ -109,6 +111,7 @@ public:
                         Args... args);
 
     bool same_thread() const;
+    void post(const std::function<void ()> &call);
 
 signals:
     were_signal<void ()> destroyed;
@@ -189,14 +192,22 @@ were_object_pointer<T> &were_object_pointer<T>::operator=(const were_object_poin
 template <typename T>
 void were_object_pointer<T>::reset()
 {
-    // XXXT Thread.
-
     if (object_ != nullptr)
     {
         object_->decrement_reference_count();
 
         if (object_->reference_count() == 0 && object_->collapsed())
-            delete object_;
+        {
+            if (object_->same_thread())
+            {
+                delete object_;
+            }
+            else
+            {
+                were_object *object__ = object_;
+                object_->post([object__](){delete object__;});
+            }
+        }
 
         object_ = nullptr;
         pointer_ = nullptr;
@@ -303,6 +314,18 @@ were_object_pointer<T>::operator were_object_pointer<were_object>()
     return were_object_pointer<were_object>(object_);
 }
 
+template <typename T>
+were_object_pointer<were_thread> were_object_pointer<T>::thread() const
+{
+    return object_->thread();
+}
+
+template <typename T>
+void were_object_pointer<T>::post(const std::function<void ()> &call)
+{
+    object_->post(call);
+}
+
 /* ================================================================================================================== */
 
 template <typename SourceType, typename SignalType, typename Functor>
@@ -312,8 +335,6 @@ void were_object::connect(  were_object_pointer<SourceType> source,
                             Functor call
 )
 {
-    // XXXT Thread.
-
     uint64_t pc_id = next_id();
     uint64_t sb_id = next_id();
     uint64_t cb_id = next_id();
@@ -323,14 +344,23 @@ void were_object::connect(  were_object_pointer<SourceType> source,
         were_object::disconnect(source, signal, context, pc_id, sb_id, cb_id);
     };
 
-    auto signal__ = &((source.access_UNSAFE())->*signal);
-    signal__->add_connection(call, pc_id); // XXXT Direct.
+    source.post([source, signal, call, pc_id]()
+    {
+        auto signal__ = &((source.access())->*signal);
+        signal__->add_connection(call, pc_id);
+    });
 
-    auto signal1__ = &((source.access_UNSAFE())->destroyed);
-    signal1__->add_connection(breaker, sb_id);
+    source.post([source, breaker, sb_id]()
+    {
+        auto signal__ = &((source.access())->destroyed);
+        signal__->add_connection(breaker, sb_id);
+    });
 
-    auto signal2__ = &((context.access_UNSAFE())->destroyed);
-    signal2__->add_connection(breaker, cb_id);
+    context.post([context, breaker, cb_id]()
+    {
+        auto signal__ = &((context.access())->destroyed);
+        signal__->add_connection(breaker, cb_id);
+    });
 };
 
 template <typename SourceType, typename SignalType>
@@ -339,14 +369,23 @@ void were_object::disconnect(   were_object_pointer<SourceType> source,
                                 were_object_pointer<were_object> context,
                                 uint64_t pc_id, uint64_t sb_id, uint64_t cb_id)
 {
-    auto signal__ = &((source.access_UNSAFE())->*signal);
-    signal__->remove_connection(pc_id);
+    source.post([source, signal, pc_id]()
+    {
+        auto signal__ = &((source.access())->*signal);
+        signal__->remove_connection(pc_id);
+    });
 
-    auto signal1__ = &((source.access_UNSAFE())->destroyed);
-    signal1__->remove_connection(sb_id);
+    source.post([source, sb_id]()
+    {
+        auto signal__ = &((source.access())->destroyed);
+        signal__->remove_connection(sb_id);
+    });
 
-    auto signal2__ = &((context.access_UNSAFE())->destroyed);
-    signal2__->remove_connection(cb_id);
+    context.post([context, cb_id]()
+    {
+        auto signal__ = &((context.access())->destroyed);
+        signal__->remove_connection(cb_id);
+    });
 }
 
 template <typename SourceType, typename SignalType, typename ...Args>
@@ -355,7 +394,7 @@ void were_object::emit( were_object_pointer<SourceType> source,
                         Args... args
 )
 {
-    auto signal__ = &((source.access_UNSAFE())->*signal);
+    auto signal__ = &((source.access())->*signal);
     signal__->emit(args...);
 };
 

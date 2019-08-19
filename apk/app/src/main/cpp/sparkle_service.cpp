@@ -76,13 +76,12 @@ void sparkle_service::sound()
     {
         MAKE_THIS_WOP
 
-        //sound_thread_ = were_object_pointer<were_thread>(new were_thread());
 
         were_object_pointer<sparkle_audio> audio(new sparkle_audio(files_dir_ + "/audio-0"));
 
         were_object::connect(this_wop, &were_object::destroyed, audio, [audio]()
         {
-            audio->thread()->post([audio]() mutable {audio.collapse();}); // XXXT
+            audio.thread()->post([audio]() mutable {audio.collapse();}); // XXXT
         });
     }
 

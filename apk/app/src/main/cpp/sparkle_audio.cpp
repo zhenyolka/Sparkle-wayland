@@ -110,7 +110,7 @@ void sparkle_audio::callback(BufferQueueItf playerBufferqueue, void *data)
 #if 1
     instance__.access_UNSAFE()->callback(); /* Unsafe */
 #else
-    instance__->thread()->post([instance__]()
+    instance__.thread()->post([instance__]()
     {
         instance__->callback();
     });
