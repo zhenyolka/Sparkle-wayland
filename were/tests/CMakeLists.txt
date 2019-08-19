@@ -21,4 +21,5 @@ set_target_properties(test1 PROPERTIES COMPILE_FLAGS "-Wall -Wextra -Wno-unused-
 
 target_link_libraries(test1 LINK_PUBLIC
     were
+    pthread
 )

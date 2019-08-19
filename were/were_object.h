@@ -37,7 +37,7 @@ public:
     void increment_reference_count();
     void decrement_reference_count();
     int reference_count();
-    were_object *were() const;
+    were_object_pointer<were_object> were() const;
     operator were_object_pointer<were_object>();
 
 private:
@@ -97,14 +97,7 @@ public:
                             Functor call);
 
     template <typename SourceType, typename SignalType, typename ContextType>
-    static void break_(SourceType source, SignalType signal, ContextType context, uint64_t pc_id, uint64_t sb_id, uint64_t cb_id);
-
-    template <typename Functor>
-    static void connect_x(    were_object_pointer<were_object> source,
-                                    were_object_pointer<were_object> context,
-                                    Functor call);
-
-    static void break_x_(were_object_pointer<were_object> source, were_object_pointer<were_object> context, uint64_t pc_id, uint64_t sb_id, uint64_t cb_id);
+    static void disconnect(SourceType source, SignalType signal, ContextType context, uint64_t pc_id, uint64_t sb_id, uint64_t cb_id);
 
     template <typename SourceType, typename SignalType, typename ...Args>
     static void emit(   were_object_pointer<SourceType> source,
@@ -271,7 +264,7 @@ int were_object_pointer<T>::reference_count()
 }
 
 template <typename T>
-were_object *were_object_pointer<T>::were() const
+were_object_pointer<were_object> were_object_pointer<T>::were() const
 {
     if (object_ == nullptr)
     {
@@ -279,7 +272,7 @@ were_object *were_object_pointer<T>::were() const
         throw were_exception(WE_SIMPLE);
     }
 
-    return object_;
+    return were_object_pointer<were_object>(object_);
 }
 
 template <typename T>
@@ -309,18 +302,18 @@ void were_object::connect(  were_object_pointer<SourceType> source,
     auto signal1__ = &((source.operator->())->destroyed);
     signal1__->add_connection([source, signal, context, pc_id, sb_id, cb_id]()
     {
-        break_(source, signal, context, pc_id, sb_id, cb_id);
+        were_object::disconnect(source, signal, context, pc_id, sb_id, cb_id);
     }, sb_id);
 
     auto signal2__ = &((context.operator->())->destroyed);
     signal2__->add_connection([source, signal, context, pc_id, sb_id, cb_id]()
     {
-        break_(source, signal, context, pc_id, sb_id, cb_id);
+        were_object::disconnect(source, signal, context, pc_id, sb_id, cb_id);
     }, cb_id);
 };
 
 template <typename SourceType, typename SignalType, typename ContextType>
-void were_object::break_(SourceType source, SignalType signal, ContextType context, uint64_t pc_id, uint64_t sb_id, uint64_t cb_id)
+void were_object::disconnect(SourceType source, SignalType signal, ContextType context, uint64_t pc_id, uint64_t sb_id, uint64_t cb_id)
 {
     auto signal__ = &((source.operator->())->*signal);
     signal__->remove_connection(pc_id);
@@ -331,48 +324,6 @@ void were_object::break_(SourceType source, SignalType signal, ContextType conte
     auto signal2__ = &((context.operator->())->destroyed);
     signal2__->remove_connection(cb_id);
 }
-
-template <typename Functor>
-void were_object::connect_x(    were_object_pointer<were_object> source,
-                                were_object_pointer<were_object> context,
-                                Functor call
-)
-{
-    // XXXT Thread.
-
-    uint64_t pc_id = next_id();
-    uint64_t sb_id = next_id();
-    uint64_t cb_id = next_id();
-
-    auto signal__ = &((source.were())->destroyed);
-    signal__->add_connection(call, pc_id); // XXXT Direct.
-
-    auto signal1__ = &((source.were())->destroyed);
-    signal1__->add_connection([source, context, pc_id, sb_id, cb_id]()
-    {
-        break_x_(source, context, pc_id, sb_id, cb_id);
-    }, sb_id);
-
-    auto signal2__ = &((context.were())->destroyed);
-    signal2__->add_connection([source, context, pc_id, sb_id, cb_id]()
-    {
-        break_x_(source, context, pc_id, sb_id, cb_id);
-    }, cb_id);
-};
-
-#if 0
-void were_object::break_x_(were_object_pointer<were_object> source, were_object_pointer<were_object> context, uint64_t pc_id, uint64_t sb_id, uint64_t cb_id)
-{
-    auto signal__ = &((source.were())->destroyed);
-    signal__->remove_connection(pc_id);
-
-    auto signal1__ = &((source.were())->destroyed);
-    signal1__->remove_connection(sb_id);
-
-    auto signal2__ = &((context.were())->destroyed);
-    signal2__->remove_connection(cb_id);
-}
-#endif
 
 template <typename SourceType, typename SignalType, typename ...Args>
 void were_object::emit( were_object_pointer<SourceType> source,

@@ -34,7 +34,7 @@ were_signal_handler::were_signal_handler()
         throw were_exception(WE_SIMPLE);
 
     thread()->add_fd_listener(fd_, EPOLLIN | EPOLLET, this_wop);
-    were_object::connect_x(this_wop, this_wop, [this_wop]()
+    were_object::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
     {
         this_wop->thread()->remove_fd_listener(this_wop->fd_, this_wop);
     });

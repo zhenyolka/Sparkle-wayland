@@ -36,20 +36,8 @@ void were_object::add_dependency(were_object_pointer<were_object> dependency)
 {
     MAKE_THIS_WOP
 
-    were_object::connect_x(dependency, this_wop, [this_wop]() mutable
+    were_object::connect(dependency, &were_object::destroyed, this_wop, [this_wop]() mutable
     {
         this_wop.collapse();
     });
-}
-
-void were_object::break_x_(were_object_pointer<were_object> source, were_object_pointer<were_object> context, uint64_t pc_id, uint64_t sb_id, uint64_t cb_id)
-{
-    auto signal__ = &((source.were())->destroyed);
-    signal__->remove_connection(pc_id);
-
-    auto signal1__ = &((source.were())->destroyed);
-    signal1__->remove_connection(sb_id);
-
-    auto signal2__ = &((context.were())->destroyed);
-    signal2__->remove_connection(cb_id);
 }
