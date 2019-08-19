@@ -108,7 +108,7 @@ void sparkle_audio::callback(BufferQueueItf playerBufferqueue, void *data)
     were_object_pointer<sparkle_audio> instance__(instance);
 
 #if 1
-    instance__->callback(); /* Unsafe */
+    instance__.access_UNSAFE()->callback(); /* Unsafe */
 #else
     instance__->thread()->post([instance__]()
     {
@@ -129,7 +129,7 @@ void sparkle_audio::callback()
 
 #if 1
     uint64_t data = 0;
-    client_->send_all((char *)&data, sizeof(uint64_t));
+    client_.access_UNSAFE()->send_all((char *)&data, sizeof(uint64_t));
 #endif
 }
 

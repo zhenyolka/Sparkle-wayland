@@ -44,7 +44,7 @@ void were_thread::add_fd_listener(int fd, uint32_t events, were_object_pointer<w
 
     struct epoll_event event;
     event.events = events;
-    event.data.ptr = listener.get();
+    event.data.ptr = listener.access();
 
     if (epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, fd, &event) == -1)
         throw were_exception(WE_SIMPLE);

@@ -8,7 +8,7 @@
 
 /* ================================================================================================================== */
 
-uint64_t were_object::next_id_ = 0;
+uint64_t were_object::next_id_ = 1;
 
 were_object::~were_object()
 {
@@ -40,4 +40,12 @@ void were_object::add_dependency(were_object_pointer<were_object> dependency)
     {
         this_wop.collapse();
     });
+}
+
+bool were_object::same_thread() const
+{
+    if (thread() && thread() != were_thread::current_thread())
+        return false;
+    else
+        return true;
 }

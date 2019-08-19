@@ -148,7 +148,7 @@ Java_com_sion_sparkle_MainActivity_native_1create(JNIEnv *env, jobject instance)
     native__->increment_reference_count();
     sparkle_android_logger::instance().redirect_output(native__->files_dir() + "/log.txt");
 
-    return jlong(native__.get());
+    return jlong(native__.access());
 }
 
 extern "C" JNIEXPORT void JNICALL

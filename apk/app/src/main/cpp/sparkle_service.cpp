@@ -105,7 +105,7 @@ Java_com_sion_sparkle_SparkleService_native_1create(JNIEnv *env, jobject instanc
     sparkle_android_logger::instance().redirect_output(native__->files_dir() + "/log.txt");
     native__->enable_native_loop(dup(thread->fd()));
 
-    return jlong(native__.get());
+    return jlong(native__.access());
 }
 
 extern "C" JNIEXPORT void JNICALL
