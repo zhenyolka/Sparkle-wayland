@@ -76,6 +76,21 @@ void were_thread::remove_fd_listener_(int fd)
 
 void were_thread::process(int timeout)
 {
+    call_queue_mutex_.lock();
+    while (call_queue_.size() > 0)
+    {
+        {
+            std::function<void ()> call = call_queue_.front();
+            call_queue_.pop();
+            call_queue_mutex_.unlock();
+            call();
+        }
+        call_queue_mutex_.lock();
+    }
+    call_queue_mutex_.unlock();
+
+    idle();
+
     struct epoll_event events[MAX_EVENTS];
 
     int n = epoll_wait(epoll_fd_, events, MAX_EVENTS, timeout);
@@ -87,8 +102,6 @@ void were_thread::process(int timeout)
         were_thread_fd_listener *listener = reinterpret_cast<were_thread_fd_listener *>(events[i].data.ptr);
         listener->event(events[i].events);
     }
-
-    idle();
 }
 
 void were_thread::run()
@@ -137,16 +150,6 @@ void were_thread::event(uint32_t events)
         uint64_t counter = 0;
         if (read(event_fd_, &counter, sizeof(uint64_t)) != sizeof(uint64_t))
             throw were_exception(WE_SIMPLE);
-
-        for (unsigned int i = 0; i < counter; ++i)
-        {
-            call_queue_mutex_.lock();
-            std::function<void ()> call = call_queue_.front();
-            call_queue_.pop();
-            call_queue_mutex_.unlock();
-            call();
-        }
-
     }
     else
         throw were_exception(WE_SIMPLE);
@@ -154,11 +157,16 @@ void were_thread::event(uint32_t events)
 
 void were_thread::post(const std::function<void ()> &call)
 {
+    MAKE_THIS_WOP
+
     call_queue_mutex_.lock();
     call_queue_.push(call);
     call_queue_mutex_.unlock();
 
-    uint64_t add = 1;
-    if (write(event_fd_, &add, sizeof(uint64_t)) != sizeof(uint64_t))
-        throw were_exception(WE_SIMPLE);
+    if (were_thread::current_thread() != this_wop)
+    {
+        uint64_t add = 1;
+        if (write(event_fd_, &add, sizeof(uint64_t)) != sizeof(uint64_t))
+            throw were_exception(WE_SIMPLE);
+    }
 }
