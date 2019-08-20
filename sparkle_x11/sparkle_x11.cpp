@@ -153,8 +153,6 @@ void sparkle_x11::connect_keyboard(were_object_pointer<sparkle_x11_surface> x11_
     {
         keyboard->key_release(code);
     });
-
-    fprintf(stdout, "keyboard registered\n");
 }
 
 void sparkle_x11::connect_pointer(were_object_pointer<sparkle_x11_surface> x11_surface, were_object_pointer<sparkle_pointer> pointer)
@@ -186,6 +184,4 @@ void sparkle_x11::connect_pointer(were_object_pointer<sparkle_x11_surface> x11_s
     {
         pointer->leave(x11_surface->surface());
     });
-
-    fprintf(stdout, "pointer registered\n");
 }

@@ -249,8 +249,6 @@ void sparkle_android_surface::register_keyboard(were_object_pointer<sparkle_keyb
     });
 
     keyboard->enter(surface); // XXX2
-
-    fprintf(stdout, "keyboard registered\n");
 }
 
 void sparkle_android_surface::register_pointer(were_object_pointer<sparkle_pointer> pointer)
@@ -286,8 +284,6 @@ void sparkle_android_surface::register_pointer(were_object_pointer<sparkle_point
     });
 
     pointer->enter(surface); // XXX2
-
-    fprintf(stdout, "pointer registered\n");
 }
 
 void sparkle_android_surface::register_touch(were_object_pointer<sparkle_touch> touch)
@@ -308,6 +304,4 @@ void sparkle_android_surface::register_touch(were_object_pointer<sparkle_touch> 
     {
         touch->motion(surface, id, x, y);
     });
-
-    fprintf(stdout, "touch registered\n");
 }

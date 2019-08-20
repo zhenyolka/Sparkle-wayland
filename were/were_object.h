@@ -43,7 +43,7 @@ public:
     were_object_pointer<were_object> were() const;
     operator were_object_pointer<were_object>();
     were_object_pointer<were_thread> thread() const;
-    void post(const std::function<void ()> &call);
+    void post(const std::function<void ()> &call) const;
 
 private:
     were_object *object_;
@@ -55,6 +55,12 @@ private:
 class were_object
 {
 public:
+
+    enum connection_type
+    {
+        connection_type_direct,
+        connection_type_queued,
+    };
 
     virtual ~were_object();
     were_object();
@@ -93,11 +99,11 @@ public:
         return next_id_++;
     }
 
-    template <typename SourceType, typename SignalType, typename Functor>
+    template <typename SourceType, typename SignalType, typename Functor, typename ...Args>
     static void connect(    were_object_pointer<SourceType> source,
-                            SignalType signal,
+                            were_signal<void (Args...)> SignalType::*signal,
                             were_object_pointer<were_object> context,
-                            Functor call);
+                            Functor call, were_object::connection_type type = were_object::connection_type_direct);
 
     template <typename SourceType, typename SignalType>
     static void disconnect( were_object_pointer<SourceType> source,
@@ -147,7 +153,7 @@ were_object_pointer<T>::were_object_pointer(T *object__)
     if (object_ != nullptr)
         object_->increment_reference_count();
 
-    if (object_ != nullptr && object_->collapsed()) // XXXT
+    if (object_ != nullptr && object_->collapsed())
     {
         fprintf(stdout, "Type %s\n", typeid(T).name());
         throw were_exception(WE_SIMPLE);
@@ -321,33 +327,50 @@ were_object_pointer<were_thread> were_object_pointer<T>::thread() const
 }
 
 template <typename T>
-void were_object_pointer<T>::post(const std::function<void ()> &call)
+void were_object_pointer<T>::post(const std::function<void ()> &call) const
 {
     object_->post(call);
 }
 
 /* ================================================================================================================== */
 
-template <typename SourceType, typename SignalType, typename Functor>
+template <typename SourceType, typename SignalType, typename Functor, typename ...Args>
 void were_object::connect(  were_object_pointer<SourceType> source,
-                            SignalType signal,
+                            were_signal<void (Args...)> SignalType::*signal,
                             were_object_pointer<were_object> context,
-                            Functor call
-)
+                            Functor call, were_object::connection_type type)
 {
     uint64_t pc_id = next_id();
     uint64_t sb_id = next_id();
     uint64_t cb_id = next_id();
+
+    std::function<void (Args...)> call__;
+
+    if (type == were_object::connection_type_direct)
+    {
+        call__ = call;
+    }
+    else if (type == were_object::connection_type_queued)
+    {
+        std::function<void (Args...)> call1__ = call;
+        call__ = [context, call1__](Args... args)
+        {
+            context.post([call1__, args...]()
+            {
+                call1__(args...);
+            });
+        };
+    }
 
     std::function<void ()> breaker = [source, signal, context, pc_id, sb_id, cb_id]()
     {
         were_object::disconnect(source, signal, context, pc_id, sb_id, cb_id);
     };
 
-    source.post([source, signal, call, pc_id]()
+    source.post([source, signal, call__, pc_id]()
     {
         auto signal__ = &((source.access())->*signal);
-        signal__->add_connection(call, pc_id);
+        signal__->add_connection(call__, pc_id);
     });
 
     source.post([source, breaker, sb_id]()
@@ -391,8 +414,7 @@ void were_object::disconnect(   were_object_pointer<SourceType> source,
 template <typename SourceType, typename SignalType, typename ...Args>
 void were_object::emit( were_object_pointer<SourceType> source,
                         SignalType signal,
-                        Args... args
-)
+                        Args... args)
 {
     auto signal__ = &((source.access())->*signal);
     signal__->emit(args...);

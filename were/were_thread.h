@@ -53,7 +53,8 @@ private:
 private:
     static thread_local were_object_pointer<were_thread> current_thread_;
     int epoll_fd_;
-    std::set< were_object_pointer<were_thread_idle_handler> > idle_handlers_; // XXXT Thread safety
+    std::set< were_object_pointer<were_thread_idle_handler> > idle_handlers_;
+    //std::mutex idle_handlers_mutex_;
     int event_fd_;
     std::queue< std::function<void ()> > call_queue_;
     std::mutex call_queue_mutex_;

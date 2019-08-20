@@ -108,20 +108,26 @@ void were_thread::add_idle_handler(were_object_pointer<were_thread_idle_handler>
 
     handler.increment_reference_count();
 
+    //idle_handlers_mutex_.lock();
     idle_handlers_.insert(handler);
+    //idle_handlers_mutex_.unlock();
 }
 
 void were_thread::remove_idle_handler(were_object_pointer<were_thread_idle_handler> handler)
 {
+    //idle_handlers_mutex_.lock();
     idle_handlers_.erase(handler);
+    //idle_handlers_mutex_.unlock();
 
     handler.decrement_reference_count();
 }
 
 void were_thread::idle()
 {
+    //idle_handlers_mutex_.lock();
     for (auto it = idle_handlers_.begin(); it != idle_handlers_.end(); ++it)
         (*it)->idle();
+    //idle_handlers_mutex_.unlock();
 }
 
 void were_thread::event(uint32_t events)

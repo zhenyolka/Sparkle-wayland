@@ -58,7 +58,7 @@ Java_com_sion_sparkle_SparkleView_surface_1changed(JNIEnv *env, jobject instance
     else
         window = nullptr;
 
-    were_object::emit(view, &sparkle_view::surface_changed, window); // XXXT Direct
+    were_object::emit(view, &sparkle_view::surface_changed, window);
 
     if (window != nullptr)
         ANativeWindow_release(window);
