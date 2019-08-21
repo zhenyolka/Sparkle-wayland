@@ -122,6 +122,29 @@ signals:
     were_signal<void ()> destroyed;
 
 private:
+
+    template <typename ...Args>
+    static void add_connection_safe(    were_signal<void (Args...)> *signal,
+                                        const std::function<void (Args...)> &call,
+                                        uint64_t id,
+                                        were_object_pointer<were_object> context);
+
+    template <typename ...Args>
+    static void remove_connection_safe( were_signal<void (Args...)> *signal,
+                                        uint64_t id,
+                                        were_object_pointer<were_object> context);
+
+    template <typename SourceType, typename SignalType, typename ...Args>
+    static std::function<void ()> make_breaker( were_object_pointer<SourceType> source,
+                                                were_signal<void (Args...)> SignalType::*signal,
+                                                were_object_pointer<were_object> context,
+                                                uint64_t pc_id, uint64_t sb_id, uint64_t cb_id);
+
+    template <typename ...Args>
+    static std::function<void (Args...)> make_queued_call(  const std::function<void (Args...)> &call,
+                                                            were_object_pointer<were_object> context);
+
+private:
     int reference_count_;
     bool collapsed_;
     were_object_pointer<were_thread> thread_;
@@ -318,6 +341,58 @@ void were_object_pointer<T>::post(const std::function<void ()> &call) const
 
 /* ================================================================================================================== */
 
+template <typename ...Args>
+void were_object::add_connection_safe(  were_signal<void (Args...)> *signal,
+                                        const std::function<void (Args...)> &call,
+                                        uint64_t id,
+                                        were_object_pointer<were_object> context)
+{
+    context.post([signal, call, id]()
+    {
+        signal->add_connection(call, id);
+    });
+}
+
+template <typename ...Args>
+void were_object::remove_connection_safe(   were_signal<void (Args...)> *signal,
+                                            uint64_t id,
+                                            were_object_pointer<were_object> context)
+{
+    context.post([signal, id]()
+    {
+        signal->remove_connection(id);
+    });
+}
+
+template <typename SourceType, typename SignalType, typename ...Args>
+std::function<void ()> were_object::make_breaker(   were_object_pointer<SourceType> source,
+                                                    were_signal<void (Args...)> SignalType::*signal,
+                                                    were_object_pointer<were_object> context,
+                                                    uint64_t pc_id, uint64_t sb_id, uint64_t cb_id)
+{
+    std::function<void ()> breaker = [source, signal, context, pc_id, sb_id, cb_id]()
+    {
+        were_object::disconnect(source, signal, context, pc_id, sb_id, cb_id);
+    };
+
+    return breaker;
+}
+
+template <typename ...Args>
+std::function<void (Args...)> were_object::make_queued_call(    const std::function<void (Args...)> &call,
+                                                                were_object_pointer<were_object> context)
+{
+    std::function<void (Args...)> queued_call = [context, call](Args... args)
+    {
+        context.post([call, args...]()
+        {
+            call(args...);
+        });
+    };
+
+    return queued_call;
+}
+
 template <typename SourceType, typename SignalType, typename Functor, typename ...Args>
 void were_object::connect(  were_object_pointer<SourceType> source,
                             were_signal<void (Args...)> SignalType::*signal,
@@ -332,43 +407,19 @@ void were_object::connect(  were_object_pointer<SourceType> source,
     std::function<void (Args...)> call__;
 
     if (type == were_object::connection_type_direct)
-    {
-        call__ = call;
-    }
+        call__ = std::function<void (Args...)>(call);
     else if (type == were_object::connection_type_queued)
-    {
-        std::function<void (Args...)> call1__ = call;
-        call__ = [context, call1__](Args... args)
-        {
-            context.post([call1__, args...]()
-            {
-                call1__(args...);
-            });
-        };
-    }
+        call__ = make_queued_call(std::function<void (Args...)>(call), context);
 
-    std::function<void ()> breaker = [source, signal, context, pc_id, sb_id, cb_id]()
-    {
-        were_object::disconnect(source, signal, context, pc_id, sb_id, cb_id);
-    };
+    std::function<void ()> breaker = make_breaker(source, signal, context, pc_id, sb_id, cb_id);
 
-    source.post([source, signal, call__, pc_id]()
-    {
-        auto signal__ = &((source.access())->*signal);
-        signal__->add_connection(call__, pc_id);
-    });
+    auto signal1__ = &((source.access_UNSAFE())->*signal);
+    auto signal2__ = &((source.access_UNSAFE())->destroyed);
+    auto signal3__ = &((context.access_UNSAFE())->destroyed);
 
-    source.post([source, breaker, sb_id]()
-    {
-        auto signal__ = &((source.access())->destroyed);
-        signal__->add_connection(breaker, sb_id);
-    });
-
-    context.post([context, breaker, cb_id]()
-    {
-        auto signal__ = &((context.access())->destroyed);
-        signal__->add_connection(breaker, cb_id);
-    });
+    add_connection_safe(signal1__, call__, pc_id, source);
+    add_connection_safe(signal2__, breaker, sb_id, source);
+    add_connection_safe(signal3__, breaker, cb_id, context);
 };
 
 template <typename SourceType, typename SignalType>
@@ -377,23 +428,13 @@ void were_object::disconnect(   were_object_pointer<SourceType> source,
                                 were_object_pointer<were_object> context,
                                 uint64_t pc_id, uint64_t sb_id, uint64_t cb_id)
 {
-    source.post([source, signal, pc_id]()
-    {
-        auto signal__ = &((source.access())->*signal);
-        signal__->remove_connection(pc_id);
-    });
+    auto signal1__ = &((source.access_UNSAFE())->*signal);
+    auto signal2__ = &((source.access_UNSAFE())->destroyed);
+    auto signal3__ = &((context.access_UNSAFE())->destroyed);
 
-    source.post([source, sb_id]()
-    {
-        auto signal__ = &((source.access())->destroyed);
-        signal__->remove_connection(sb_id);
-    });
-
-    context.post([context, cb_id]()
-    {
-        auto signal__ = &((context.access())->destroyed);
-        signal__->remove_connection(cb_id);
-    });
+    remove_connection_safe(signal1__, pc_id, source);
+    remove_connection_safe(signal2__, sb_id, source);
+    remove_connection_safe(signal3__, cb_id, context);
 }
 
 template <typename SourceType, typename SignalType, typename ...Args>
