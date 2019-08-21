@@ -175,7 +175,7 @@ were_object_pointer<T>::were_object_pointer(T *object__)
     if (object_ != nullptr)
         object_->increment_reference_count();
 
-    // XXX2
+    // XXX2 caused problems in operator were_object_pointer
     //if (object_ != nullptr && object_->collapsed())
     //    throw were_exception(WE_SIMPLE);
 }
