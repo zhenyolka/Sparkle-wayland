@@ -36,7 +36,7 @@ sparkle_x11_surface::sparkle_x11_surface(were_object_pointer<sparkle_x11> x11, w
     else
         XUnmapWindow(display_->get(), window_);
 
-    were_object::connect(x11, &sparkle_x11::event, this_wop, [this_wop](XEvent event){this_wop->process(event);});
+    were_object::connect(x11, &sparkle_x11::event1, this_wop, [this_wop](XEvent event){this_wop->process(event);});
 
     were_object::connect(surface, &sparkle_surface::attach, this_wop, [this_wop](struct wl_resource *buffer, int32_t x, int32_t y)
     {

@@ -2,7 +2,8 @@
 #define SPARKLE_X11_H
 
 #include "sparkle.h"
-#include "were_timer.h"
+//#include "were_timer.h"
+#include "were_thread.h"
 #include <X11/Xlib.h>
 
 
@@ -12,7 +13,7 @@ class sparkle_pointer;
 
 typedef were_object_wrapper<were_object_wrapper_primitive<Display *>> x11_display;
 
-class sparkle_x11 : public were_object
+class sparkle_x11 : public were_object, public were_thread_fd_listener
 {
 public:
     ~sparkle_x11();
@@ -21,20 +22,19 @@ public:
     were_object_pointer<x11_display> display() const {return display_;}
 
 signals:
-    were_signal<void (XEvent event)> event; // XXX3
+    were_signal<void (XEvent event)> event1; // XXX3
     were_signal<void (were_object_pointer<sparkle_x11_surface> x11_surface)> x11_surface_created;
     were_signal<void (were_object_pointer<sparkle_keyboard> keyboard)> keyboard_created;
     were_signal<void (were_object_pointer<sparkle_pointer> pointer)> pointer_created;
 
 
 private:
-    void timeout();
+    void event(uint32_t events);
     static void connect_keyboard(were_object_pointer<sparkle_x11_surface> x11_surface, were_object_pointer<sparkle_keyboard> keyboard);
     static void connect_pointer(were_object_pointer<sparkle_x11_surface> x11_surface, were_object_pointer<sparkle_pointer> pointer);
 
 private:
     were_object_pointer<x11_display> display_;
-    were_object_pointer<were_timer> timer_;
     int dpi_;
 };
 

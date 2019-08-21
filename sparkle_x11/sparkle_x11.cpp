@@ -16,7 +16,6 @@
 
 sparkle_x11::~sparkle_x11()
 {
-    timer_.collapse();
     display_.collapse();
 }
 
@@ -34,9 +33,13 @@ sparkle_x11::sparkle_x11(were_object_pointer<sparkle> sparkle)
         XCloseDisplay(display);
     });
 
-    timer_ = were_object_pointer<were_timer>(new were_timer(1000/60));
-    were_object::connect(timer_, &were_timer::timeout, this_wop, [this_wop](){this_wop->timeout();});
-    timer_->start();
+    int fd = XConnectionNumber(display_->get());
+
+    thread()->add_fd_listener(fd, EPOLLIN | EPOLLET, this_wop);
+    were_object::connect(this_wop, &were_object::destroyed, this_wop, [this_wop, fd]()
+    {
+        this_wop->thread()->remove_fd_listener(fd, this_wop);
+    });
 
     were_object::connect(sparkle->output(), &sparkle_global<sparkle_output>::instance, this_wop, [this_wop](were_object_pointer<sparkle_output> output)
     {
@@ -124,7 +127,7 @@ sparkle_x11::sparkle_x11(were_object_pointer<sparkle> sparkle)
     });
 }
 
-void sparkle_x11::timeout()
+void sparkle_x11::event(uint32_t events)
 {
     MAKE_THIS_WOP
 
@@ -133,7 +136,7 @@ void sparkle_x11::timeout()
     while (XPending(display_->get()))
     {
         XNextEvent(display_->get(), &event__);
-        were_object::emit(this_wop, &sparkle_x11::event, event__);
+        were_object::emit(this_wop, &sparkle_x11::event1, event__);
     }
 }
 
