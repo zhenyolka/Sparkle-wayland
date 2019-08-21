@@ -36,13 +36,13 @@ sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
     sparkle_android__->add_dependency(this_wop);
 
 #ifndef SOUND_THREAD
-    audio_ = were_object_pointer<sparkle_audio>(new sparkle_audio(files_dir_ + "/audio-0"));
-    audio_->add_dependency(this_wop);
+    were_object_pointer<sparkle_audio> audio(new sparkle_audio(files_dir_ + "/audio-0"));
+    audio->add_dependency(this_wop);
 #endif
 
 #ifdef SOUND_THREAD
     sound_thread_c_ = std::thread(&sparkle_service::sound, this);
-    sound_thread_c_.detach(); // XXX1
+    sound_thread_c_.detach(); // XXX2
 #endif
 }
 

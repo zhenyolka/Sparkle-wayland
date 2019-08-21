@@ -3,15 +3,14 @@
 
 #include "sparkle_java_object.h"
 
-#define SOUND_THREAD
+//#define SOUND_THREAD
 
 #ifdef SOUND_THREAD
 #include <thread>
 #endif
 
 class sparkle;
-//class sparkle_android;
-//class sparkle_audio;
+
 
 
 class sparkle_service : public sparkle_java_object
@@ -36,11 +35,8 @@ private:
 private:
     std::string files_dir_;
     were_object_pointer<sparkle> sparkle_;
-    //were_object_pointer<sparkle_android> sparkle_android_;
-    //were_object_pointer<sparkle_audio> audio_;
 #ifdef SOUND_THREAD
     std::thread sound_thread_c_;
-    //were_object_pointer<were_thread> sound_thread_;
 #endif
 };
 
