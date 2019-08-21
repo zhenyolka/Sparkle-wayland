@@ -101,7 +101,8 @@ public:
     static void connect(    were_object_pointer<SourceType> source,
                             were_signal<void (Args...)> SignalType::*signal,
                             were_object_pointer<were_object> context,
-                            Functor call, were_object::connection_type type = were_object::connection_type_direct);
+                            Functor call,
+                            were_object::connection_type type = were_object::connection_type_direct);
 
     template <typename SourceType, typename SignalType>
     static void disconnect( were_object_pointer<SourceType> source,
@@ -321,7 +322,8 @@ template <typename SourceType, typename SignalType, typename Functor, typename .
 void were_object::connect(  were_object_pointer<SourceType> source,
                             were_signal<void (Args...)> SignalType::*signal,
                             were_object_pointer<were_object> context,
-                            Functor call, were_object::connection_type type)
+                            Functor call,
+                            were_object::connection_type type)
 {
     uint64_t pc_id = next_id();
     uint64_t sb_id = next_id();
