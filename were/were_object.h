@@ -175,8 +175,9 @@ were_object_pointer<T>::were_object_pointer(T *object__)
     if (object_ != nullptr)
         object_->increment_reference_count();
 
-    if (object_ != nullptr && object_->collapsed())
-        throw were_exception(WE_SIMPLE);
+    // XXX2
+    //if (object_ != nullptr && object_->collapsed())
+    //    throw were_exception(WE_SIMPLE);
 }
 
 template <typename T>

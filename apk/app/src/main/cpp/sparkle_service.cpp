@@ -102,6 +102,7 @@ Java_com_sion_sparkle_SparkleService_native_1create(JNIEnv *env, jobject instanc
     were_object_pointer<sparkle_service> native__(new sparkle_service(env, instance));
     sparkle_android_logger::instance().redirect_output(native__->files_dir() + "/log.txt");
     native__->enable_native_loop(dup(thread->fd()));
+    were_thread::current_thread()->process(0); // XXX2
 
     return jlong(native__.access());
 }
