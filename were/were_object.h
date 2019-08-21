@@ -3,8 +3,6 @@
 
 #include "were_exception.h"
 #include "were_signal.h"
-#include <cstdio>
-#include <typeinfo>
 #include <functional>
 
 #define MAKE_THIS_WOP \
@@ -154,10 +152,7 @@ were_object_pointer<T>::were_object_pointer(T *object__)
         object_->increment_reference_count();
 
     if (object_ != nullptr && object_->collapsed())
-    {
-        fprintf(stdout, "Type %s\n", typeid(T).name());
         throw were_exception(WE_SIMPLE);
-    }
 }
 
 template <typename T>
@@ -234,16 +229,10 @@ template <typename T>
 T *were_object_pointer<T>::access() const
 {
     if (pointer_ == nullptr)
-    {
-        fprintf(stdout, "Type %s\n", typeid(T).name());
         throw were_exception(WE_SIMPLE);
-    }
 
     if (!object_->same_thread())
-    {
-        fprintf(stdout, "Type %s\n", typeid(T).name());
         throw were_exception(WE_SIMPLE);
-    }
 
     return pointer_;
 }
@@ -252,10 +241,7 @@ template <typename T>
 T *were_object_pointer<T>::access_UNSAFE() const
 {
     if (pointer_ == nullptr)
-    {
-        fprintf(stdout, "Type %s\n", typeid(T).name());
         throw were_exception(WE_SIMPLE);
-    }
 
     return pointer_;
 }
@@ -306,10 +292,7 @@ template <typename T>
 were_object_pointer<were_object> were_object_pointer<T>::were() const
 {
     if (object_ == nullptr)
-    {
-        fprintf(stdout, "Type %s\n", typeid(T).name());
         throw were_exception(WE_SIMPLE);
-    }
 
     return were_object_pointer<were_object>(object_);
 }
