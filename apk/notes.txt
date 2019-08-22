@@ -1,2 +1,0 @@
-~/.gradle/gradle.properties
-org.gradle.jvmargs=-Xmx1024m -XX:MaxPermSize=256m
