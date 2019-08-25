@@ -114,7 +114,7 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
             {
                 String action = intent.getAction();
 
-                if (action.equals(sparkle_.ACTION_HIDE))
+                if (action.equals(sparkle_.ACTION_HIDE) || action.equals(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
                 {
                     set_visible(false);
                 }
@@ -137,6 +137,7 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
             IntentFilter filter = new IntentFilter();
             filter.addAction(sparkle_.ACTION_HIDE);
             filter.addAction(sparkle_.ACTION_SHOW);
+            filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
             sparkle_.registerReceiver(receiver_, filter);
 
             enabled_ = true;
