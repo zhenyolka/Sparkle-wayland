@@ -11,6 +11,7 @@ static const int button_map[6] = {0, BTN_LEFT, BTN_MIDDLE, BTN_RIGHT, BTN_GEAR_U
 sparkle_x11_surface::~sparkle_x11_surface()
 {
     XDestroyWindow(display_->get(), window_);
+    XPending(display_->get()); /* Go away, window! */
 }
 
 sparkle_x11_surface::sparkle_x11_surface(were_object_pointer<sparkle_x11> x11, were_object_pointer<sparkle_surface> surface) :

@@ -102,6 +102,22 @@ void were_thread::process(int timeout)
     }
 
     idle();
+
+#if 1
+    // XXX1
+    call_queue_mutex_.lock();
+    while (call_queue_.size() > 0)
+    {
+        {
+            std::function<void ()> call = call_queue_.front();
+            call_queue_.pop();
+            call_queue_mutex_.unlock();
+            call();
+        }
+        call_queue_mutex_.lock();
+    }
+    call_queue_mutex_.unlock();
+#endif
 }
 
 void were_thread::run()
