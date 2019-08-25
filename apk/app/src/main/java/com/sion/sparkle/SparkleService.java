@@ -15,6 +15,7 @@ import android.app.NotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.PendingIntent; // Actions
+import android.widget.RemoteViews; // Custom notification
 
 // Queue
 import android.os.MessageQueue;
@@ -134,6 +135,8 @@ public class SparkleService extends Service
     {
         createNotificationChannel();
 
+        RemoteViews notificationLayout = new RemoteViews(getPackageName(), R.layout.notification_small);
+
         Intent intent1 = new Intent();
         intent1.setAction(ACTION_HIDE);
         PendingIntent pendingIntent1 = PendingIntent.getBroadcast(this, 0, intent1, 0);
@@ -146,15 +149,23 @@ public class SparkleService extends Service
         intent3.setAction(ACTION_STOP);
         PendingIntent pendingIntent3 = PendingIntent.getBroadcast(this, 0, intent3, 0);
 
+        notificationLayout.setOnClickPendingIntent(R.id.button1, pendingIntent1);
+        notificationLayout.setOnClickPendingIntent(R.id.button2, pendingIntent2);
+        notificationLayout.setOnClickPendingIntent(R.id.button3, pendingIntent3);
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
             //.setContentTitle("Title")
-            .setContentText("Sparkle")
+            //.setContentText("Sparkle")
             .setSmallIcon(R.drawable.notification_icon)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             //.setOngoing(true)
-            .addAction(R.drawable.notification_icon, "Hide", pendingIntent1)
-            .addAction(R.drawable.notification_icon, "Show", pendingIntent2)
-            .addAction(R.drawable.notification_icon, "Stop", pendingIntent3);
+            //.addAction(R.drawable.notification_icon, "Hide", pendingIntent1)
+            //.addAction(R.drawable.notification_icon, "Show", pendingIntent2)
+            //.addAction(R.drawable.notification_icon, "Stop", pendingIntent3)
+            .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
+            .setCustomContentView(notificationLayout);
+
+
 
         Notification notification = builder.build();
 
