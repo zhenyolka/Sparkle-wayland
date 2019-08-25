@@ -61,8 +61,8 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
         int flags = 0;
         flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL; // allow any pointer events outside of the window to be sent to the windows behind it
         flags |= WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
-        //flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
-        //flags |= WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+        flags |= WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+
 
         params = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT, 0, 0,
