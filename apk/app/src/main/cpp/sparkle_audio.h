@@ -33,7 +33,6 @@
 
 #define check_result(r) do { if ((r) != SL_RESULT_SUCCESS) throw were_exception(WE_SIMPLE); } while (0)
 
-const int sparkle_audio_buffer_size = 65536;
 
 class were_unix_server;
 class were_unix_socket;
