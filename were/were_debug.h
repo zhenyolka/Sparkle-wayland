@@ -43,6 +43,8 @@ public:
 
     void add_object(were_object *object__);
     void remove_object(were_object *object__);
+    void add_connection();
+    void remove_connection();
 
     void print_now();
 
@@ -57,6 +59,7 @@ private:
     std::thread thread_;
     bool run_;
     int object_count_;
+    int connection_count_;
 #ifdef X_DEBUG
     std::set<were_object *> object_set_;
     std::mutex object_set_mutex_;

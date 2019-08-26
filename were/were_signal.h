@@ -2,6 +2,7 @@
 #define WERE_SIGNAL_H
 
 #include "were_exception.h"
+#include "were_debug.h"
 #include <functional>
 #include <cstdint>
 #include <list>
@@ -43,6 +44,7 @@ void were_signal<void (Args...)>::add_connection(const std::function<void (Args.
     connection.id_ = id;
 
     connections_.push_back(connection);
+    were_debug::instance().add_connection();
 }
 
 template <typename Signature> class were_signal;
@@ -54,6 +56,7 @@ void were_signal<void (Args...)>::remove_connection(uint64_t id)
         if ((*it).id_ == id)
         {
             connections_.erase(it);
+            were_debug::instance().remove_connection();
             break;
         }
     }

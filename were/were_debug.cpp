@@ -82,7 +82,7 @@ were_debug::~were_debug()
 }
 
 were_debug::were_debug() :
-    run_(false), object_count_(0)
+    run_(false), object_count_(0), connection_count_(0)
 {
 }
 
@@ -142,7 +142,7 @@ void were_debug::print_now()
     printf("\033[0;0H"); // Move cursor
 #endif
 
-    fprintf(stdout, "| CPU: %5.1f%% %5.1f%% | OC: %3d | PWR: %4d |\n", cpu_load, load1, object_count_, get_power());
+    fprintf(stdout, "| CPU: %5.1f%% %5.1f%% | OC: %3d | CC: %3d | PWR: %4d |\n", cpu_load, load1, object_count_, connection_count_, get_power());
 #ifdef X_DEBUG
     print_objects();
     fprintf(stdout, "\n");
@@ -203,6 +203,16 @@ void were_debug::remove_object(were_object *object__)
     object_set_mutex_.unlock();
 #endif
     object_count_ -= 1;
+}
+
+void were_debug::add_connection()
+{
+    connection_count_ += 1;
+}
+
+void were_debug::remove_connection()
+{
+    connection_count_ -= 1;
 }
 
 void were_debug::print_objects()
