@@ -153,7 +153,7 @@ void sparkle_android_surface::upload_1(void *destination, const void *source,
     {
         const uint64_t *source_i_l = &source_i[source_stride_bytes / 8 * y];
         uint64_t *destination_i_l = &destination_i[destination_stride_bytes / 8 * y];
-        for (int x = x1; x < x2 / 2; ++x)
+        for (int x = x1 / 2; x < (x2 + 1) / 2; ++x)
             destination_i_l[x] = source_i_l[x] | 0xFF000000FF000000ULL;
     }
 #endif
@@ -205,7 +205,7 @@ void sparkle_android_surface::upload_2(void *destination, const void *source,
     {
         const uint64_t *source_i_l = &source_i[source_stride_bytes / 8 * y];
         uint64_t *destination_i_l = &destination_i[destination_stride_bytes / 8 * y];
-        for (int x = x1; x < x2 / 2; ++x)
+        for (int x = x1 / 2; x < (x2 + 1) / 2; ++x)
         {
             destination_i_l[x] =
             ((source_i_l[x] >> 16) & 0x000000FF000000FFULL) |
