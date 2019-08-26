@@ -348,7 +348,7 @@ void were_object::add_connection_safe(  were_signal<void (Args...)> *signal,
                                         uint64_t id,
                                         were_object_pointer<were_object> context)
 {
-    context.post([signal, call, id]()
+    context.post([context, signal, call, id]()
     {
         signal->add_connection(call, id);
     });
@@ -359,7 +359,7 @@ void were_object::remove_connection_safe(   were_signal<void (Args...)> *signal,
                                             uint64_t id,
                                             were_object_pointer<were_object> context)
 {
-    context.post([signal, id]()
+    context.post([context, signal, id]()
     {
         signal->remove_connection(id);
     });
