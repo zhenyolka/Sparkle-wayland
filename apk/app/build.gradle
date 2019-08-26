@@ -9,6 +9,7 @@ class MyVersion
         def err = new StringBuilder()
         def p = "git rev-list --count HEAD".execute()
         p.consumeProcessOutput(out, err)
+        p.waitForProcessOutput(out, err)
         p.waitFor()
         revision = out.toInteger()
     }

@@ -133,6 +133,7 @@ void sparkle_android_surface::upload_0(void *destination, const void *source,
 void sparkle_android_surface::upload_1(void *destination, const void *source,
     int source_stride_bytes, int destination_stride_bytes, int x1, int y1, int x2, int y2)
 {
+#if 0
     const uint32_t *source_i = reinterpret_cast<const uint32_t *>(source);
     uint32_t *destination_i = reinterpret_cast<uint32_t *>(destination);
 
@@ -143,11 +144,25 @@ void sparkle_android_surface::upload_1(void *destination, const void *source,
         for (int x = x1; x < x2; ++x)
             destination_i_l[x] = source_i_l[x] | 0xFF000000;
     }
+#endif
+#if 1
+    const uint64_t *source_i = reinterpret_cast<const uint64_t *>(source);
+    uint64_t *destination_i = reinterpret_cast<uint64_t *>(destination);
+
+    for (int y = y1; y < y2; ++y)
+    {
+        const uint64_t *source_i_l = &source_i[source_stride_bytes / 8 * y];
+        uint64_t *destination_i_l = &destination_i[destination_stride_bytes / 8 * y];
+        for (int x = x1; x < x2 / 2; ++x)
+            destination_i_l[x] = source_i_l[x] | 0xFF000000FF000000ULL;
+    }
+#endif
 }
 
 void sparkle_android_surface::upload_2(void *destination, const void *source,
     int source_stride_bytes, int destination_stride_bytes, int x1, int y1, int x2, int y2)
 {
+#if 0
     const sparkle_pixel *source_p = reinterpret_cast<const sparkle_pixel *>(source);
     sparkle_pixel *destination_p = reinterpret_cast<sparkle_pixel *>(destination);
     register sparkle_pixel output;
@@ -164,6 +179,41 @@ void sparkle_android_surface::upload_2(void *destination, const void *source,
             destination_p_l[x] = output;
         }
     }
+#endif
+#if 0
+    const uint32_t *source_i = reinterpret_cast<const uint32_t *>(source);
+    uint32_t *destination_i = reinterpret_cast<uint32_t *>(destination);
+
+    for (int y = y1; y < y2; ++y)
+    {
+        const uint32_t *source_i_l = &source_i[source_stride_bytes / 4 * y];
+        uint32_t *destination_i_l = &destination_i[destination_stride_bytes / 4 * y];
+        for (int x = x1; x < x2; ++x)
+        {
+            destination_i_l[x] =
+            ((source_i_l[x] >> 16) & 0x000000FF) |
+            ((source_i_l[x] << 0)  & 0x0000FF00) |
+            ((source_i_l[x] << 16) & 0x00FF0000);
+        }
+    }
+#endif
+#if 1
+    const uint64_t *source_i = reinterpret_cast<const uint64_t *>(source);
+    uint64_t *destination_i = reinterpret_cast<uint64_t *>(destination);
+
+    for (int y = y1; y < y2; ++y)
+    {
+        const uint64_t *source_i_l = &source_i[source_stride_bytes / 8 * y];
+        uint64_t *destination_i_l = &destination_i[destination_stride_bytes / 8 * y];
+        for (int x = x1; x < x2 / 2; ++x)
+        {
+            destination_i_l[x] =
+            ((source_i_l[x] >> 16) & 0x000000FF000000FFULL) |
+            ((source_i_l[x] << 0)  & 0x0000FF000000FF00ULL) |
+            ((source_i_l[x] << 16) & 0x00FF000000FF0000ULL);
+        }
+    }
+#endif
 }
 
 void sparkle_android_surface::commit(bool full)
