@@ -32,4 +32,6 @@ target_link_libraries(sparkle LINK_PUBLIC
     X11
     lua
     pthread
+    dl
+    -rdynamic
 )
