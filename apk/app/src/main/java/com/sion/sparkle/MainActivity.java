@@ -41,6 +41,7 @@ public class MainActivity extends Activity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this))
         {
@@ -49,8 +50,7 @@ public class MainActivity extends Activity
             startActivityForResult(intent, 1);
         }
 
-        Button button1 = new Button(this);
-        button1.setText("Start");
+        Button button1 = (Button)findViewById(R.id.button1);
         button1.setOnClickListener(new Button.OnClickListener()
         {
             @Override
@@ -67,8 +67,7 @@ public class MainActivity extends Activity
             }
         });
 
-        Button button2 = new Button(this);
-        button2.setText("Stop");
+        Button button2 = (Button)findViewById(R.id.button2);
         button2.setOnClickListener(new Button.OnClickListener()
         {
             @Override
@@ -81,8 +80,7 @@ public class MainActivity extends Activity
             }
         });
 
-        Button button3 = new Button(this);
-        button3.setText("Edit settings.lua");
+        Button button3 = (Button)findViewById(R.id.button3);
         button3.setOnClickListener(new Button.OnClickListener()
         {
             @Override
@@ -96,8 +94,7 @@ public class MainActivity extends Activity
             }
         });
 
-        Button button4 = new Button(this);
-        button4.setText("Edit user.sh");
+        Button button4 = (Button)findViewById(R.id.button4);
         button4.setOnClickListener(new Button.OnClickListener()
         {
             @Override
@@ -111,8 +108,7 @@ public class MainActivity extends Activity
             }
         });
 
-        Button button5 = new Button(this);
-        button5.setText("Check log");
+        Button button5 = (Button)findViewById(R.id.button5);
         button5.setOnClickListener(new Button.OnClickListener()
         {
             @Override
@@ -125,25 +121,6 @@ public class MainActivity extends Activity
                 startActivity(intent);
             }
         });
-
-        ImageView image = new ImageView(this);
-        image.setImageResource(R.drawable.sparkle);
-
-        LinearLayout.LayoutParams params1 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1);
-        LinearLayout.LayoutParams params2 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.addView(image, params1);
-        layout.addView(button1, params2);
-        layout.addView(button2, params2);
-        layout.addView(button3, params2);
-        layout.addView(button4, params2);
-        layout.addView(button5, params2);
-
-
-        layout.setBackgroundColor(Color.BLACK);
-        setContentView(layout);
 
         native_ = native_create();
         native_setup(native_);
