@@ -3,12 +3,9 @@
 #include <csignal>
 #include <cstdio>
 #include <exception>
-
-#ifdef __ANDROID__
 #include <unwind.h>
 #include <dlfcn.h>
 #include <cxxabi.h>
-#endif
 
 
 were_backtrace::~were_backtrace()
@@ -68,18 +65,16 @@ void were_backtrace::handler(int n)
     std::_Exit(-1);
 }
 
-#ifdef __ANDROID__
-
-struct android_backtrace_state
+struct backtrace_state
 {
     void **current;
     void **end;
 };
 
-_Unwind_Reason_Code android_unwind_callback(struct _Unwind_Context *context, void *arg)
+_Unwind_Reason_Code unwind_callback(struct _Unwind_Context *context, void *arg)
 {
-    android_backtrace_state *state = (android_backtrace_state *)arg;
-    uintptr_t pc = _Unwind_GetIP(context);
+    backtrace_state *state = (backtrace_state *)arg;
+    _Unwind_Ptr pc = _Unwind_GetIP(context);
     if (pc)
     {
         if (state->current == state->end)
@@ -93,16 +88,14 @@ _Unwind_Reason_Code android_unwind_callback(struct _Unwind_Context *context, voi
 
 void dump_stack()
 {
-    fprintf(stdout, "android stack dump\n");
-
     const int max = 100;
     void *buffer[max];
 
-    android_backtrace_state state;
+    backtrace_state state;
     state.current = buffer;
     state.end = buffer + max;
 
-    _Unwind_Backtrace(android_unwind_callback, &state);
+    _Unwind_Backtrace(unwind_callback, &state);
 
     int count = (int)(state.current - buffer);
 
@@ -127,17 +120,7 @@ void dump_stack()
         if (NULL != demangled)
             free(demangled);
     }
-
-    fprintf(stdout, "android stack dump done\n");
 }
-
-#else
-
-void dump_stack()
-{
-}
-
-#endif
 
 void were_backtrace::print_backtrace()
 {
