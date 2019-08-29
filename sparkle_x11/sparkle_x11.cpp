@@ -142,8 +142,8 @@ void sparkle_x11::event(uint32_t events)
 
 void sparkle_x11::connect_keyboard(were_object_pointer<sparkle_x11_surface> x11_surface, were_object_pointer<sparkle_keyboard> keyboard)
 {
-    //if (wl_resource_get_client(keyboard->resource()) != wl_resource_get_client(surface_->resource()))
-    //    return; // XXX2
+    if (keyboard->client() != x11_surface->surface()->client())
+        return;
 
     were_object::connect(x11_surface, &sparkle_x11_surface::key_press, keyboard, [keyboard, x11_surface](int code)
     {
@@ -160,8 +160,8 @@ void sparkle_x11::connect_keyboard(were_object_pointer<sparkle_x11_surface> x11_
 
 void sparkle_x11::connect_pointer(were_object_pointer<sparkle_x11_surface> x11_surface, were_object_pointer<sparkle_pointer> pointer)
 {
-    //if (wl_resource_get_client(keyboard->resource()) != wl_resource_get_client(surface_->resource()))
-    //    return; // XXX2
+    if (pointer->client() != x11_surface->surface()->client())
+        return;
 
     were_object::connect(x11_surface, &sparkle_x11_surface::pointer_button_press, pointer, [pointer](int button)
     {

@@ -281,10 +281,10 @@ void sparkle_android_surface::commit(bool full)
 
 void sparkle_android_surface::register_keyboard(were_object_pointer<sparkle_keyboard> keyboard)
 {
-    were_object_pointer<sparkle_surface> surface(surface_);
+    if (keyboard->client() != surface_->client())
+        return;
 
-    //if (wl_resource_get_client(keyboard->resource()) != wl_resource_get_client(surface_->resource()))
-    //    return; // XXX2
+    were_object_pointer<sparkle_surface> surface(surface_);
 
     were_object::connect(view_, &sparkle_view::key_down, keyboard, [keyboard, surface](int code)
     {
@@ -303,10 +303,10 @@ void sparkle_android_surface::register_keyboard(were_object_pointer<sparkle_keyb
 
 void sparkle_android_surface::register_pointer(were_object_pointer<sparkle_pointer> pointer)
 {
-    were_object_pointer<sparkle_surface> surface(surface_);
+    if (pointer->client() != surface_->client())
+        return;
 
-    //if (wl_resource_get_client(keyboard->resource()) != wl_resource_get_client(surface_->resource()))
-    //    return; // XXX2
+    were_object_pointer<sparkle_surface> surface(surface_);
 
     were_object::connect(view_, &sparkle_view::pointer_button_down, pointer, [pointer](int button)
     {
@@ -338,6 +338,9 @@ void sparkle_android_surface::register_pointer(were_object_pointer<sparkle_point
 
 void sparkle_android_surface::register_touch(were_object_pointer<sparkle_touch> touch)
 {
+    if (touch->client() != surface_->client())
+        return;
+
     were_object_pointer<sparkle_surface> surface(surface_);
 
     were_object::connect(view_, &sparkle_view::touch_down, touch, [touch, surface](int id, int x, int y)
