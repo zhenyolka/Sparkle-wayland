@@ -85,7 +85,7 @@ public:
 
     void collapse();
 
-    were_object_pointer<were_thread> thread() const
+    virtual were_object_pointer<were_thread> thread() // XXX2 were_thread
     {
         return thread_;
     }
@@ -128,8 +128,8 @@ public:
                         SignalType signal,
                         Args... args);
 
-    bool same_thread() const;
     void post(const std::function<void ()> &call);
+    static were_object_pointer<were_thread> &current_thread();
 
 signals:
     were_signal<void ()> destroyed;
@@ -233,11 +233,11 @@ void were_object_pointer<T>::reset()
 {
     if (object_ != nullptr)
     {
-        object_->decrement_reference_count();
+        //object_->decrement_reference_count();
 
-        if (object_->reference_count() == 0 && object_->collapsed())
+        if (object_->reference_count() == 1 && object_->collapsed())
         {
-            if (object_->same_thread())
+            if (were_object::current_thread() == object_->thread())
             {
                 delete object_;
             }
@@ -247,6 +247,8 @@ void were_object_pointer<T>::reset()
                 object_->post([object__](){delete object__;});
             }
         }
+        else
+            object_->decrement_reference_count();
 
         object_ = nullptr;
         pointer_ = nullptr;
@@ -269,7 +271,7 @@ T *were_object_pointer<T>::access() const
     if (pointer_ == nullptr)
         throw were_exception(WE_SIMPLE);
 
-    if (!object_->same_thread())
+    if (were_object::current_thread() != object_->thread())
         throw were_exception(WE_SIMPLE);
 
     return pointer_;

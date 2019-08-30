@@ -63,6 +63,8 @@ void were_timer::stop()
 
 void were_timer::event(uint32_t events)
 {
+    MAKE_THIS_WOP
+
     if (events == EPOLLIN)
     {
         uint64_t expirations;
@@ -70,7 +72,7 @@ void were_timer::event(uint32_t events)
         if (read(fd_, &expirations, sizeof(uint64_t)) != sizeof(uint64_t))
             throw were_exception(WE_SIMPLE);
 
-        were_object::emit(were_object_pointer<were_timer>(this), &were_timer::timeout);
+        were_object::emit(this_wop, &were_timer::timeout);
     }
     else
         throw were_exception(WE_SIMPLE);

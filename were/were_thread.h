@@ -49,6 +49,7 @@ private:
     void event(uint32_t events);
     void add_fd_listener_(int fd, uint32_t events, were_thread_fd_listener *listener);
     void remove_fd_listener_(int fd);
+    virtual were_object_pointer<were_thread> thread();
 
 private:
     static thread_local were_object_pointer<were_thread> current_thread_;

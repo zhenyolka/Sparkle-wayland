@@ -42,6 +42,8 @@ were_signal_handler::were_signal_handler()
 
 void were_signal_handler::event(uint32_t events)
 {
+    MAKE_THIS_WOP
+
     if (events == EPOLLIN)
     {
         struct signalfd_siginfo si;
@@ -49,7 +51,7 @@ void were_signal_handler::event(uint32_t events)
         if (read(fd_, &si, sizeof(struct signalfd_siginfo)) != sizeof(struct signalfd_siginfo))
             throw were_exception(WE_SIMPLE);
 
-        were_object::emit(were_object_pointer<were_signal_handler>(this), &were_signal_handler::signal, si.ssi_signo);
+        were_object::emit(this_wop, &were_signal_handler::signal, si.ssi_signo);
     }
     else
         throw were_exception(WE_SIMPLE);

@@ -41,15 +41,12 @@ void were_object::add_dependency(were_object_pointer<were_object> dependency)
     });
 }
 
-bool were_object::same_thread() const
-{
-    if (thread() && thread() != were_thread::current_thread())
-        return false;
-    else
-        return true;
-}
-
 void were_object::post(const std::function<void ()> &call)
 {
     thread()->post(call);
+}
+
+were_object_pointer<were_thread> &were_object::current_thread()
+{
+    return were_thread::current_thread();
 }
