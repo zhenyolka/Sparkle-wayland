@@ -3,11 +3,12 @@ package com.sion.sparkle;
 // Basic
 import androidx.annotation.Keep;
 import android.os.Build;
+import android.content.Intent;
+import android.content.Context;
+import android.util.Log;
+
 import android.app.Activity;
 import android.os.Bundle;
-
-// Start/Stop service
-import android.content.Intent; // XXX3 Basic
 
 // Request permissions
 import android.provider.Settings;
@@ -15,13 +16,7 @@ import android.net.Uri;
 
 // UI
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.view.View; // Button callback
-import android.widget.ImageView;
-import android.graphics.Color;
-
-// Log
-import android.util.Log;
 
 
 public class MainActivity extends Activity

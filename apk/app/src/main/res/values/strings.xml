@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="title">Sparkle</string>
+
     <string name="start">Start</string>
     <string name="stop">Stop</string>
     <string name="e_settings">Edit settings.lua</string>
     <string name="e_user">Edit user.sh</string>
     <string name="e_log">Check log</string>
+
+    <string name="save">Save</string>
+
 </resources>

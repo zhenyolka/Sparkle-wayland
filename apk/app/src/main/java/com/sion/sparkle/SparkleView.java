@@ -1,5 +1,12 @@
 package com.sion.sparkle;
 
+// Basic
+import androidx.annotation.Keep;
+import android.os.Build;
+import android.content.Intent;
+import android.content.Context;
+import android.util.Log;
+
 import android.view.SurfaceView;
 
 import android.view.SurfaceHolder;
@@ -8,36 +15,22 @@ import android.view.Surface;
 import android.view.WindowManager;
 import android.view.Gravity;
 
-import androidx.annotation.Keep; // XXX3 Basic
-
-// Check version
-import android.os.Build;
-
+// Input
 import android.view.MotionEvent;
 import android.view.KeyEvent;
-
-// Check input source
-import android.view.InputDevice;
-
-import android.util.Log;
-
-// Software keyboard
-import android.view.inputmethod.InputMethodManager;
+import android.view.InputDevice; // Check input source
+import android.view.inputmethod.InputMethodManager; // Software keyboard
 
 // Broadcast receiver
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
-import android.content.Intent; // XXX3 Basic
-import android.content.Context; // XXX3 Basic
+
 
 // Orientation control
 import android.util.DisplayMetrics;
 import android.content.pm.ActivityInfo;
 
-import android.graphics.PixelFormat;
-
-
-import android.util.Log;
+//import android.graphics.PixelFormat;
 
 
 public class SparkleView extends SurfaceView implements SurfaceHolder.Callback

@@ -2,12 +2,13 @@ package com.sion.sparkle;
 
 // Basic
 import androidx.annotation.Keep;
+import android.os.Build;
+import android.content.Intent;
+import android.content.Context;
+import android.util.Log;
+
 import android.app.Service;
 import android.os.IBinder;
-import android.content.Intent;
-
-// System services
-import android.content.Context; // Basic
 
 // Notification
 import androidx.core.app.NotificationCompat;
@@ -41,13 +42,6 @@ import android.content.IntentFilter;
 //map.put(k, v);
 //map.remove(k);
 //Map<Long, MyIdleHandler> idle_handlers_ = new HashMap<Long, MyIdleHandler>();
-
-// Check version
-import android.os.Build;
-
-
-import android.util.Log;
-
 
 // Timer
 //import java.util.Timer;
