@@ -94,14 +94,14 @@ extern "C" JNIEXPORT jlong JNICALL
 Java_com_sion_sparkle_SparkleService_native_1create(JNIEnv *env, jobject instance)
 {
     were_backtrace::instance().enable();
-
     were_debug::instance().start();
 
-    were_object_pointer<were_thread> thread(new were_thread());
+    if (!were_thread::current_thread())
+        were_object_pointer<were_thread> thread(new were_thread());
 
     were_object_pointer<sparkle_service> native__(new sparkle_service(env, instance));
     sparkle_android_logger::instance().redirect_output(native__->files_dir() + "/log.txt");
-    native__->enable_native_loop(dup(thread->fd()));
+    native__->enable_native_loop(dup(were_thread::current_thread()->fd()));
     were_thread::current_thread()->process(0); // XXX2
 
     return jlong(native__.access());
@@ -113,26 +113,20 @@ Java_com_sion_sparkle_SparkleService_native_1destroy(JNIEnv *env, jobject instan
     were_object_pointer<sparkle_service> native__(reinterpret_cast<sparkle_service *>(native));
     native__->disable_native_loop();
 
-
     native__.collapse();
 
-    for (int i = 0; i < 100; ++i)
+    for (int i = 0; i < 100; ++i) // XXX2 Clean
         were_thread::current_thread()->process(10);
 
     if (were_thread::current_thread().reference_count() == 1)
     {
         were_thread::current_thread().collapse();
-        fprintf(stdout, "exit good\n");
-    }
-    else
-    {
-        fprintf(stdout, "exit bad\n");
+        fprintf(stdout, "thread collapsed\n");
+        were_debug::instance().stop();
     }
 
-    were_debug::instance().stop();
-
-    fprintf(stdout, "SIGINT\n");
-    raise(SIGINT); /* That is how we deal with program termination and proper resource deallocation! Yeah! */
+    //fprintf(stdout, "SIGINT\n");
+    //raise(SIGINT); /* That is how we deal with program termination and proper resource deallocation! Yeah! */
 }
 
 extern "C" JNIEXPORT void JNICALL

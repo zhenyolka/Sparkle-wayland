@@ -6,6 +6,7 @@
 
 #include "sparkle_android_logger.h"
 #include "were_backtrace.h"
+#include "were_thread.h"
 
 extern "C"
 {
@@ -143,6 +144,10 @@ extern "C" JNIEXPORT jlong JNICALL
 Java_com_sion_sparkle_MainActivity_native_1create(JNIEnv *env, jobject instance)
 {
     were_backtrace::instance().enable();
+    were_debug::instance().start();
+
+    if (!were_thread::current_thread())
+        were_object_pointer<were_thread> thread(new were_thread());
 
     were_object_pointer<sparkle_main_activity> native__(new sparkle_main_activity(env, instance));
     native__->increment_reference_count();
@@ -157,6 +162,16 @@ Java_com_sion_sparkle_MainActivity_native_1destroy(JNIEnv *env, jobject instance
     were_object_pointer<sparkle_main_activity> native__(reinterpret_cast<sparkle_main_activity *>(native));
     native__->decrement_reference_count();
     native__.collapse();
+
+    for (int i = 0; i < 100; ++i)
+        were_thread::current_thread()->process(10);
+
+    if (were_thread::current_thread().reference_count() == 1)
+    {
+        were_thread::current_thread().collapse();
+        fprintf(stdout, "thread collapsed\n");
+        were_debug::instance().stop();
+    }
 }
 
 extern "C" JNIEXPORT void JNICALL
