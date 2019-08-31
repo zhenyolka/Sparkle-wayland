@@ -39,7 +39,7 @@ public class SparkleEditorActivity extends Activity
 
         Intent intent = getIntent();
         file_ = intent.getStringExtra(MainActivity.EXTRA_FILE);
-        boolean read_only = intent.getBooleanExtra(MainActivity.EXTRA_FILE_RO, true);
+        boolean read_only = intent.getBooleanExtra(MainActivity.EXTRA_FILE_LOG, true);
 
         if (read_only)
         {
@@ -48,22 +48,35 @@ public class SparkleEditorActivity extends Activity
             TextView text = (TextView)findViewById(R.id.text);
             final ScrollView scroller = (ScrollView)findViewById(R.id.scroller);
 
+            text.setText("");
+
             try
             {
-                text.setText(read_file(file_));
-                scroller.post(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        scroller.fullScroll(View.FOCUS_DOWN);
-                    }
-                });
+                text.append(read_file(file_ + ".old"));
+
             }
             catch (IOException e)
             {
                 Log.e("Sparkle", e.getMessage());
             }
+
+            try
+            {
+                text.append(read_file(file_));
+            }
+            catch (IOException e)
+            {
+                Log.e("Sparkle", e.getMessage());
+            }
+
+            scroller.post(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    scroller.fullScroll(View.FOCUS_DOWN);
+                }
+            });
 
         }
         else

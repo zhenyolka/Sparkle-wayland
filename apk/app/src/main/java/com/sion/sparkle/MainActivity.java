@@ -22,7 +22,7 @@ import android.view.View; // Button callback
 public class MainActivity extends Activity
 {
     public static final String EXTRA_FILE = "com.sion.sparkle.FILE";
-    public static final String EXTRA_FILE_RO = "com.sion.sparkle.FILE_RO";
+    public static final String EXTRA_FILE_LOG = "com.sion.sparkle.FILE_LOG";
 
     @Override
     protected void onDestroy()
@@ -84,7 +84,7 @@ public class MainActivity extends Activity
                 Intent intent = new Intent(MainActivity.this, SparkleEditorActivity.class);
                 String file = "settings.lua";
                 intent.putExtra(EXTRA_FILE, file);
-                intent.putExtra(EXTRA_FILE_RO, false);
+                intent.putExtra(EXTRA_FILE_LOG, false);
                 startActivity(intent);
             }
         });
@@ -98,7 +98,7 @@ public class MainActivity extends Activity
                 Intent intent = new Intent(MainActivity.this, SparkleEditorActivity.class);
                 String file = "user.sh";
                 intent.putExtra(EXTRA_FILE, file);
-                intent.putExtra(EXTRA_FILE_RO, false);
+                intent.putExtra(EXTRA_FILE_LOG, false);
                 startActivity(intent);
             }
         });
@@ -112,7 +112,7 @@ public class MainActivity extends Activity
                 Intent intent = new Intent(MainActivity.this, SparkleEditorActivity.class);
                 String file = "log.txt";
                 intent.putExtra(EXTRA_FILE, file);
-                intent.putExtra(EXTRA_FILE_RO, true);
+                intent.putExtra(EXTRA_FILE_LOG, true);
                 startActivity(intent);
             }
         });
