@@ -29,6 +29,7 @@ public:
     void add_connection(const std::function<void (Args...)> &call, uint64_t id);
     void remove_connection(uint64_t id);
     void emit(Args... args);
+    bool emitting() const {return emitting_;}
 
 private:
     std::list<connection_type> connections_;
