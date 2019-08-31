@@ -301,7 +301,8 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
         else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP)
         {
             InputMethodManager imm = (InputMethodManager)sparkle_.getSystemService(sparkle_.INPUT_METHOD_SERVICE);
-            imm.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT);
+            //imm.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT);
+            imm.toggleSoftInput(0, 0);
         }
         else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)
         {
