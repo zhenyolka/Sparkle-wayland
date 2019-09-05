@@ -44,6 +44,7 @@ public:
     void idle();
 
     void post(const std::function<void ()> &call);
+    void process_queue();
 
 private:
     void event(uint32_t events);

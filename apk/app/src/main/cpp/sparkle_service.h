@@ -3,15 +3,6 @@
 
 #include "sparkle_java_object.h"
 
-//#define SOUND_THREAD
-
-#ifdef SOUND_THREAD
-#include <thread>
-#endif
-
-class sparkle;
-
-
 
 class sparkle_service : public sparkle_java_object
 {
@@ -28,16 +19,7 @@ public:
     int display_height();
 
 private:
-#ifdef SOUND_THREAD
-    void sound();
-#endif
-
-private:
     std::string files_dir_;
-    were_object_pointer<sparkle> sparkle_;
-#ifdef SOUND_THREAD
-    std::thread sound_thread_c_;
-#endif
 };
 
 #endif // SPARKLE_SERVICE_H

@@ -76,19 +76,6 @@ void were_thread::remove_fd_listener_(int fd)
 
 void were_thread::process(int timeout)
 {
-    call_queue_mutex_.lock();
-    while (call_queue_.size() > 0)
-    {
-        {
-            std::function<void ()> call = call_queue_.front();
-            call_queue_.pop();
-            call_queue_mutex_.unlock();
-            call();
-        }
-        call_queue_mutex_.lock();
-    }
-    call_queue_mutex_.unlock();
-
     struct epoll_event events[MAX_EVENTS];
 
     int n = epoll_wait(epoll_fd_, events, MAX_EVENTS, timeout);
@@ -103,25 +90,13 @@ void were_thread::process(int timeout)
 
     idle();
 
-#if 1
-    // XXX1
-    call_queue_mutex_.lock();
-    while (call_queue_.size() > 0)
-    {
-        {
-            std::function<void ()> call = call_queue_.front();
-            call_queue_.pop();
-            call_queue_mutex_.unlock();
-            call();
-        }
-        call_queue_mutex_.lock();
-    }
-    call_queue_mutex_.unlock();
-#endif
+    process_queue();
 }
 
 void were_thread::run()
 {
+    process_queue();
+
     for (;;)
     {
         process(1000);
@@ -185,6 +160,22 @@ void were_thread::post(const std::function<void ()> &call)
         if (write(event_fd_, &add, sizeof(uint64_t)) != sizeof(uint64_t))
             throw were_exception(WE_SIMPLE);
     }
+}
+
+void were_thread::process_queue()
+{
+    call_queue_mutex_.lock();
+    while (call_queue_.size() > 0)
+    {
+        {
+            std::function<void ()> call = call_queue_.front();
+            call_queue_.pop();
+            call_queue_mutex_.unlock();
+            call();
+        }
+        call_queue_mutex_.lock();
+    }
+    call_queue_mutex_.unlock();
 }
 
 were_object_pointer<were_thread> were_thread::thread()

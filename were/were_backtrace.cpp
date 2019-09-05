@@ -1,7 +1,7 @@
 #include "were_backtrace.h"
 #include <cstdlib>
-#include <csignal>
 #include <cstdio>
+#include <csignal>
 #include <exception>
 #include <unwind.h>
 #include <dlfcn.h>
@@ -73,25 +73,27 @@ struct backtrace_state
 
 _Unwind_Reason_Code unwind_callback(struct _Unwind_Context *context, void *arg)
 {
-    backtrace_state *state = (backtrace_state *)arg;
+    struct backtrace_state *state = (struct backtrace_state *)arg;
+
     _Unwind_Ptr pc = _Unwind_GetIP(context);
+
     if (pc)
     {
         if (state->current == state->end)
             return _URC_END_OF_STACK;
         else
-            *state->current++ = reinterpret_cast<void *>(pc);
+            *state->current++ = (void *)(pc);
     }
 
     return _URC_NO_REASON;
 }
 
-void dump_stack()
+void were1_backtrace_print()
 {
     const int max = 100;
     void *buffer[max];
 
-    backtrace_state state;
+    struct backtrace_state state;
     state.current = buffer;
     state.end = buffer + max;
 
@@ -99,9 +101,9 @@ void dump_stack()
 
     int count = (int)(state.current - buffer);
 
-    for (int idx = 0; idx < count; idx++)
+    for (int i = 0; i < count; ++i)
     {
-        const void *addr = buffer[idx];
+        const void *addr = buffer[i];
         const char *symbol = "";
 
         Dl_info info;
@@ -111,18 +113,15 @@ void dump_stack()
         int status = 0;
         char *demangled = __cxxabiv1::__cxa_demangle(symbol, 0, 0, &status);
 
-        fprintf(stdout, "%03d: 0x%p %s\n",
-                idx,
-                addr,
-                (NULL != demangled && 0 == status) ?
-                demangled : symbol);
+        fprintf(stdout, "%03d: 0x%p %s\n", i, addr,
+            (demangled != NULL && status == 0) ? demangled : symbol);
 
-        if (NULL != demangled)
+        if (demangled != NULL)
             free(demangled);
     }
 }
 
 void were_backtrace::print_backtrace()
 {
-    dump_stack();
+    were1_backtrace_print();
 }

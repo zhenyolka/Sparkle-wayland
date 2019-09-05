@@ -7,15 +7,8 @@
 #include "sparkle_audio.h"
 #include "were_debug.h"
 #include "were_backtrace.h"
-
-#include <csignal>
-#include "were_timer.h"
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-
+#include <unistd.h> // dup()
+//#include <csignal> // SIGINT
 
 
 sparkle_service::~sparkle_service()
@@ -29,21 +22,14 @@ sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
 
     files_dir_ = call_string_method("files_dir", "()Ljava/lang/String;");
 
-    sparkle_ = were_object_pointer<sparkle>(new sparkle(files_dir_));
-    sparkle_->add_dependency(this_wop);
+    were_object_pointer<sparkle> sparkle__ = were_object_pointer<sparkle>(new sparkle(files_dir_));
+    sparkle__->add_dependency(this_wop);
 
-    were_object_pointer<sparkle_android> sparkle_android__(new sparkle_android(sparkle_, this_wop));
+    were_object_pointer<sparkle_android> sparkle_android__(new sparkle_android(sparkle__, this_wop));
     sparkle_android__->add_dependency(this_wop);
 
-#ifndef SOUND_THREAD
-    were_object_pointer<sparkle_audio> audio(new sparkle_audio(files_dir_ + "/audio-0"));
-    audio->add_dependency(this_wop);
-#endif
-
-#ifdef SOUND_THREAD
-    sound_thread_c_ = std::thread(&sparkle_service::sound, this);
-    sound_thread_c_.detach(); // XXX2
-#endif
+    were_object_pointer<sparkle_audio> sparkle_audio__(new sparkle_audio(files_dir_ + "/audio-0"));
+    sparkle_audio__->add_dependency(this_wop);
 }
 
 void sparkle_service::enable_native_loop(int fd)
@@ -65,30 +51,6 @@ int sparkle_service::display_height()
 {
     return call_int_method("display_height", "()I");
 }
-
-#ifdef SOUND_THREAD
-void sparkle_service::sound()
-{
-    {
-        were_object_pointer<were_thread> thread(new were_thread());
-    }
-
-    {
-        MAKE_THIS_WOP
-
-        were_object_pointer<sparkle_audio> audio(new sparkle_audio(files_dir_ + "/audio-0"));
-
-        were_object::connect(this_wop, &were_object::destroyed, audio, [audio]() mutable
-        {
-            audio.collapse();
-        }, were_object::connection_type_queued);
-    }
-
-    were_thread::current_thread()->run();
-
-    were_thread::current_thread().collapse();
-}
-#endif
 
 extern "C" JNIEXPORT jlong JNICALL
 Java_com_sion_sparkle_SparkleService_native_1create(JNIEnv *env, jobject instance)
