@@ -2,6 +2,7 @@
 #include "were_exception.h"
 #include <unistd.h>
 #include <sys/eventfd.h>
+#include <ctime>
 
 
 const int MAX_EVENTS = 16;
@@ -74,38 +75,6 @@ void were_thread::remove_fd_listener_(int fd)
         throw were_exception(WE_SIMPLE);
 }
 
-void were_thread::process(int timeout)
-{
-    struct epoll_event events[MAX_EVENTS];
-
-    int n = epoll_wait(epoll_fd_, events, MAX_EVENTS, timeout);
-    if (n == -1 && errno != EINTR)
-        throw were_exception(WE_SIMPLE_ERRNO);
-
-    for (int i = 0; i < n; ++i)
-    {
-        were_thread_fd_listener *listener = reinterpret_cast<were_thread_fd_listener *>(events[i].data.ptr);
-        listener->event(events[i].events);
-    }
-
-    idle();
-
-    process_queue();
-}
-
-void were_thread::run()
-{
-    process_queue();
-
-    for (;;)
-    {
-        process(1000);
-
-        if (reference_count() == 1) // XXX2
-            break;
-    }
-}
-
 void were_thread::add_idle_handler(were_object_pointer<were_thread_idle_handler> handler)
 {
     MAKE_THIS_WOP
@@ -126,7 +95,22 @@ void were_thread::remove_idle_handler(were_object_pointer<were_thread_idle_handl
     handler.decrement_reference_count();
 }
 
-void were_thread::idle()
+void were_thread::process_events(int timeout)
+{
+    struct epoll_event events[MAX_EVENTS];
+
+    int n = epoll_wait(epoll_fd_, events, MAX_EVENTS, timeout);
+    if (n == -1 && errno != EINTR)
+        throw were_exception(WE_SIMPLE_ERRNO);
+
+    for (int i = 0; i < n; ++i)
+    {
+        were_thread_fd_listener *listener = reinterpret_cast<were_thread_fd_listener *>(events[i].data.ptr);
+        listener->event(events[i].events);
+    }
+}
+
+void were_thread::process_idle()
 {
     //idle_handlers_mutex_.lock();
     for (auto it = idle_handlers_.begin(); it != idle_handlers_.end(); ++it)
@@ -134,16 +118,65 @@ void were_thread::idle()
     //idle_handlers_mutex_.unlock();
 }
 
-void were_thread::event(uint32_t events)
+void were_thread::process_queue()
 {
-    if (events == EPOLLIN)
+    call_queue_mutex_.lock();
+    while (call_queue_.size() > 0)
     {
-        uint64_t counter = 0;
-        if (read(event_fd_, &counter, sizeof(uint64_t)) != sizeof(uint64_t))
-            throw were_exception(WE_SIMPLE);
+        {
+            std::function<void ()> call = call_queue_.front();
+            call_queue_.pop();
+            call_queue_mutex_.unlock();
+            call();
+        }
+        call_queue_mutex_.lock();
     }
-    else
-        throw were_exception(WE_SIMPLE);
+    call_queue_mutex_.unlock();
+}
+
+void were_thread::run()
+{
+    process_queue();
+
+    for (;;)
+    {
+        process_events(1000);
+        process_queue();
+        process_idle();
+
+        if (reference_count() == 1)
+            break;
+    }
+}
+
+void were_thread::run_once()
+{
+    process_events(0);
+    process_queue();
+    process_idle();
+}
+
+void were_thread::run_for(int ms)
+{
+    struct timespec ts1, ts2;
+    clock_gettime(CLOCK_MONOTONIC, &ts1);
+
+    for (;;)
+    {
+        process_events(10);
+        process_queue();
+        process_idle();
+
+        if (reference_count() == 1)
+            break;
+
+        clock_gettime(CLOCK_MONOTONIC, &ts2);
+        uint64_t elapsed = 0;
+        elapsed += 1000ULL * (ts2.tv_sec - ts1.tv_sec);
+        elapsed += (ts2.tv_nsec - ts1.tv_nsec) / 1000000ULL;
+        if (elapsed > ms)
+            break;
+    }
 }
 
 void were_thread::post(const std::function<void ()> &call)
@@ -162,20 +195,16 @@ void were_thread::post(const std::function<void ()> &call)
     }
 }
 
-void were_thread::process_queue()
+void were_thread::event(uint32_t events)
 {
-    call_queue_mutex_.lock();
-    while (call_queue_.size() > 0)
+    if (events == EPOLLIN)
     {
-        {
-            std::function<void ()> call = call_queue_.front();
-            call_queue_.pop();
-            call_queue_mutex_.unlock();
-            call();
-        }
-        call_queue_mutex_.lock();
+        uint64_t counter = 0;
+        if (read(event_fd_, &counter, sizeof(uint64_t)) != sizeof(uint64_t))
+            throw were_exception(WE_SIMPLE);
     }
-    call_queue_mutex_.unlock();
+    else
+        throw were_exception(WE_SIMPLE);
 }
 
 were_object_pointer<were_thread> were_thread::thread()

@@ -153,6 +153,8 @@ Java_com_sion_sparkle_MainActivity_native_1create(JNIEnv *env, jobject instance)
     native__->increment_reference_count();
     sparkle_android_logger::instance().redirect_output(native__->files_dir() + "/log.txt");
 
+    were_thread::current_thread()->process_queue(); // XXX2
+
     return jlong(native__.access());
 }
 
@@ -163,8 +165,7 @@ Java_com_sion_sparkle_MainActivity_native_1destroy(JNIEnv *env, jobject instance
     native__->decrement_reference_count();
     native__.collapse();
 
-    for (int i = 0; i < 100; ++i)
-        were_thread::current_thread()->process(10);
+    were_thread::current_thread()->run_for(1000);
 
     if (were_thread::current_thread().reference_count() == 1)
     {

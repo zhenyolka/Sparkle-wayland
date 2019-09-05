@@ -38,18 +38,20 @@ public:
     void add_idle_handler(were_object_pointer<were_thread_idle_handler> handler);
     void remove_idle_handler(were_object_pointer<were_thread_idle_handler> handler);
 
-    void process(int timeout = -1);
-    void run();
-
-    void idle();
-
-    void post(const std::function<void ()> &call);
+    void process_events(int timeout = -1);
+    void process_idle();
     void process_queue();
 
+    void run();
+    void run_once();
+    void run_for(int ms);
+
+    void post(const std::function<void ()> &call);
+
 private:
-    void event(uint32_t events);
     void add_fd_listener_(int fd, uint32_t events, were_thread_fd_listener *listener);
     void remove_fd_listener_(int fd);
+    void event(uint32_t events);
     virtual were_object_pointer<were_thread> thread();
 
 private:

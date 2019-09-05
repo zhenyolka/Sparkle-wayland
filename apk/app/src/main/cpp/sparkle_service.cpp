@@ -64,7 +64,8 @@ Java_com_sion_sparkle_SparkleService_native_1create(JNIEnv *env, jobject instanc
     were_object_pointer<sparkle_service> native__(new sparkle_service(env, instance));
     sparkle_android_logger::instance().redirect_output(native__->files_dir() + "/log.txt");
     native__->enable_native_loop(dup(were_thread::current_thread()->fd()));
-    were_thread::current_thread()->process(0); // XXX2
+
+    were_thread::current_thread()->process_queue(); // XXX2
 
     return jlong(native__.access());
 }
@@ -77,8 +78,7 @@ Java_com_sion_sparkle_SparkleService_native_1destroy(JNIEnv *env, jobject instan
 
     native__.collapse();
 
-    for (int i = 0; i < 100; ++i) // XXX2 Clean
-        were_thread::current_thread()->process(10);
+    were_thread::current_thread()->run_for(1000);
 
     if (were_thread::current_thread().reference_count() == 1)
     {
@@ -94,11 +94,12 @@ Java_com_sion_sparkle_SparkleService_native_1destroy(JNIEnv *env, jobject instan
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleService_native_1loop_1fd_1event(JNIEnv *env, jobject instance, jlong user)
 {
-    were_thread::current_thread()->process(0);
+    were_thread::current_thread()->run_once();
+
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleService_native_1loop_1idle_1event(JNIEnv *env, jobject instance, jlong user)
 {
-    were_thread::current_thread()->idle();
+    were_thread::current_thread()->process_idle();
 }
