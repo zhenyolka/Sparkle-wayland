@@ -221,12 +221,43 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
                     if (!rmb_)
                         touch_up(user, 0, event.getX(), event.getY());
                     else
-                    {
                         pointer_button_up(user, 2);
-                    }
+                    return true;
+                case MotionEvent.ACTION_HOVER_MOVE:
+                    pointer_motion(user, event.getX(), event.getY());
                     return true;
                 case MotionEvent.ACTION_MOVE:
                     touch_motion(user, 0, event.getX(), event.getY());
+                    return true;
+            }
+        }
+        else if (hasSource(source, InputDevice.SOURCE_STYLUS))
+        {
+            switch (event.getAction())
+            {
+                case MotionEvent.ACTION_DOWN:
+                    if (!rmb_)
+                    {
+                        pointer_motion(user, event.getX(), event.getY());
+                        pointer_button_down(user, 1);
+                    }
+                    else
+                    {
+                        pointer_motion(user, event.getX(), event.getY());
+                        pointer_button_down(user, 2);
+                    }
+                    return true;
+                case MotionEvent.ACTION_UP:
+                    if (!rmb_)
+                        pointer_button_up(user, 1);
+                    else
+                        pointer_button_up(user, 2);
+                    return true;
+                case MotionEvent.ACTION_HOVER_MOVE:
+                    pointer_motion(user, event.getX(), event.getY());
+                    return true;
+                case MotionEvent.ACTION_MOVE:
+                    pointer_motion(user, event.getX(), event.getY());
                     return true;
             }
         }
