@@ -98,6 +98,7 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
 
         enabled_ = false;
         rmb_ = false;
+        rmb_down_ = false;
 
 
         receiver_ = new BroadcastReceiver()
@@ -209,19 +210,27 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
             switch (event.getAction())
             {
                 case MotionEvent.ACTION_DOWN:
-                    if (!rmb_)
-                        touch_down(user, 0, event.getX(), event.getY());
-                    else
+                    if (rmb_)
                     {
                         pointer_motion(user, event.getX(), event.getY());
                         pointer_button_down(user, 2);
+                        rmb_down_ = true;
+                    }
+                    else
+                    {
+                        touch_down(user, 0, event.getX(), event.getY());
                     }
                     return true;
                 case MotionEvent.ACTION_UP:
-                    if (!rmb_)
-                        touch_up(user, 0, event.getX(), event.getY());
-                    else
+                    if (rmb_down_)
+                    {
                         pointer_button_up(user, 2);
+                        rmb_down_ = false;
+                    }
+                    else
+                    {
+                        touch_up(user, 0, event.getX(), event.getY());
+                    }
                     return true;
                 case MotionEvent.ACTION_HOVER_MOVE:
                     pointer_motion(user, event.getX(), event.getY());
@@ -236,22 +245,28 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
             switch (event.getAction())
             {
                 case MotionEvent.ACTION_DOWN:
-                    if (!rmb_)
+                    if (rmb_ || (event.getButtonState() & MotionEvent.BUTTON_STYLUS_PRIMARY) == MotionEvent.BUTTON_STYLUS_PRIMARY)
+                    {
+                        pointer_motion(user, event.getX(), event.getY());
+                        pointer_button_down(user, 2);
+                        rmb_down_ = true;
+                    }
+                    else
                     {
                         pointer_motion(user, event.getX(), event.getY());
                         pointer_button_down(user, 1);
                     }
-                    else
-                    {
-                        pointer_motion(user, event.getX(), event.getY());
-                        pointer_button_down(user, 2);
-                    }
                     return true;
                 case MotionEvent.ACTION_UP:
-                    if (!rmb_)
-                        pointer_button_up(user, 1);
-                    else
+                    if (rmb_down_)
+                    {
                         pointer_button_up(user, 2);
+                        rmb_down_ = false;
+                    }
+                    else
+                    {
+                        pointer_button_up(user, 1);
+                    }
                     return true;
                 case MotionEvent.ACTION_HOVER_MOVE:
                     pointer_motion(user, event.getX(), event.getY());
@@ -394,5 +409,6 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
     WindowManager.LayoutParams params;
     boolean enabled_;
     boolean rmb_;
+    boolean rmb_down_;
     BroadcastReceiver receiver_;
 }
