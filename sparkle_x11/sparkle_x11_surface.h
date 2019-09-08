@@ -1,6 +1,9 @@
 #ifndef SPARKLE_X11_SURFACE_H
 #define SPARKLE_X11_SURFACE_H
 
+#define TOUCH_MODE 1
+#define TOUCH_ID 0
+
 #include "sparkle.h"
 #include <X11/Xlib.h>
 
@@ -51,6 +54,9 @@ private:
     Window window_;
     struct wl_resource *buffer_; // XXX2 Temporary
     struct wl_resource *callback_; // XXX2 Temporary
+#if TOUCH_MODE
+    bool touch_down_;
+#endif
 };
 
 #endif // SPARKLE_X11_SURFACE_H

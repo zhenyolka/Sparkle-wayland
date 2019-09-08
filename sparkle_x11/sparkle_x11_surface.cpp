@@ -71,6 +71,10 @@ sparkle_x11_surface::sparkle_x11_surface(were_object_pointer<sparkle_x11> x11, w
 
     buffer_ = nullptr;
     callback_ = nullptr;
+
+#if TOUCH_MODE
+    touch_down_ = false;
+#endif
 }
 
 void sparkle_x11_surface::process(XEvent event)
@@ -87,14 +91,33 @@ void sparkle_x11_surface::process(XEvent event)
             break;
         case ButtonPress:
             if (event.xbutton.type == ButtonPress)
+            {
+#if TOUCH_MODE
+                were_object::emit(this_wop, &sparkle_x11_surface::touch_down, TOUCH_ID, event.xbutton.x, event.xbutton.y);
+                touch_down_ = true;
+#else
                 were_object::emit(this_wop, &sparkle_x11_surface::pointer_button_down, button_map[event.xbutton.button]);
+#endif
+            }
             break;
         case ButtonRelease:
             if (event.xbutton.type == ButtonRelease)
+            {
+#if TOUCH_MODE
+                were_object::emit(this_wop, &sparkle_x11_surface::touch_up, TOUCH_ID, event.xbutton.x, event.xbutton.y);
+                touch_down_ = false;
+#else
                 were_object::emit(this_wop, &sparkle_x11_surface::pointer_button_up, button_map[event.xbutton.button]);
+#endif
+            }
             break;
         case MotionNotify:
+#if TOUCH_MODE
+            if (touch_down_)
+                were_object::emit(this_wop, &sparkle_x11_surface::touch_motion, TOUCH_ID, event.xbutton.x, event.xbutton.y);
+#else
             were_object::emit(this_wop, &sparkle_x11_surface::pointer_motion, event.xbutton.x, event.xbutton.y);
+#endif
             break;
         case KeyPress:
             were_object::emit(this_wop, &sparkle_x11_surface::key_down, event.xkey.keycode);
@@ -103,10 +126,16 @@ void sparkle_x11_surface::process(XEvent event)
             were_object::emit(this_wop, &sparkle_x11_surface::key_up, event.xkey.keycode);
             break;
         case EnterNotify:
+#if TOUCH_MODE
+#else
             were_object::emit(this_wop, &sparkle_x11_surface::pointer_enter);
+#endif
             break;
         case LeaveNotify:
+#if TOUCH_MODE
+#else
             were_object::emit(this_wop, &sparkle_x11_surface::pointer_leave);
+#endif
             break;
         default:
             break;
