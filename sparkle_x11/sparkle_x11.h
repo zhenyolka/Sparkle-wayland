@@ -2,7 +2,6 @@
 #define SPARKLE_X11_H
 
 #include "sparkle.h"
-//#include "were_timer.h"
 #include "were_thread.h"
 #include <X11/Xlib.h>
 
@@ -10,6 +9,7 @@
 class sparkle_x11_surface;
 class sparkle_keyboard;
 class sparkle_pointer;
+class sparkle_touch;
 
 typedef were_object_wrapper<were_object_wrapper_primitive<Display *>> x11_display;
 
@@ -26,12 +26,11 @@ signals:
     were_signal<void (were_object_pointer<sparkle_x11_surface> x11_surface)> x11_surface_created;
     were_signal<void (were_object_pointer<sparkle_keyboard> keyboard)> keyboard_created;
     were_signal<void (were_object_pointer<sparkle_pointer> pointer)> pointer_created;
+    were_signal<void (were_object_pointer<sparkle_touch> touch)> touch_created;
 
 
 private:
     void event(uint32_t events);
-    static void connect_keyboard(were_object_pointer<sparkle_x11_surface> x11_surface, were_object_pointer<sparkle_keyboard> keyboard);
-    static void connect_pointer(were_object_pointer<sparkle_x11_surface> x11_surface, were_object_pointer<sparkle_pointer> pointer);
 
 private:
     were_object_pointer<x11_display> display_;

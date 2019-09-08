@@ -1,6 +1,9 @@
 #include "sparkle_x11_surface.h"
 #include "sparkle_x11.h"
 #include "sparkle_surface.h"
+#include "sparkle_keyboard.h"
+#include "sparkle_pointer.h"
+#include "sparkle_touch.h"
 #include "were_debug.h"
 #include <X11/Xutil.h> // XImage
 #include <linux/input-event-codes.h>
@@ -84,20 +87,20 @@ void sparkle_x11_surface::process(XEvent event)
             break;
         case ButtonPress:
             if (event.xbutton.type == ButtonPress)
-                were_object::emit(this_wop, &sparkle_x11_surface::pointer_button_press, button_map[event.xbutton.button]);
+                were_object::emit(this_wop, &sparkle_x11_surface::pointer_button_down, button_map[event.xbutton.button]);
             break;
         case ButtonRelease:
             if (event.xbutton.type == ButtonRelease)
-                were_object::emit(this_wop, &sparkle_x11_surface::pointer_button_release, button_map[event.xbutton.button]);
+                were_object::emit(this_wop, &sparkle_x11_surface::pointer_button_up, button_map[event.xbutton.button]);
             break;
         case MotionNotify:
             were_object::emit(this_wop, &sparkle_x11_surface::pointer_motion, event.xbutton.x, event.xbutton.y);
             break;
         case KeyPress:
-            were_object::emit(this_wop, &sparkle_x11_surface::key_press, event.xkey.keycode);
+            were_object::emit(this_wop, &sparkle_x11_surface::key_down, event.xkey.keycode);
             break;
         case KeyRelease:
-            were_object::emit(this_wop, &sparkle_x11_surface::key_release, event.xkey.keycode);
+            were_object::emit(this_wop, &sparkle_x11_surface::key_up, event.xkey.keycode);
             break;
         case EnterNotify:
             were_object::emit(this_wop, &sparkle_x11_surface::pointer_enter);
@@ -150,4 +153,90 @@ void sparkle_x11_surface::commit()
         wl_resource_destroy(callback_);
         callback_ = nullptr;
     }
+}
+
+void sparkle_x11_surface::register_keyboard(were_object_pointer<sparkle_keyboard> keyboard)
+{
+    MAKE_THIS_WOP
+
+    if (keyboard->client() != surface_->client())
+        return;
+
+    were_object_pointer<sparkle_surface> surface(surface_);
+
+    were_object::connect(this_wop, &sparkle_x11_surface::key_down, keyboard, [keyboard, surface](int code)
+    {
+        keyboard->key_press(code);
+        keyboard.thread()->process_idle();
+    });
+
+    were_object::connect(this_wop, &sparkle_x11_surface::key_up, keyboard, [keyboard, surface](int code)
+    {
+        keyboard->key_release(code);
+        keyboard.thread()->process_idle();
+    });
+
+    keyboard->enter(surface); // XXX2
+}
+
+void sparkle_x11_surface::register_pointer(were_object_pointer<sparkle_pointer> pointer)
+{
+    MAKE_THIS_WOP
+
+    if (pointer->client() != surface_->client())
+        return;
+
+    were_object_pointer<sparkle_surface> surface(surface_);
+
+    were_object::connect(this_wop, &sparkle_x11_surface::pointer_button_down, pointer, [pointer](int button)
+    {
+        pointer->button_down(button);
+    });
+
+    were_object::connect(this_wop, &sparkle_x11_surface::pointer_button_up, pointer, [pointer](int button)
+    {
+        pointer->button_up(button);
+    });
+
+    were_object::connect(this_wop, &sparkle_x11_surface::pointer_motion, pointer, [pointer](int x, int y)
+    {
+        pointer->motion(x, y);
+    });
+
+    were_object::connect(this_wop, &sparkle_x11_surface::pointer_enter, pointer, [pointer, surface]()
+    {
+        pointer->enter(surface);
+    });
+
+    were_object::connect(this_wop, &sparkle_x11_surface::pointer_leave, pointer, [pointer, surface]()
+    {
+        pointer->leave(surface);
+    });
+
+    pointer->enter(surface); // XXX2
+}
+
+void sparkle_x11_surface::register_touch(were_object_pointer<sparkle_touch> touch)
+{
+    MAKE_THIS_WOP
+
+    if (touch->client() != surface_->client())
+        return;
+
+    were_object_pointer<sparkle_surface> surface(surface_);
+
+    were_object::connect(this_wop, &sparkle_x11_surface::touch_down, touch, [touch, surface](int id, int x, int y)
+    {
+        touch->down(surface, id, x, y);
+    });
+
+    were_object::connect(this_wop, &sparkle_x11_surface::touch_up, touch, [touch, surface](int id, int x, int y)
+    {
+        touch->up(surface, id, x, y);
+    });
+
+    were_object::connect(this_wop, &sparkle_x11_surface::touch_motion, touch, [touch, surface](int id, int x, int y)
+    {
+        touch->motion(surface, id, x, y);
+    });
 }

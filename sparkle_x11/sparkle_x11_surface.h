@@ -6,6 +6,9 @@
 
 class sparkle_x11;
 class sparkle_surface;
+class sparkle_keyboard;
+class sparkle_pointer;
+class sparkle_touch;
 typedef were_object_wrapper<were_object_wrapper_primitive<Display *>> x11_display;
 
 class sparkle_x11_surface : public were_object
@@ -19,12 +22,21 @@ public:
         return surface_;
     }
 
-signals:
-    were_signal<void (int code)> key_press;
-    were_signal<void (int code)> key_release;
+    void register_keyboard(were_object_pointer<sparkle_keyboard> keyboard);
+    void register_pointer(were_object_pointer<sparkle_pointer> pointer);
+    void register_touch(were_object_pointer<sparkle_touch> touch);
 
-    were_signal<void (int button)> pointer_button_press;
-    were_signal<void (int button)> pointer_button_release;
+signals:
+
+    were_signal<void (int code)> key_down;
+    were_signal<void (int code)> key_up;
+
+    were_signal<void (int id, int x, int y)> touch_down;
+    were_signal<void (int id, int x, int y)> touch_up;
+    were_signal<void (int id, int x, int y)> touch_motion;
+
+    were_signal<void (int button)> pointer_button_down;
+    were_signal<void (int button)> pointer_button_up;
     were_signal<void (int x, int y)> pointer_motion;
     were_signal<void ()> pointer_enter;
     were_signal<void ()> pointer_leave;

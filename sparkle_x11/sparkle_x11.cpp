@@ -59,28 +59,6 @@ sparkle_x11::sparkle_x11(were_object_pointer<sparkle> sparkle)
             output->send_done();
     });
 
-#if 0
-    were::connect(sparkle->compositor(), &sparkle_global<sparkle_compositor>::instance, this_wop, [this_wop](were_object_pointer<sparkle_compositor> compositor)
-    {
-        were::connect(compositor, &sparkle_compositor::surface_created, this_wop, [this_wop](were_object_pointer<sparkle_surface> surface)
-        {
-            were_object_pointer<sparkle_x11_surface> x11_surface(new sparkle_x11_surface(this_wop, surface));
-            x11_surface->add_dependency(surface); // XXX2
-
-            were::connect(this_wop, &sparkle_x11::keyboard_created, x11_surface, [x11_surface](were_object_pointer<sparkle_keyboard> keyboard)
-            {
-                connect_keyboard(x11_surface, keyboard);
-            });
-
-            were::connect(this_wop, &sparkle_x11::pointer_created, x11_surface, [x11_surface](were_object_pointer<sparkle_pointer> pointer)
-            {
-                connect_pointer(x11_surface, pointer);
-            });
-
-            were::emit(this_wop, &sparkle_x11::x11_surface_created, x11_surface);
-        });
-    });
-#else
     were_object::connect(sparkle->shell(), &sparkle_global<sparkle_shell>::instance, this_wop, [this_wop](were_object_pointer<sparkle_shell> shell)
     {
         were_object::connect(shell, &sparkle_shell::shell_surface_created, this_wop, [this_wop](were_object_pointer<sparkle_shell_surface> shell_surface, were_object_pointer<sparkle_surface> surface)
@@ -90,18 +68,22 @@ sparkle_x11::sparkle_x11(were_object_pointer<sparkle> sparkle)
 
             were_object::connect(this_wop, &sparkle_x11::keyboard_created, x11_surface, [x11_surface](were_object_pointer<sparkle_keyboard> keyboard)
             {
-                connect_keyboard(x11_surface, keyboard);
+                x11_surface->register_keyboard(keyboard);
             });
 
             were_object::connect(this_wop, &sparkle_x11::pointer_created, x11_surface, [x11_surface](were_object_pointer<sparkle_pointer> pointer)
             {
-                connect_pointer(x11_surface, pointer);
+                x11_surface->register_pointer(pointer);
+            });
+
+            were_object::connect(this_wop, &sparkle_x11::touch_created, x11_surface, [x11_surface](were_object_pointer<sparkle_touch> touch)
+            {
+                x11_surface->register_touch(touch);
             });
 
             were_object::emit(this_wop, &sparkle_x11::x11_surface_created, x11_surface);
         });
     });
-#endif
 
     were_object::connect(sparkle->seat(), &sparkle_global<sparkle_seat>::instance, this_wop, [this_wop](were_object_pointer<sparkle_seat> seat)
     {
@@ -109,7 +91,7 @@ sparkle_x11::sparkle_x11(were_object_pointer<sparkle> sparkle)
         {
             were_object::connect(this_wop, &sparkle_x11::x11_surface_created, keyboard, [keyboard](were_object_pointer<sparkle_x11_surface> x11_surface)
             {
-                connect_keyboard(x11_surface, keyboard);
+                x11_surface->register_keyboard(keyboard);
             });
 
             were_object::emit(this_wop, &sparkle_x11::keyboard_created, keyboard);
@@ -119,11 +101,22 @@ sparkle_x11::sparkle_x11(were_object_pointer<sparkle> sparkle)
         {
             were_object::connect(this_wop, &sparkle_x11::x11_surface_created, pointer, [pointer](were_object_pointer<sparkle_x11_surface> x11_surface)
             {
-                connect_pointer(x11_surface, pointer);
+                x11_surface->register_pointer(pointer);
             });
 
             were_object::emit(this_wop, &sparkle_x11::pointer_created, pointer);
         });
+
+        were_object::connect(seat, &sparkle_seat::touch_created, this_wop, [this_wop](were_object_pointer<sparkle_touch> touch)
+        {
+            were_object::connect(this_wop, &sparkle_x11::x11_surface_created, touch, [touch](were_object_pointer<sparkle_x11_surface> x11_surface)
+            {
+                x11_surface->register_touch(touch);
+            });
+
+            were_object::emit(this_wop, &sparkle_x11::touch_created, touch);
+        });
+
     });
 }
 
@@ -138,53 +131,4 @@ void sparkle_x11::event(uint32_t events)
         XNextEvent(display_->get(), &event__);
         were_object::emit(this_wop, &sparkle_x11::event1, event__);
     }
-}
-
-void sparkle_x11::connect_keyboard(were_object_pointer<sparkle_x11_surface> x11_surface, were_object_pointer<sparkle_keyboard> keyboard)
-{
-    if (keyboard->client() != x11_surface->surface()->client())
-        return;
-
-    were_object::connect(x11_surface, &sparkle_x11_surface::key_press, keyboard, [keyboard, x11_surface](int code)
-    {
-        keyboard->enter(x11_surface->surface());
-        keyboard->key_press(code);
-        keyboard->leave(x11_surface->surface());
-    });
-
-    were_object::connect(x11_surface, &sparkle_x11_surface::key_release, keyboard, [keyboard](int code)
-    {
-        keyboard->key_release(code);
-    });
-}
-
-void sparkle_x11::connect_pointer(were_object_pointer<sparkle_x11_surface> x11_surface, were_object_pointer<sparkle_pointer> pointer)
-{
-    if (pointer->client() != x11_surface->surface()->client())
-        return;
-
-    were_object::connect(x11_surface, &sparkle_x11_surface::pointer_button_press, pointer, [pointer](int button)
-    {
-        pointer->button_down(button);
-    });
-
-    were_object::connect(x11_surface, &sparkle_x11_surface::pointer_button_release, pointer, [pointer](int button)
-    {
-        pointer->button_up(button);
-    });
-
-    were_object::connect(x11_surface, &sparkle_x11_surface::pointer_motion, pointer, [pointer](int x, int y)
-    {
-        pointer->motion(x, y);
-    });
-
-    were_object::connect(x11_surface, &sparkle_x11_surface::pointer_enter, pointer, [pointer, x11_surface]()
-    {
-        pointer->enter(x11_surface->surface());
-    });
-
-    were_object::connect(x11_surface, &sparkle_x11_surface::pointer_leave, pointer, [pointer, x11_surface]()
-    {
-        pointer->leave(x11_surface->surface());
-    });
 }

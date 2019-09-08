@@ -9,6 +9,7 @@
 
 #include <wayland-server.h>
 #include <sys/stat.h>
+#include <unistd.h> // unlink
 
 
 #include <cstdio>
