@@ -21,7 +21,7 @@ void sparkle_android_logger::redirect_output(const std::string &file)
 
     rename(file.c_str(), std::string(file + ".old").c_str());
 
-    int fd = open(file.c_str(), O_WRONLY | O_CREAT | O_APPEND);
+    int fd = open(file.c_str(), O_WRONLY | O_CREAT);
     if (fd != -1)
     {
         fchmod(fd, 0644);
