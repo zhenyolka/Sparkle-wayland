@@ -45,6 +45,7 @@ public:
     void remove_object(were_object *object__);
     void add_connection();
     void remove_connection();
+    void frame();
 
     void print_now();
 
@@ -60,6 +61,7 @@ private:
     bool run_;
     int object_count_;
     int connection_count_;
+    int frames_;
 #ifdef X_DEBUG
     std::set<were_object *> object_set_;
     std::mutex object_set_mutex_;

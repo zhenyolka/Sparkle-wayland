@@ -10,6 +10,8 @@
 #include "sparkle_pointer.h"
 #include "sparkle_touch.h"
 
+#include "were_debug.h"
+
 #include <android/native_window_jni.h>
 
 
@@ -268,6 +270,8 @@ void sparkle_android_surface::commit(bool full)
             ANativeWindow_unlockAndPost(window_);
 
             damage_.clear();
+
+            were_debug::instance().frame();
         }
     }
 

@@ -48,7 +48,11 @@ sparkle::sparkle(const std::string &home_dir)
     wl_display_init_shm(display_->get());
 
     if (!home_dir.empty())
+    {
+        std::string path = home_dir + "/wayland-0";
+        unlink(path.c_str());
         setenv("XDG_RUNTIME_DIR", home_dir.c_str(), 1);
+    }
 
     if (wl_display_add_socket(display_->get(), "wayland-0") == -1)
         throw were_exception(WE_SIMPLE);

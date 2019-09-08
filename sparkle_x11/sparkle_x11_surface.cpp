@@ -1,6 +1,7 @@
 #include "sparkle_x11_surface.h"
 #include "sparkle_x11.h"
 #include "sparkle_surface.h"
+#include "were_debug.h"
 #include <X11/Xutil.h> // XImage
 #include <linux/input-event-codes.h>
 
@@ -130,6 +131,8 @@ void sparkle_x11_surface::commit()
             XPutImage(display_->get(), window_, DefaultGC(display_->get(), 0), image, 0, 0, 0, 0, image->width, image->height);
             image->data = nullptr;
             XDestroyImage(image);
+
+            were_debug::instance().frame();
         }
         else
         {

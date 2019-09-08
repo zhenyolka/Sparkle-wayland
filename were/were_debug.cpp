@@ -82,7 +82,7 @@ were_debug::~were_debug()
 }
 
 were_debug::were_debug() :
-    run_(false), object_count_(0), connection_count_(0)
+    run_(false), object_count_(0), connection_count_(0), frames_(0)
 {
 }
 
@@ -142,7 +142,13 @@ void were_debug::print_now()
     printf("\033[0;0H"); // Move cursor
 #endif
 
-    fprintf(stdout, "| CPU: %5.1f%% %5.1f%% | OC: %3d | CC: %3d | PWR: %4d |\n", cpu_load, load1, object_count_, connection_count_, get_power());
+    float elapsed_real_secs = 1.0 * (elapsed_real / 1000000LL) / 1000;
+    float fps = 0.0;
+    if (elapsed_real_secs > 0)
+        fps = 1.0 * frames_ / elapsed_real_secs;
+    frames_ = 0;
+
+    fprintf(stdout, "| CPU: %5.1f%% %5.1f%% | OC: %3d | CC: %3d | PWR: %4d | FPS: %2.1f |\n", cpu_load, load1, object_count_, connection_count_, get_power(), fps);
 #ifdef X_DEBUG
     print_objects();
     fprintf(stdout, "\n");
@@ -213,6 +219,11 @@ void were_debug::add_connection()
 void were_debug::remove_connection()
 {
     connection_count_ -= 1;
+}
+
+void were_debug::frame()
+{
+    frames_ += 1;
 }
 
 void were_debug::print_objects()
