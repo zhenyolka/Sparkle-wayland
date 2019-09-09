@@ -29,7 +29,8 @@ target_link_libraries(sparkle LINK_PUBLIC
     were
     sparkle_common
     wayland-server
-    X11
+    xcb
+    xcb-shm
     lua
     pthread
     dl

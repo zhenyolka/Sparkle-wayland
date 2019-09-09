@@ -5,14 +5,14 @@
 #define TOUCH_ID 0
 
 #include "sparkle.h"
-#include <X11/Xlib.h>
+#include "were1_xcb.h"
 
 class sparkle_x11;
 class sparkle_surface;
 class sparkle_keyboard;
 class sparkle_pointer;
 class sparkle_touch;
-typedef were_object_wrapper<were_object_wrapper_primitive<Display *>> x11_display;
+typedef were_object_wrapper<were_object_wrapper_primitive<struct were1_xcb_display *>> x11_display;
 
 class sparkle_x11_surface : public were_object
 {
@@ -45,13 +45,13 @@ signals:
     were_signal<void ()> pointer_leave;
 
 private:
-    void process(XEvent event);
+    void process(xcb_generic_event_t *event);
     void commit();
 
 private:
     were_object_pointer<x11_display> display_;
     were_object_pointer<sparkle_surface> surface_;
-    Window window_;
+    struct were1_xcb_window *window_;
     struct wl_resource *buffer_; // XXX2 Temporary
     struct wl_resource *callback_; // XXX2 Temporary
 #if TOUCH_MODE

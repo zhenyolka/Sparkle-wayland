@@ -25,15 +25,15 @@ sparkle_x11::sparkle_x11(were_object_pointer<sparkle> sparkle)
 
     dpi_ = sparkle->settings()->get_int("DPI", 96);
 
-    display_ = were_object_pointer<x11_display>(new x11_display(XOpenDisplay(nullptr)));
+    display_ = were_object_pointer<x11_display>(new x11_display(were1_xcb_display_open()));
     if (display_->get() == nullptr)
         throw were_exception(WE_SIMPLE);
-    display_->set_destructor([](Display *&display)
+    display_->set_destructor([](struct were1_xcb_display *&display)
     {
-        XCloseDisplay(display);
+        were1_xcb_display_close(display);
     });
 
-    int fd = XConnectionNumber(display_->get());
+    int fd = were1_xcb_display_fd(display_->get());
 
     thread()->add_fd_listener(fd, EPOLLIN | EPOLLET, this_wop);
     were_object::connect(this_wop, &were_object::destroyed, this_wop, [this_wop, fd]()
@@ -120,15 +120,15 @@ sparkle_x11::sparkle_x11(were_object_pointer<sparkle> sparkle)
     });
 }
 
+void sparkle_x11::handler(xcb_generic_event_t *event, void *user)
+{
+    sparkle_x11 *instance = reinterpret_cast<sparkle_x11 *>(user);
+    were_object_pointer<sparkle_x11> instance__(instance);
+
+    were_object::emit(instance__, &sparkle_x11::event1, event);
+}
+
 void sparkle_x11::event(uint32_t events)
 {
-    MAKE_THIS_WOP
-
-    XEvent event__;
-
-    while (XPending(display_->get()))
-    {
-        XNextEvent(display_->get(), &event__);
-        were_object::emit(this_wop, &sparkle_x11::event1, event__);
-    }
+    were1_xcb_display_get_events(display_->get(), &sparkle_x11::handler, this);
 }
