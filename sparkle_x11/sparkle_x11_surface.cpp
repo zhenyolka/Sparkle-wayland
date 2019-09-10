@@ -56,6 +56,12 @@ sparkle_x11_surface::sparkle_x11_surface(were_object_pointer<sparkle_x11> x11, w
         this_wop->callback_ = wl_resource_create(this_wop->surface_->client(), &wl_callback_interface, 1, callback);
     });
 
+    were_object::connect(surface, &sparkle_surface::damage, this_wop, [this_wop](int32_t x, int32_t y, int32_t width, int32_t height)
+    {
+        //this_wop->damage_.add(x, y, x + width, y + height);
+        //fprintf(stdout, "dmg %d %d %d %d\n", x, y, width, height);
+    });
+
     buffer_ = nullptr;
     callback_ = nullptr;
 
