@@ -23,6 +23,7 @@ public class MainActivity extends Activity
 {
     public static final String EXTRA_FILE = "com.sion.sparkle.FILE";
     public static final String EXTRA_FILE_LOG = "com.sion.sparkle.FILE_LOG";
+    public static final String EXTRA_QUIET = "com.sion.sparkle.QUIET";
 
     @Override
     protected void onDestroy()
@@ -44,6 +45,10 @@ public class MainActivity extends Activity
             intent.setData(Uri.parse("package:" + getPackageName()));
             startActivityForResult(intent, 1);
         }
+
+        Intent intent__ = getIntent();
+        // am start -n com.sion.sparkle/.MainActivity --ez com.sion.sparkle.QUIET 1
+        boolean quiet = intent__.getBooleanExtra(MainActivity.EXTRA_QUIET, false);
 
         Button button1 = (Button)findViewById(R.id.button1);
         button1.setOnClickListener(new Button.OnClickListener()
@@ -119,6 +124,16 @@ public class MainActivity extends Activity
 
         native_ = native_create();
         native_setup(native_);
+
+        if (quiet)
+        {
+            Intent intent = new Intent(MainActivity.this, SparkleService.class);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                startForegroundService(intent);
+            else
+                startService(intent);
+            finish();
+        }
     }
 
     @Keep
