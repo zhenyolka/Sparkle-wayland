@@ -7,8 +7,6 @@ file(GLOB EVERYTHING
     "*.h"
 )
 
-message(${EVERYTHING})
-
 if(DEFINED ANDROID)
     list(FILTER EVERYTHING EXCLUDE REGEX
         ".*were1_xcb.c|h$"

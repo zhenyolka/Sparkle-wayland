@@ -121,109 +121,54 @@ void sparkle_x11_surface::process(xcb_generic_event_t *event)
             }
             break;
         }
-    }
-
-#if 0
-    switch (event->response_type & ~0x80)
-    {
-\
-        case XCB_BUTTON_PRESS: {
-            xcb_button_press_event_t *ev = (xcb_button_press_event_t *)e;
-            print_modifiers(ev->state);
-
-            switch (ev->detail) {
-                case 4:
-                    printf ("Wheel Button up in window %ld, at coordinates (%d,%d)\n",
-                            ev->event, ev->event_x, ev->event_y);
-                    break;
-                case 5:
-                    printf ("Wheel Button down in window %ld, at coordinates (%d,%d)\n",
-                            ev->event, ev->event_x, ev->event_y);
-                    break;
-                default:
-                    printf ("Button %d pressed in window %ld, at coordinates (%d,%d)\n",
-                            ev->detail, ev->event, ev->event_x, ev->event_y);
+        case XCB_ENTER_NOTIFY:
+        {
+            xcb_enter_notify_event_t *ev = (xcb_enter_notify_event_t *)event;
+            if (ev->event == window_->window)
+            {
+#if TOUCH_MODE
+#else
+                // ev->event_x, ev->event_y
+                were_object::emit(this_wop, &sparkle_x11_surface::pointer_enter);
+#endif
             }
             break;
         }
-                case XCB_BUTTON_RELEASE: {
-                    xcb_button_release_event_t *ev = (xcb_button_release_event_t *)e;
-                    print_modifiers(ev->state);
-
-                    printf ("Button %d released in window %ld, at coordinates (%d,%d)\n",
-                            ev->detail, ev->event, ev->event_x, ev->event_y);
-                    break;
-                }
-                case XCB_MOTION_NOTIFY: {
-                    xcb_motion_notify_event_t *ev = (xcb_motion_notify_event_t *)e;
-
-                    printf ("Mouse moved in window %ld, at coordinates (%d,%d)\n",
-                            ev->event, ev->event_x, ev->event_y);
-                    break;
-                }
-                case XCB_ENTER_NOTIFY: {
-                    xcb_enter_notify_event_t *ev = (xcb_enter_notify_event_t *)e;
-
-                    printf ("Mouse entered window %ld, at coordinates (%d,%d)\n",
-                            ev->event, ev->event_x, ev->event_y);
-                    break;
-                }
-                case XCB_LEAVE_NOTIFY: {
-                    xcb_leave_notify_event_t *ev = (xcb_leave_notify_event_t *)e;
-
-                    printf ("Mouse left window %ld, at coordinates (%d,%d)\n",
-                            ev->event, ev->event_x, ev->event_y);
-                    break;
-                }
-                case XCB_KEY_PRESS: {
-                    xcb_key_press_event_t *ev = (xcb_key_press_event_t *)e;
-                    print_modifiers(ev->state);
-
-                    printf ("Key pressed in window %ld\n",
-                            ev->event);
-                    break;
-                }
-                case XCB_KEY_RELEASE: {
-                    xcb_key_release_event_t *ev = (xcb_key_release_event_t *)e;
-                    print_modifiers(ev->state);
-
-                    printf ("Key released in window %ld\n",
-                            ev->event);
-                    break;
-                }
-                default:
-                    /* Unknown event type, ignore it */
-                    printf("Unknown event: %d\n", e->response_type);
-                    break;
-    }
-
-}
-#endif
-
-#if 0
-
-        case KeyPress:
-            were_object::emit(this_wop, &sparkle_x11_surface::key_down, event.xkey.keycode);
-            break;
-        case KeyRelease:
-            were_object::emit(this_wop, &sparkle_x11_surface::key_up, event.xkey.keycode);
-            break;
-        case EnterNotify:
+        case XCB_LEAVE_NOTIFY:
+        {
+            xcb_leave_notify_event_t *ev = (xcb_leave_notify_event_t *)event;
+            if (ev->event == window_->window)
+            {
 #if TOUCH_MODE
 #else
-            were_object::emit(this_wop, &sparkle_x11_surface::pointer_enter);
+                were_object::emit(this_wop, &sparkle_x11_surface::pointer_leave);
 #endif
+            }
             break;
-        case LeaveNotify:
-#if TOUCH_MODE
-#else
-            were_object::emit(this_wop, &sparkle_x11_surface::pointer_leave);
-#endif
+        }
+        case XCB_KEY_PRESS:
+        {
+            xcb_key_press_event_t *ev = (xcb_key_press_event_t *)event;
+            if (ev->event == window_->window)
+            {
+                were_object::emit(this_wop, &sparkle_x11_surface::key_down, ev->detail);
+            }
             break;
+        }
+        case XCB_KEY_RELEASE:
+        {
+            xcb_key_release_event_t *ev = (xcb_key_release_event_t *)event;
+            if (ev->event == window_->window)
+            {
+                were_object::emit(this_wop, &sparkle_x11_surface::key_up, ev->detail);
+            }
+            break;
+        }
         default:
             break;
+
     }
-#endif
+
 }
 
 void sparkle_x11_surface::commit()

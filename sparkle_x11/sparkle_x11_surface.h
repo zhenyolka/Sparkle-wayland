@@ -1,7 +1,7 @@
 #ifndef SPARKLE_X11_SURFACE_H
 #define SPARKLE_X11_SURFACE_H
 
-#define TOUCH_MODE 1
+#define TOUCH_MODE 0
 #define TOUCH_ID 0
 
 #include "sparkle.h"
