@@ -3,17 +3,21 @@
 #include <android/native_window_jni.h>
 #include <linux/input-event-codes.h>
 
+
 static const int button_map[7] = {0, BTN_LEFT, BTN_RIGHT, 0, BTN_MIDDLE, BTN_GEAR_UP, BTN_GEAR_DOWN};
 
 sparkle_view::~sparkle_view()
 {
+    if (window_ != nullptr)
+        ANativeWindow_release(window_);
 }
 
-sparkle_view::sparkle_view(JNIEnv *env, were_object_pointer<sparkle_service> service) :
-    sparkle_java_object(env, "com/sion/sparkle/SparkleView", "(Lcom/sion/sparkle/SparkleService;J)V", service->object1(), jlong(this))
+sparkle_view::sparkle_view(JNIEnv *env, were_object_pointer<sparkle_service> service, int format) :
+    sparkle_java_object(env, "com/sion/sparkle/SparkleView", "(Lcom/sion/sparkle/SparkleService;J)V", service->object1(), jlong(this)), window_(nullptr)
 {
     width_ = 100;
     height_ = 100;
+    format_ = format;
 }
 
 void sparkle_view::set_enabled(bool enabled)
@@ -46,6 +50,69 @@ void sparkle_view::set_size(int width, int height)
     }
 }
 
+bool sparkle_view::lock(char **data, int *x1, int *y1, int *x2, int *y2, int *stride)
+{
+    if (window_ == nullptr)
+        return false;
+
+    ARect rect;
+    rect.left = *x1;
+    rect.top = *y1;
+    rect.right = *x2;
+    rect.bottom = *y2;
+
+    ANativeWindow_Buffer buffer;
+
+    if (ANativeWindow_lock(window_, &buffer, &rect) != 0)
+        throw were_exception(WE_SIMPLE);
+
+    if (buffer.width != width_ || buffer.height != height_)
+        throw were_exception(WE_SIMPLE);
+
+    *x1 = rect.left;
+    *y1 = rect.top;
+    *x2 = rect.right;
+    *y2 = rect.bottom;
+    *stride = buffer.stride * 4;
+    *data = (char *)buffer.bits;
+
+    return true;
+}
+
+bool sparkle_view::unlock_and_post()
+{
+    ANativeWindow_unlockAndPost(window_);
+
+    return true;
+}
+
+void sparkle_view::set_window(ANativeWindow *window)
+{
+    MAKE_THIS_WOP
+
+    if (window_ != nullptr)
+        ANativeWindow_release(window_);
+
+    window_ = window;
+
+    if (window_ != nullptr)
+    {
+        ANativeWindow_acquire(window_);
+
+        int w_width = ANativeWindow_getWidth(window_);
+        int w_height = ANativeWindow_getHeight(window_);
+        //int w_format = ANativeWindow_getFormat(window_);
+
+        if (w_width != width_ || w_height != height_)
+            throw were_exception(WE_SIMPLE);
+
+        if (ANativeWindow_setBuffersGeometry(window_, w_width, w_height, format_) != 0)
+            throw were_exception(WE_SIMPLE);
+    }
+
+    were_object::emit(this_wop, &sparkle_view::surface_changed);
+}
+
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleView_surface_1changed(JNIEnv *env, jobject instance, jlong user, jobject surface)
 {
@@ -58,7 +125,7 @@ Java_com_sion_sparkle_SparkleView_surface_1changed(JNIEnv *env, jobject instance
     else
         window = nullptr;
 
-    were_object::emit(view, &sparkle_view::surface_changed, window);
+    view->set_window(window);
 
     if (window != nullptr)
         ANativeWindow_release(window);

@@ -28,54 +28,30 @@ struct sparkle_pixel
 
 sparkle_android_surface::~sparkle_android_surface()
 {
-    if (window_ != nullptr)
-        ANativeWindow_release(window_);
-
     view_->set_enabled(false);
     view_.collapse();
 }
 
 sparkle_android_surface::sparkle_android_surface(were_object_pointer<sparkle_android> android, were_object_pointer<sparkle_surface> surface) :
-    surface_(surface), window_(nullptr)
+    surface_(surface)
 {
     MAKE_THIS_WOP
 
     upload_mode_ = android->sparkle1()->settings()->get_int("upload_mode", 0);
     no_damage_ = android->sparkle1()->settings()->get_bool("no_damage", false);
 
-    view_ = were_object_pointer<sparkle_view>(new sparkle_view(android->service()->env(), android->service()));
+    int format;
+    if (upload_mode_ == 2)
+        format = WINDOW_FORMAT_RGBX_8888;
+    else
+        format = WINDOW_FORMAT;
+
+    view_ = were_object_pointer<sparkle_view>(new sparkle_view(android->service()->env(), android->service(), format));
     view_->set_enabled(true);
 
-    were_object::connect(view_, &sparkle_view::surface_changed, this_wop, [this_wop](ANativeWindow *window)
+    were_object::connect(view_, &sparkle_view::surface_changed, this_wop, [this_wop]()
     {
-        if (this_wop->window_ != nullptr)
-            ANativeWindow_release(this_wop->window_);
-
-        this_wop->window_ = window;
-
-        if (window != nullptr)
-        {
-            ANativeWindow_acquire(this_wop->window_); // XXX2 Move to sparkle_view
-
-            int w_width = ANativeWindow_getWidth(window);
-            int w_height = ANativeWindow_getHeight(window);
-            //int w_format = ANativeWindow_getFormat(window);
-
-            if (w_width != this_wop->view_->width() || w_height != this_wop->view_->height())
-                throw were_exception(WE_SIMPLE);
-
-            int format = WINDOW_FORMAT;
-            if (this_wop->upload_mode_ == 2)
-                format = WINDOW_FORMAT_RGBX_8888;
-
-            if (ANativeWindow_setBuffersGeometry(window, w_width, w_height, format) != 0)
-                throw were_exception(WE_SIMPLE);
-
-            this_wop->commit(true);
-        }
-        else
-        {
-        }
+        this_wop->commit(true);
     });
 
     were_object::connect(surface, &sparkle_surface::attach, this_wop, [this_wop](struct wl_resource *buffer, int32_t x, int32_t y)
@@ -237,41 +213,37 @@ void sparkle_android_surface::commit(bool full)
         {
             view_->set_size(width, height);
         }
-        else if ((format == WL_SHM_FORMAT_ARGB8888 || format == WL_SHM_FORMAT_XRGB8888) && window_ != nullptr)
+        else if ((format == WL_SHM_FORMAT_ARGB8888 || format == WL_SHM_FORMAT_XRGB8888))
         {
             if (full || no_damage_)
                 damage_.add(0, 0, width, height);
 
             damage_.limit(width, height);
 
-            ANativeWindow_Buffer buffer;
 
-            ARect rect;
-            rect.left = damage_.x1();
-            rect.top = damage_.y1();
-            rect.right = damage_.x2();
-            rect.bottom = damage_.y2();
+            int x1 = damage_.x1();
+            int y1 = damage_.y1();
+            int x2 = damage_.x2();
+            int y2 = damage_.y2();
+            int destination_stride;
+            char *destination;
 
+            if (view_->lock(&destination, &x1, &y1, &x2, &y2, &destination_stride))
+            {
+                if (upload_mode_ == 0)
+                    upload_0(destination, data, stride, destination_stride, x1, y1, x2, y2);
+                else if (upload_mode_ == 1)
+                    upload_1(destination, data, stride, destination_stride, x1, y1, x2, y2);
+                else if (upload_mode_ == 2)
+                    upload_2(destination, data, stride, destination_stride, x1, y1, x2, y2);
 
-            if (ANativeWindow_lock(window_, &buffer, &rect) != 0)
-                throw were_exception(WE_SIMPLE);
+                view_->unlock_and_post();
 
-            if (buffer.width != width || buffer.height != height)
-                throw were_exception(WE_SIMPLE);
+                damage_.clear();
 
-            if (upload_mode_ == 0)
-                upload_0(buffer.bits, data, stride, buffer.stride * 4, rect.left, rect.top, rect.right, rect.bottom);
-            else if (upload_mode_ == 1)
-                upload_1(buffer.bits, data, stride, buffer.stride * 4, rect.left, rect.top, rect.right, rect.bottom);
-            else if (upload_mode_ == 2)
-                upload_2(buffer.bits, data, stride, buffer.stride * 4, rect.left, rect.top, rect.right, rect.bottom);
+                were_debug::instance().frame();
+            }
 
-
-            ANativeWindow_unlockAndPost(window_);
-
-            damage_.clear();
-
-            were_debug::instance().frame();
         }
     }
 
