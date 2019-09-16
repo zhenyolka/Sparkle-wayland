@@ -3,6 +3,7 @@
 
 #include "were_exception.h"
 #include "were_signal.h"
+#include <atomic>
 #include <functional>
 
 #define MAKE_THIS_WOP \
@@ -59,17 +60,17 @@ public:
 
     void increment_reference_count()
     {
-        reference_count_ += 1;
+        reference_count_++;
     }
 
     void decrement_reference_count()
     {
-        reference_count_ -= 1;
+        reference_count_--;
     }
 
     int reference_count() const
     {
-        return reference_count_;
+        return reference_count_.load();
     }
 
     bool collapsed() const
@@ -138,7 +139,7 @@ private:
                                                             were_object_pointer<were_object> context);
 
 private:
-    int reference_count_;
+    std::atomic<int> reference_count_;
     bool collapsed_;
     were_object_pointer<were_thread> thread_;
     static uint64_t next_id_;
