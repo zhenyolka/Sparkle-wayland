@@ -414,9 +414,9 @@ void were_object::connect(  were_object_pointer<SourceType> source,
 
     std::function<void ()> breaker = make_breaker(source, signal, context, pc_id, sb_id, cb_id);
 
-    auto signal1__ = &((source.access())->*signal);
-    auto signal2__ = &((source.access())->destroyed);
-    auto signal3__ = &((context.access())->destroyed);
+    auto signal1__ = &((source.access_UNSAFE())->*signal);
+    auto signal2__ = &((source.access_UNSAFE())->destroyed);
+    auto signal3__ = &((context.access_UNSAFE())->destroyed);
 
     add_connection_safe(signal1__, call__, pc_id, source);
     add_connection_safe(signal2__, breaker, sb_id, source);
@@ -429,9 +429,9 @@ void were_object::disconnect(   were_object_pointer<SourceType> source,
                                 were_object_pointer<were_object> context,
                                 uint64_t pc_id, uint64_t sb_id, uint64_t cb_id)
 {
-    auto signal1__ = &((source.access())->*signal);
-    auto signal2__ = &((source.access())->destroyed);
-    auto signal3__ = &((context.access())->destroyed);
+    auto signal1__ = &((source.access_UNSAFE())->*signal);
+    auto signal2__ = &((source.access_UNSAFE())->destroyed);
+    auto signal3__ = &((context.access_UNSAFE())->destroyed);
 
     remove_connection_safe(signal1__, pc_id, source);
     remove_connection_safe(signal2__, sb_id, source);

@@ -43,7 +43,7 @@ void were_object::add_dependency(were_object_pointer<were_object> dependency)
 
 void were_object::post(const std::function<void ()> &call)
 {
-    thread()->post(call);
+    thread().access_UNSAFE()->post(call);
 }
 
 were_object_pointer<were_thread> &were_object::current_thread()
