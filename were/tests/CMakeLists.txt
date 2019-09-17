@@ -1,25 +1,21 @@
 cmake_minimum_required(VERSION 3.6.0)
-project(test1)
+project(tests)
 
 add_subdirectory(.. ./were)
 
-file(GLOB EVERYTHING
-    "*.cpp"
-    "*.h"
+include_directories(..)
+
+
+add_executable(server server.cpp)
+set_target_properties(server PROPERTIES COMPILE_FLAGS "-Wall -Wextra -Wno-unused-parameter -std=c++11 -O2")
+target_link_libraries(server LINK_PUBLIC
+    were
+    pthread
 )
 
-add_executable(test1
-    ${EVERYTHING}
-)
-
-target_include_directories(test1 PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/..
-)
-
-set_target_properties(test1 PROPERTIES COMPILE_FLAGS "-Wall -Wextra -Wno-unused-parameter -std=c++11 -O2")
-
-target_link_libraries(test1 LINK_PUBLIC
+add_executable(client client.cpp)
+set_target_properties(client PROPERTIES COMPILE_FLAGS "-Wall -Wextra -Wno-unused-parameter -std=c++11 -O2")
+target_link_libraries(client LINK_PUBLIC
     were
     pthread
 )

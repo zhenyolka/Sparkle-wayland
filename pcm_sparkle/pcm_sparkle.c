@@ -59,8 +59,6 @@ static int sparkle_initialize(snd_pcm_sparkle_t *sparkle, const char *path)
 
 static int sparkle_finish(snd_pcm_sparkle_t *sparkle)
 {
-    usleep(200000); // XXX1
-
     if (sparkle->fd > 0)
     {
         were1_unix_socket_destroy(sparkle->fd);

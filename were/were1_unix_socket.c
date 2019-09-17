@@ -48,6 +48,13 @@ int were1_unix_server_accept(int fd)
     return accept(fd, NULL, NULL);
 }
 
+void were1_unix_server_reject(int fd)
+{
+    int client_fd = accept(fd, NULL, NULL);
+    shutdown(client_fd, SHUT_RDWR);
+    close(client_fd);
+}
+
 int were1_unix_socket_connect(const char *path)
 {
     int fd = socket(AF_UNIX, SOCK_STREAM, 0);

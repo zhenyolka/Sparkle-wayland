@@ -48,6 +48,9 @@ void sparkle_audio::connect_client()
     if (client_)
     {
         were_log("can't accept audio connection\n");
+
+        server_->reject();
+
         return;
     }
 

@@ -10,6 +10,7 @@ extern "C" {
 int were1_unix_server_create(const char *path);
 void were1_unix_server_destroy(const char *path, int fd);
 int were1_unix_server_accept(int fd);
+void were1_unix_server_reject(int fd);
 
 int were1_unix_socket_connect(const char *path);
 void were1_unix_socket_destroy(int fd);

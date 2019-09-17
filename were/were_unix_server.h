@@ -16,6 +16,7 @@ public:
     were_unix_server(const std::string &path);
 
     were_object_pointer<were_unix_socket> accept();
+    void reject();
 
 signals:
     were_signal<void ()> new_connection;
