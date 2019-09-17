@@ -5,6 +5,7 @@
 #include "were1_ring_buffer.h"
 #include "were_exception.h"
 
+
 #include <SLES/OpenSLES.h>
 
 #ifdef ANDROID
@@ -38,6 +39,7 @@ struct sparkle_audio_buffer
     char data[65536];
 };
 
+class were_timer;
 
 class sparkle_player : public were_object
 {
@@ -75,6 +77,8 @@ private:
     int playing_;
 
     struct sparkle_audio_buffer *buffer_;
+
+    were_object_pointer<were_timer> check_timer_;
 };
 
 #endif // SPARKLE_PLAYER_H

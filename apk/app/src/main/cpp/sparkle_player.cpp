@@ -1,4 +1,5 @@
 #include "sparkle_player.h"
+#include "were_timer.h"
 #include "were_log.h"
 
 #define UNSAFE 1
@@ -6,6 +7,7 @@
 
 sparkle_player::~sparkle_player()
 {
+    check_timer_.collapse();
     (*player_)->Destroy(player_);
     (*output_mix_)->Destroy(output_mix_);
     (*engine_)->Destroy(engine_);
@@ -67,6 +69,15 @@ sparkle_player::sparkle_player() :
     result = (*player_buffer_queue_)->RegisterCallback(player_buffer_queue_, callback, this);
     check_result(result);
 
+
+    MAKE_THIS_WOP
+
+    check_timer_ = were_object_pointer<were_timer>(new were_timer(1000));
+    were_object::connect(check_timer_, &were_timer::timeout, this_wop, [this_wop]()
+    {
+        this_wop->check();
+    }); // XXX3 Find better solution
+
     state_ = 100;
     stop();
 }
@@ -87,6 +98,8 @@ void sparkle_player::start()
         playing_ = 0;
 
         check();
+
+        check_timer_->start();
     }
 }
 
@@ -95,6 +108,8 @@ void sparkle_player::stop()
     if (state_ != SL_PLAYSTATE_STOPPED)
     {
         SLresult result;
+
+        check_timer_->stop();
 
         were_log("stopping player\n");
 
