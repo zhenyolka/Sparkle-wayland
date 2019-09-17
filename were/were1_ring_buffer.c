@@ -50,3 +50,9 @@ int were1_ring_buffer_bytes_available(struct were1_ring_buffer *buffer)
 {
     return buffer->write_position - buffer->read_position;
 }
+
+void were1_ring_buffer_reset(struct were1_ring_buffer *buffer)
+{
+    buffer->write_position = 0;
+    buffer->read_position = 0;
+}

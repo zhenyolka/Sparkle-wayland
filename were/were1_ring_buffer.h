@@ -22,6 +22,7 @@ void were1_ring_buffer_write_finish(struct were1_ring_buffer *buffer, int size);
 int were1_ring_buffer_read_start(struct were1_ring_buffer *buffer, char **p, int size);
 void were1_ring_buffer_read_finish(struct were1_ring_buffer *buffer, int size);
 int were1_ring_buffer_bytes_available(struct were1_ring_buffer *buffer);
+void were1_ring_buffer_reset(struct were1_ring_buffer *buffer);
 
 #ifdef  __cplusplus
 }
