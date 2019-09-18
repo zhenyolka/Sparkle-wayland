@@ -19,3 +19,14 @@ target_link_libraries(client LINK_PUBLIC
     were
     pthread
 )
+
+add_executable(surface surface.cpp)
+set_target_properties(surface PROPERTIES COMPILE_FLAGS "-Wall -Wextra -Wno-unused-parameter -std=c++11 -O2")
+target_link_libraries(surface LINK_PUBLIC
+    were
+    pthread
+    xcb
+    xcb-shm
+    dl
+    -rdynamic
+)
