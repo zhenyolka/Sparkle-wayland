@@ -2,9 +2,26 @@
 #include "were1_tmpfile.h"
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
+
 
 #define SHM
 
+static void were1_xcb_window_attach_buffer(struct were1_xcb_window *window)
+{
+    window->fd = were1_tmpfile_create(window->width * window->height * 4);
+    were1_tmpfile_map(&window->data, window->width * window->height * 4, window->fd);
+
+    window->shmseg = xcb_generate_id(window->display->connection);
+    xcb_shm_attach_fd(window->display->connection, window->shmseg, window->fd, 0);
+}
+
+static void were1_xcb_window_detach_buffer(struct were1_xcb_window *window)
+{
+    xcb_shm_detach(window->display->connection, window->shmseg);
+    were1_tmpfile_unmap(&window->data, window->width * window->height * 4);
+    close(window->fd);
+}
 
 struct were1_xcb_display *were1_xcb_display_open()
 {
@@ -55,6 +72,7 @@ struct were1_xcb_window *were1_xcb_window_create(struct were1_xcb_display *displ
     uint32_t values[2];
 
     struct were1_xcb_window *window = malloc(sizeof(struct were1_xcb_window));
+    memset(window, 0, sizeof(struct were1_xcb_window));
 
     window->display = display;
     window->width = width;
@@ -88,13 +106,7 @@ struct were1_xcb_window *were1_xcb_window_create(struct were1_xcb_display *displ
     //    return -1;
 
 #ifdef SHM
-    window->fd = were1_tmpfile_create(width * height * 4);
-    were1_tmpfile_map(&window->data, width * height * 4, window->fd);
-
-    window->shmseg = xcb_generate_id(display->connection);
-    xcb_shm_attach_fd(display->connection, window->shmseg, window->fd, 0);
-#else
-    window->data = NULL;
+    were1_xcb_window_attach_buffer(window);
 #endif
 
     return window;
@@ -103,9 +115,7 @@ struct were1_xcb_window *were1_xcb_window_create(struct were1_xcb_display *displ
 void were1_xcb_window_destroy(struct were1_xcb_window *window)
 {
 #ifdef SHM
-    xcb_shm_detach(window->display->connection, window->shmseg);
-    were1_tmpfile_unmap(&window->data, window->width * window->height * 4);
-    close(window->fd);
+    were1_xcb_window_detach_buffer(window);
 #endif
     xcb_unmap_window(window->display->connection, window->window);
     xcb_destroy_window(window->display->connection, window->window);
@@ -123,4 +133,35 @@ void were1_xcb_window_commit(struct were1_xcb_window *window)
     xcb_request_check(window->display->connection, cookie);
 #endif
     //xcb_flush(window->display->connection);
+}
+
+void were1_xcb_window_commit_with_damage(struct were1_xcb_window *window, int x1, int y1, int x2, int y2)
+{
+#ifdef SHM
+    xcb_void_cookie_t cookie = xcb_shm_put_image_checked(window->display->connection, window->window, window->display->gc, window->width, window->height, x1, y1, x2 - x1, y2 - y1, x1, y1, window->display->screen->root_depth, XCB_IMAGE_FORMAT_Z_PIXMAP, 0, window->shmseg, 0);
+    xcb_request_check(window->display->connection, cookie);
+#else
+#warning "no shm"
+    xcb_void_cookie_t cookie = xcb_put_image_checked(window->display->connection, XCB_IMAGE_FORMAT_Z_PIXMAP, window->window, window->display->gc, window->width, window->height, 0, 0, 0, window->display->screen->root_depth, window->width * window->height * 4, window->data);
+    xcb_request_check(window->display->connection, cookie);
+#endif
+    //xcb_flush(window->display->connection);
+}
+
+void were1_xcb_window_set_size(struct were1_xcb_window *window, int width, int height)
+{
+    uint32_t values[] = { width, height };
+    xcb_void_cookie_t cookie = xcb_configure_window_checked(window->display->connection, window->window, XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, values);
+    xcb_request_check(window->display->connection, cookie);
+
+#ifdef SHM
+    were1_xcb_window_detach_buffer(window);
+#endif
+
+    window->width = width;
+    window->height = height;
+
+#ifdef SHM
+    were1_xcb_window_attach_buffer(window);
+#endif
 }

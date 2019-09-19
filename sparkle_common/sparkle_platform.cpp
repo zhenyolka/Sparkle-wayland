@@ -6,6 +6,7 @@
 #include "sparkle_shell.h"
 #include "sparkle_seat.h"
 #include "sparkle_platform_surface.h"
+#include "were_platform_surface_provider.h"
 
 
 sparkle_platform::~sparkle_platform()
@@ -17,14 +18,15 @@ sparkle_platform::sparkle_platform(were_object_pointer<sparkle> sparkle, were_ob
 {
     MAKE_THIS_WOP
 
-    dpi_ = sparkle->settings()->get_int("DPI", 96);
-
     were_object::connect(sparkle->output(), &sparkle_global<sparkle_output>::instance, this_wop, [this_wop](were_object_pointer<sparkle_output> output)
     {
-        int width = 1280;
-        int height = 720;
-        int mm_width = width * 254 / (this_wop->dpi_ * 10);
-        int mm_height = height * 254 / (this_wop->dpi_ * 10);
+        int width = this_wop->platform_surface_provider()->display_width();
+        int height = this_wop->platform_surface_provider()->display_height();
+        int dpi = this_wop->sparkle1()->settings()->get_int("DPI", 96);
+        int mm_width = width * 254 / (dpi * 10);
+        int mm_height = height * 254 / (dpi * 10);
+
+        fprintf(stdout, "display size: %dx%d %dx%d\n", width, height, mm_width, mm_height);
 
         output->send_geometry(0, 0, mm_width, mm_height, 0, "Barely working solutions", "Sparkle", 0);
 

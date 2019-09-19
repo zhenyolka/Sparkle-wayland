@@ -30,7 +30,6 @@ signals:
 private:
     were_object_pointer<sparkle> sparkle_;
     were_object_pointer<were_platform_surface_provider> platform_surface_provider_;
-    int dpi_;
 };
 
 #endif // SPARKLE_PLATFORM_H

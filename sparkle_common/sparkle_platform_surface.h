@@ -99,6 +99,7 @@ private:
     struct wl_resource *callback_; // XXX2 Temporary
     sparkle_damage damage_;
     bool no_damage_;
+    int upload_mode_;
 };
 
 #endif // SPARKLE_PLATFORM_SURFACE_H

@@ -1,18 +1,19 @@
 #ifndef SPARKLE_MAIN_ACTIVITY_H
 #define SPARKLE_MAIN_ACTIVITY_H
 
+#include "were_object.h"
 #include "sparkle_java_object.h"
 #include <thread>
 
 class AAssetManager;
 
-class sparkle_main_activity : public sparkle_java_object
+class sparkle_main_activity : public were_object, public sparkle_java_object
 {
 public:
     ~sparkle_main_activity();
     sparkle_main_activity(JNIEnv *env, jobject instance);
 
-    std::string files_dir() const {return files_dir_;}
+    std::string files_dir() const { return files_dir_; }
 
     void setup();
     void start();

@@ -1,9 +1,9 @@
 #include "sparkle_service.h"
-
+#include "sparkle_view.h"
 #include "sparkle_android_logger.h"
 #include "were_thread.h"
 #include "sparkle.h"
-#include "sparkle_android.h"
+#include "sparkle_platform.h"
 #include "sparkle_audio.h"
 #include "were_debug.h"
 #include "were_backtrace.h"
@@ -22,14 +22,38 @@ sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
 
     files_dir_ = call_string_method("files_dir", "()Ljava/lang/String;");
 
-    were_object_pointer<sparkle> sparkle__ = were_object_pointer<sparkle>(new sparkle(files_dir_));
+    were_object_pointer<sparkle> sparkle__(new sparkle(files_dir_));
     sparkle__->add_dependency(this_wop);
 
-    were_object_pointer<sparkle_android> sparkle_android__(new sparkle_android(sparkle__, this_wop));
-    sparkle_android__->add_dependency(this_wop);
+    were_object_pointer<sparkle_platform> sparkle_platform__(new sparkle_platform(sparkle__, this_wop));
+    sparkle_platform__->add_dependency(this_wop);
 
     were_object_pointer<sparkle_audio> sparkle_audio__(new sparkle_audio(files_dir_ + "/audio-0"));
     sparkle_audio__->add_dependency(this_wop);
+}
+
+int sparkle_service::display_width() const
+{
+    return const_cast<sparkle_service *>(this)->call_int_method("display_width", "()I");
+}
+
+int sparkle_service::display_height() const
+{
+    return const_cast<sparkle_service *>(this)->call_int_method("display_height", "()I");
+}
+
+were_object_pointer<were_platform_surface> sparkle_service::create_surface()
+{
+    MAKE_THIS_WOP
+
+    were_object_pointer<sparkle_view> surface(new sparkle_view(env(), this_wop, 5)); //XXX1 Format
+    surface->set_enabled(true); // XXX1 Remove
+    were_object::connect(surface, &were_object::destroyed, surface, [surface]()
+    {
+        surface->set_enabled(false);
+    });
+
+    return surface;
 }
 
 void sparkle_service::enable_native_loop(int fd)
@@ -40,16 +64,6 @@ void sparkle_service::enable_native_loop(int fd)
 void sparkle_service::disable_native_loop()
 {
     call_void_method("disable_native_loop", "()V");
-}
-
-int sparkle_service::display_width()
-{
-    return call_int_method("display_width", "()I");
-}
-
-int sparkle_service::display_height()
-{
-    return call_int_method("display_height", "()I");
 }
 
 extern "C" JNIEXPORT jlong JNICALL

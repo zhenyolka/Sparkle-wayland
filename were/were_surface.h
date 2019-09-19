@@ -12,10 +12,15 @@ public:
     ~were_surface();
     were_surface(were_object_pointer<were_platform_surface_provider> platform_surface_provider);
 
+    int width() const;
+    int height() const;
+    void set_size(int width, int height);
     bool lock(char **data, int *x1, int *y1, int *x2, int *y2, int *stride);
     bool unlock_and_post();
 
 signals:
+
+    were_signal<void ()> expose;
 
     were_signal<void (int code)> key_down;
     were_signal<void (int code)> key_up;

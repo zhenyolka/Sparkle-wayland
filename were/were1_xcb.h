@@ -36,6 +36,8 @@ int were1_xcb_display_fd(struct were1_xcb_display *display);
 struct were1_xcb_window *were1_xcb_window_create(struct were1_xcb_display *display, int width, int height);
 void were1_xcb_window_destroy(struct were1_xcb_window *window);
 void were1_xcb_window_commit(struct were1_xcb_window *window);
+void were1_xcb_window_commit_with_damage(struct were1_xcb_window *window, int x1, int y1, int x2, int y2);
+void were1_xcb_window_set_size(struct were1_xcb_window *window, int width, int height);
 
 #ifdef  __cplusplus
 }

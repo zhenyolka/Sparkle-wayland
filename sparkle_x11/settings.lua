@@ -1,6 +1,6 @@
 sparkle =
 {
-    upload_mode = 1,
     no_damage = false,
+    upload_mode = 0,
     DPI = 96,
 };

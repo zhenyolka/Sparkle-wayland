@@ -8,9 +8,8 @@ file(GLOB EVERYTHING
 )
 
 if(DEFINED ANDROID)
-    list(FILTER EVERYTHING EXCLUDE REGEX
-        ".*were1_xcb.c|h$"
-    )
+    list(FILTER EVERYTHING EXCLUDE REGEX ".*xcb.*")
+    list(FILTER EVERYTHING EXCLUDE REGEX ".*x11.*")
 endif(DEFINED ANDROID)
 
 add_library(were STATIC

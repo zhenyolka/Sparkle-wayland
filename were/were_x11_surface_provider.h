@@ -14,6 +14,8 @@ public:
     ~were_x11_surface_provider();
     were_x11_surface_provider();
 
+    int display_width() const { return 1280; }
+    int display_height() const { return 720; }
     were_object_pointer<were_platform_surface> create_surface();
 
     were_object_pointer<x11_display> display() const { return display_; }

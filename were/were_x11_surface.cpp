@@ -18,10 +18,10 @@ were_x11_surface::were_x11_surface(were_object_pointer<were_x11_surface_provider
 
     display_ = x11_surface_provider->display();
 
-    int width = 1280;
-    int height = 720;
+    width_ = 100;
+    height_ = 100;
 
-    window_ = were1_xcb_window_create(display_->get(), width, height);
+    window_ = were1_xcb_window_create(display_->get(), width_, height_);
 
     were_object::connect(x11_surface_provider, &were_x11_surface_provider::event1, this_wop, [this_wop](xcb_generic_event_t *event){this_wop->process(event);});
 
@@ -30,8 +30,20 @@ were_x11_surface::were_x11_surface(were_object_pointer<were_x11_surface_provider
 #endif
 }
 
+void were_x11_surface::set_size(int width, int height)
+{
+    width_ = width;
+    height_ = height;
+    were1_xcb_window_set_size(window_, width_, height_);
+}
+
 bool were_x11_surface::lock(char **data, int *x1, int *y1, int *x2, int *y2, int *stride)
 {
+    lock_x1_ = *x1;
+    lock_y1_ = *y1;
+    lock_x2_ = *x2;
+    lock_y2_ = *y2;
+
     *data = (char *)window_->data;
     *stride = window_->width * 4;
 
@@ -40,7 +52,8 @@ bool were_x11_surface::lock(char **data, int *x1, int *y1, int *x2, int *y2, int
 
 bool were_x11_surface::unlock_and_post()
 {
-    were1_xcb_window_commit(window_);
+    //were1_xcb_window_commit(window_);
+    were1_xcb_window_commit_with_damage(window_, lock_x1_, lock_y1_, lock_x2_, lock_y2_);
 
     return true;
 }
@@ -56,6 +69,7 @@ void were_x11_surface::process(xcb_generic_event_t *event)
             xcb_expose_event_t *ev = (xcb_expose_event_t *)event;
             if (ev->window == window_->window)
             {
+                were_object::emit(callbacks(), &were_surface::expose);
             }
             break;
         }
