@@ -16,7 +16,7 @@ class were_x11_surface : public were_platform_surface
 {
 public:
     ~were_x11_surface();
-    were_x11_surface(were_object_pointer<were_x11_surface_provider> x11_surface_provider);
+    were_x11_surface(were_object_pointer<were_x11_surface_provider> x11_surface_provider, int width, int height, int format);
 
     int width() const { return width_; }
     int height() const { return height_; }

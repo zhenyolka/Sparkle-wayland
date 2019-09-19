@@ -14,7 +14,7 @@ public:
 
     int display_width() const;
     int display_height() const;
-    were_object_pointer<were_platform_surface> create_surface();
+    were_object_pointer<were_platform_surface> create_surface(int width, int height, int format);
 
     std::string files_dir() const { return files_dir_; }
 

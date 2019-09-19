@@ -19,7 +19,7 @@ class sparkle_view : public were_platform_surface, public sparkle_java_object
 
 public:
     ~sparkle_view();
-    sparkle_view(JNIEnv *env, were_object_pointer<sparkle_service> service, int format);
+    sparkle_view(JNIEnv *env, were_object_pointer<sparkle_service> service, int width, int height, int format);
 
     void set_enabled(bool enabled);
     void set_visible(bool visible);

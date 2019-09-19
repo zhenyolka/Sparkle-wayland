@@ -42,11 +42,11 @@ int sparkle_service::display_height() const
     return const_cast<sparkle_service *>(this)->call_int_method("display_height", "()I");
 }
 
-were_object_pointer<were_platform_surface> sparkle_service::create_surface()
+were_object_pointer<were_platform_surface> sparkle_service::create_surface(int width, int height, int format)
 {
     MAKE_THIS_WOP
 
-    were_object_pointer<sparkle_view> surface(new sparkle_view(env(), this_wop, 5)); //XXX1 Format
+    were_object_pointer<sparkle_view> surface(new sparkle_view(env(), this_wop, width, height, format));
     surface->set_enabled(true); // XXX1 Remove
     were_object::connect(surface, &were_object::destroyed, surface, [surface]()
     {

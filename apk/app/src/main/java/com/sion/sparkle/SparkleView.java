@@ -36,7 +36,7 @@ import android.content.pm.ActivityInfo;
 public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
 {
     @Keep
-    SparkleView(SparkleService sparkle, long user)
+    SparkleView(SparkleService sparkle, long width, long height, long user)
     {
         super(sparkle);
 
@@ -76,8 +76,8 @@ public class SparkleView extends SurfaceView implements SurfaceHolder.Callback
 
         params.x = 0;
         params.y = 0;
-        params.width = 100;
-        params.height = 100;
+        params.width = (int)width;
+        params.height = (int)height;
         //params.alpha = 0.5F;
         //params.dimAmount = 1.0F;
         //params.format = PixelFormat.TRANSLUCENT;

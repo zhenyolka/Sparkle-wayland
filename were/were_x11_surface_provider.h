@@ -16,7 +16,7 @@ public:
 
     int display_width() const { return 1280; }
     int display_height() const { return 720; }
-    were_object_pointer<were_platform_surface> create_surface();
+    were_object_pointer<were_platform_surface> create_surface(int width, int height, int format);
 
     were_object_pointer<x11_display> display() const { return display_; }
 

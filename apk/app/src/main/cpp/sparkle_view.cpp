@@ -13,12 +13,18 @@ sparkle_view::~sparkle_view()
         ANativeWindow_release(window_);
 }
 
-sparkle_view::sparkle_view(JNIEnv *env, were_object_pointer<sparkle_service> service, int format) :
-    sparkle_java_object(env, "com/sion/sparkle/SparkleView", "(Lcom/sion/sparkle/SparkleService;J)V", service->object1(), jlong(this)), window_(nullptr)
+sparkle_view::sparkle_view(JNIEnv *env, were_object_pointer<sparkle_service> service, int width, int height, int format) :
+    sparkle_java_object(env, "com/sion/sparkle/SparkleView", "(Lcom/sion/sparkle/SparkleService;JJJ)V", service->object1(), jlong(width), jlong(height), jlong(this)), window_(nullptr)
 {
-    width_ = 100;
-    height_ = 100;
-    format_ = format;
+    width_ = width;
+    height_ = height;
+
+    if (format == WERE_SURFACE_FORMAT_ARGB8888)
+        format_ = 5;
+    else if (format == WERE_SURFACE_FORMAT_ABGR8888)
+        format_ = WINDOW_FORMAT_RGBX_8888;
+    else
+        throw were_exception(WE_SIMPLE);
 }
 
 void sparkle_view::set_enabled(bool enabled)

@@ -3,6 +3,9 @@
 
 #include "were_object.h"
 
+#define WERE_SURFACE_FORMAT_ARGB8888    1
+#define WERE_SURFACE_FORMAT_ABGR8888    2
+
 class were_platform_surface;
 class were_platform_surface_provider;
 
@@ -10,7 +13,7 @@ class were_surface : public were_object
 {
 public:
     ~were_surface();
-    were_surface(were_object_pointer<were_platform_surface_provider> platform_surface_provider);
+    were_surface(were_object_pointer<were_platform_surface_provider> platform_surface_provider, int width, int height, int format);
 
     int width() const;
     int height() const;

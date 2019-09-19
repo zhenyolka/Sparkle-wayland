@@ -28,11 +28,11 @@ were_x11_surface_provider::were_x11_surface_provider()
     });
 }
 
-were_object_pointer<were_platform_surface> were_x11_surface_provider::create_surface()
+were_object_pointer<were_platform_surface> were_x11_surface_provider::create_surface(int width, int height, int format)
 {
     MAKE_THIS_WOP
 
-    were_object_pointer<were_x11_surface> surface(new were_x11_surface(this_wop));
+    were_object_pointer<were_x11_surface> surface(new were_x11_surface(this_wop, width, height, format));
 
     return surface;
 }

@@ -147,7 +147,13 @@ sparkle_platform_surface::sparkle_platform_surface(were_object_pointer<sparkle_p
     no_damage_ = platform->sparkle1()->settings()->get_bool("no_damage", false);
     upload_mode_ = platform->sparkle1()->settings()->get_int("upload_mode", 0);
 
-    ws_ = were_object_pointer<were_surface>(new were_surface(platform->platform_surface_provider()));
+    int format;
+    if (upload_mode_ == 2)
+        format = WERE_SURFACE_FORMAT_ABGR8888;
+    else
+        format = WERE_SURFACE_FORMAT_ARGB8888;
+
+    ws_ = were_object_pointer<were_surface>(new were_surface(platform->platform_surface_provider(), 100, 100, format));
     were_object::connect(ws_, &were_surface::expose, this_wop, [this_wop]()
     {
         this_wop->commit(true);

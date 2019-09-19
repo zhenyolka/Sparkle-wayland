@@ -8,11 +8,11 @@ were_surface::~were_surface()
     platform_surface_.collapse();
 }
 
-were_surface::were_surface(were_object_pointer<were_platform_surface_provider> platform_surface_provider)
+were_surface::were_surface(were_object_pointer<were_platform_surface_provider> platform_surface_provider, int width, int height, int format)
 {
     MAKE_THIS_WOP
 
-    platform_surface_ = platform_surface_provider->create_surface();
+    platform_surface_ = platform_surface_provider->create_surface(width, height, format);
     platform_surface_->set_callbacks(this_wop);
     were_object::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
     {

@@ -12,14 +12,17 @@ were_x11_surface::~were_x11_surface()
     were1_xcb_window_destroy(window_);
 }
 
-were_x11_surface::were_x11_surface(were_object_pointer<were_x11_surface_provider> x11_surface_provider)
+were_x11_surface::were_x11_surface(were_object_pointer<were_x11_surface_provider> x11_surface_provider, int width, int height, int format)
 {
     MAKE_THIS_WOP
 
     display_ = x11_surface_provider->display();
 
-    width_ = 100;
-    height_ = 100;
+    width_ = width;
+    height_ = height;
+
+    if (format != WERE_SURFACE_FORMAT_ARGB8888)
+        throw were_exception(WE_SIMPLE);
 
     window_ = were1_xcb_window_create(display_->get(), width_, height_);
 
