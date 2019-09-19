@@ -48,6 +48,8 @@ void were1_xcb_display_close(struct were1_xcb_display *display)
 {
     xcb_free_gc(display->connection, display->gc);
     xcb_disconnect(display->connection);
+
+    free(display);
 }
 
 void were1_xcb_display_get_events(struct were1_xcb_display *display, void (*handler)(xcb_generic_event_t *event, void *user), void *user)
@@ -120,6 +122,8 @@ void were1_xcb_window_destroy(struct were1_xcb_window *window)
     xcb_unmap_window(window->display->connection, window->window);
     xcb_destroy_window(window->display->connection, window->window);
     xcb_flush(window->display->connection);
+
+    free(window);
 }
 
 void were1_xcb_window_commit(struct were1_xcb_window *window)
