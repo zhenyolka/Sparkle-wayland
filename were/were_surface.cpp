@@ -14,6 +14,10 @@ were_surface::were_surface(were_object_pointer<were_platform_surface_provider> p
 
     platform_surface_ = platform_surface_provider->create_surface();
     platform_surface_->set_callbacks(this_wop);
+    were_object::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
+    {
+        this_wop->platform_surface_->set_callbacks(were_object_pointer<were_surface>());
+    });
 }
 
 bool were_surface::lock(char **data, int *x1, int *y1, int *x2, int *y2, int *stride)
