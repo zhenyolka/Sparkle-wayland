@@ -1,3 +1,5 @@
+#define X11
+
 #include <cstdio>
 #include "were_object.h"
 #include "were_thread.h"
@@ -311,7 +313,7 @@ public:
 
         glFinish();
 
-        //eglSwapBuffers(egl_display_, egl_surface_);
+        eglSwapBuffers(egl_display_, egl_surface_);
 
         were_debug::instance().frame();
     }
