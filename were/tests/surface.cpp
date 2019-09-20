@@ -6,6 +6,8 @@
 #include "were_surface.h"
 #include "were_backtrace.h"
 
+#define WIDTH 1280
+#define HEIGHT 720
 
 class test : public were_object
 {
@@ -21,7 +23,7 @@ public:
 
         provider_ = were_object_pointer<were_x11_surface_provider>(new were_x11_surface_provider());
 
-        surface_ = were_object_pointer<were_surface>(new were_surface(provider_));
+        surface_ = were_object_pointer<were_surface>(new were_surface(provider_, WIDTH, HEIGHT, WERE_SURFACE_FORMAT_ARGB8888));
 
         were_object_pointer<were_timer> tmr(new were_timer(1000 / 30));
         were_object::connect(tmr, &were_timer::timeout, this_wop, [this_wop]()
@@ -40,12 +42,12 @@ public:
 
         int x1 = 0;
         int y1 = 0;
-        int x2 = 1280;
-        int y2 = 720;
+        int x2 = WIDTH;
+        int y2 = HEIGHT;
         int stride;
 
         surface_->lock(&data, &x1, &y1, &x2, &y2, &stride);
-        memset(data, x % 256, 1280 * 720 * 4);
+        memset(data, x % 256, WIDTH * HEIGHT * 4);
         surface_->unlock_and_post();
     }
 

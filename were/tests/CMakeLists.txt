@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.6.0)
 project(tests)
 
+
 add_subdirectory(.. ./were)
 
 include_directories(..)
@@ -20,6 +21,8 @@ target_link_libraries(client LINK_PUBLIC
     pthread
 )
 
+if(NOT DEFINED ANDROID)
+
 add_executable(surface surface.cpp)
 set_target_properties(surface PROPERTIES COMPILE_FLAGS "-Wall -Wextra -Wno-unused-parameter -std=c++11 -O2")
 target_link_libraries(surface LINK_PUBLIC
@@ -30,3 +33,27 @@ target_link_libraries(surface LINK_PUBLIC
     dl
     -rdynamic
 )
+
+endif(NOT DEFINED ANDROID)
+
+add_executable(pbo pbo.cpp)
+set_target_properties(pbo PROPERTIES COMPILE_FLAGS "-Wall -Wextra -Wno-unused-parameter -std=c++11 -O2")
+if(DEFINED ANDROID)
+target_link_libraries(pbo LINK_PUBLIC
+    were
+    dl
+    EGL
+    GLESv3
+    -static-libstdc++
+)
+else(DEFINED ANDROID)
+target_link_libraries(pbo LINK_PUBLIC
+    were
+    pthread
+    dl
+    xcb
+    xcb-shm
+    EGL
+    GLESv2
+)
+endif(DEFINED ANDROID)
