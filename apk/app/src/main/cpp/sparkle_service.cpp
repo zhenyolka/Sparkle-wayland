@@ -47,11 +47,6 @@ were_object_pointer<were_platform_surface> sparkle_service::create_surface(int w
     MAKE_THIS_WOP
 
     were_object_pointer<sparkle_view> surface(new sparkle_view(env(), this_wop, width, height, format));
-    surface->set_enabled(true); // XXX1 Remove
-    were_object::connect(surface, &were_object::destroyed, surface, [surface]()
-    {
-        surface->set_enabled(false);
-    });
 
     return surface;
 }

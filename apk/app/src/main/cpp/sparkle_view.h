@@ -21,7 +21,8 @@ public:
     ~sparkle_view();
     sparkle_view(JNIEnv *env, were_object_pointer<sparkle_service> service, int width, int height, int format);
 
-    void set_enabled(bool enabled);
+    void collapse1();
+
     void set_visible(bool visible);
 
     int width() const { return width_; }

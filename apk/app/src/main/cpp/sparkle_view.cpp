@@ -16,6 +16,10 @@ sparkle_view::~sparkle_view()
 sparkle_view::sparkle_view(JNIEnv *env, were_object_pointer<sparkle_service> service, int width, int height, int format) :
     sparkle_java_object(env, "com/sion/sparkle/SparkleView", "(Lcom/sion/sparkle/SparkleService;JJJ)V", service->object1(), jlong(width), jlong(height), jlong(this)), window_(nullptr)
 {
+    MAKE_THIS_WOP
+
+    increment_reference_count();
+
     width_ = width;
     height_ = height;
 
@@ -25,16 +29,17 @@ sparkle_view::sparkle_view(JNIEnv *env, were_object_pointer<sparkle_service> ser
         format_ = WINDOW_FORMAT_RGBX_8888;
     else
         throw were_exception(WE_SIMPLE);
+
+    were_object::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
+    {
+        this_wop->collapse1();
+    });
 }
 
-void sparkle_view::set_enabled(bool enabled)
+void sparkle_view::collapse1()
 {
-    call_void_method("set_enabled", "(Z)V", jboolean(enabled));
-
-    if (enabled) // XXX2 Yes, we need to increment it, but not here
-        increment_reference_count();
-    else
-        decrement_reference_count();
+    call_void_method("collapse", "()V");
+    decrement_reference_count();
 }
 
 void sparkle_view::set_visible(bool visible)
