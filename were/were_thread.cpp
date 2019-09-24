@@ -124,7 +124,7 @@ void were_thread::process_queue()
     while (call_queue_.size() > 0)
     {
         {
-            std::function<void ()> call = call_queue_.front();
+            std::function<void ()> call = std::move(call_queue_.front());
             call_queue_.pop();
             call_queue_mutex_.unlock();
             call();
