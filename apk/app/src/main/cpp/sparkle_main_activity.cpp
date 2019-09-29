@@ -49,15 +49,7 @@ void sparkle_main_activity::lua()
     status = lua_pcall(L, 0, 0, 0);
     if (status) goto finish;
 
-    lua_getglobal(L, "sparkle_initialize");
-    status = lua_pcall(L, 0, 0, 0);
-    if (status) goto finish;
-
     lua_getglobal(L, "start");
-    status = lua_pcall(L, 0, 0, 0);
-    if (status) goto finish;
-
-    lua_getglobal(L, "sparkle_finalize");
     status = lua_pcall(L, 0, 0, 0);
     if (status) goto finish;
 
