@@ -101,7 +101,7 @@ public class MainActivity extends Activity
             public void onClick(View v)
             {
                 Intent intent = new Intent(MainActivity.this, SparkleEditorActivity.class);
-                String file = "user.sh";
+                String file = "user.lua";
                 intent.putExtra(EXTRA_FILE, file);
                 intent.putExtra(EXTRA_FILE_LOG, false);
                 startActivity(intent);

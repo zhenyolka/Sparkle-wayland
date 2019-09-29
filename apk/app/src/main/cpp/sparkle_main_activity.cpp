@@ -117,8 +117,6 @@ void sparkle_main_activity::setup()
     copy_asset(assets, "settings.lua", "settings.lua", 0644);
     copy_asset(assets, "sparkle.lua", "sparkle.lua", 0644);
     copy_asset(assets, "user.lua", "user.lua", 0644);
-    copy_asset(assets, "sparkle.sh", "sparkle.sh", 0644);
-    copy_asset(assets, "user.sh", "user.sh", 0644);
 
     env()->DeleteLocalRef(java_assets);
 }

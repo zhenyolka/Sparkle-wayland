@@ -2,8 +2,7 @@
 local sparkle = require "sparkle";
 
 function start()
-    os.execute("/system/bin/sh user.sh start");
-    --start_generic_container({source="/dev/block/mmcblk0p36", point="/data/local/tmp/fedora", user="sion"});
+    start_generic_container({source="/dev/block/mmcblk0p36", point="/data/local/tmp/fedora", user="sion"});
 end
 
 function start_generic_container(args)
@@ -29,11 +28,6 @@ function start_generic_container(args)
         s.chroot({user=args.user, command="mkdir -p /tmp/sparkle"});
         s.critical("busybox ln -s /data/data/com.sion.sparkle/files/wayland-0 tmp/sparkle/wayland-0");
     end
-
-    --if (not s.running("sshd")) then
-    --    s.chroot({command="/usr/sbin/sshd"});
-    --    s.sleep(1);
-    --end
 
     if (not s.running("Xwayland")) then
         s.chroot({user=args.user, command="XDG_RUNTIME_DIR=/tmp/sparkle Xwayland :0 -noreset &"});
