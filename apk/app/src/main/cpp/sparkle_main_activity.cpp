@@ -44,30 +44,30 @@ void sparkle_main_activity::lua()
     luaL_openlibs(L);
 
     status = luaL_loadfile(L, "user.lua");
-    if (status)
-    {
-        fprintf(stderr, "Failed to load script: %s\n", lua_tostring(L, -1));
-        goto finish;
-    }
+    if (status) goto finish;
 
     status = lua_pcall(L, 0, 0, 0);
-    if (status)
-    {
-        fprintf(stderr, "Failed to run script: %s\n", lua_tostring(L, -1));
-        goto finish;
-    }
+    if (status) goto finish;
+
+    lua_getglobal(L, "sparkle_initialize");
+    status = lua_pcall(L, 0, 0, 0);
+    if (status) goto finish;
 
     lua_getglobal(L, "start");
-
     status = lua_pcall(L, 0, 0, 0);
-    if (status)
-    {
-        fprintf(stderr, "Failed to run script: %s\n", lua_tostring(L, -1));
-        goto finish;
-    }
+    if (status) goto finish;
+
+    lua_getglobal(L, "sparkle_finalize");
+    status = lua_pcall(L, 0, 0, 0);
+    if (status) goto finish;
 
 finish:
+
+    if (status)
+        fprintf(stderr, "%s\n", lua_tostring(L, -1));
+
     lua_close(L);
+
     lua_done_ = true;
 }
 

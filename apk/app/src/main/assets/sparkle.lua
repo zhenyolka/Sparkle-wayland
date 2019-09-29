@@ -1,56 +1,72 @@
+
 local sparkle = {};
 
-sparkle.create = function()
+function sparkle.open(path, mode)
+    local handle = io.open(path, mode);
+    if (handle == nil) then
+        error();
+    end
+    return handle;
+end
+
+function sparkle.create(shell)
+
     local self = {};
 
-    os.execute("busybox mkfifo -m 0600 shell_stdin");
-    os.execute("busybox mkfifo -m 0600 shell_stdout");
-    os.execute("su < shell_stdin > shell_stdout &");
+    ----------------------------------------------------------------------------
 
-    local stdin = io.open("shell_stdin", "w");
-    if (stdin == nil) then
-        error();
-    end
-    local stdout = io.open("shell_stdout", "r");
-    if (stdout == nil) then
-        error();
-    end
+    os.execute("pwd");
+    os.execute("type busybox");
+    os.execute("busybox mkfifo -m 0600 shell_in");
+    os.execute("busybox mkfifo -m 0600 shell_out");
+    os.execute("busybox mkfifo -m 0600 shell_result");
+    os.execute(shell .. " < shell_in > /dev/null &");
+
+    local in_pipe_ = sparkle.open("shell_in", "w");
+
+    ----------------------------------------------------------------------------
 
     function self.destroy()
-        stdout.close(stdout);
-        stdin.close(stdin);
+        in_pipe_.close(in_pipe_);
     end
 
-    local function write(text)
-        stdin.write(stdin, text);
-        stdin.flush(stdin);
+    ----------------------------------------------------------------------------
+
+    local function write_(text)
+        in_pipe_.write(in_pipe_, text);
+        in_pipe_.flush(in_pipe_);
     end
 
-    local function read_until_rc()
-        local text = "";
-        while (true) do
-            local line = stdout.read(stdout, "*l");
-            if (line == nil) then
-                exit();
-            elseif (string.sub(line, 1, 3) == "RC=") then
-                local rc = tonumber(string.sub(line, 4, -1));
-                return rc, text;
-            else
-                text = text .. line;
-            end
-        end
+    local function read_()
+        local out_pipe = sparkle.open("shell_out", "r");
+        local result_pipe = sparkle.open("shell_result", "r");
+        local out_text = out_pipe.read(out_pipe, "*a");
+        local result_text = result_pipe.read(result_pipe, "*a");
+        result_pipe.close(result_pipe);
+        out_pipe.close(out_pipe);
+        return tonumber(result_text), string.sub(out_text, 1, -2);
     end
 
-    local function execute(command)
-        write(command .. "\n");
-        write("echo RC=$?\n");
-        local rc, text = read_until_rc();
+    ----------------------------------------------------------------------------
+
+    function self.execute(command)
+        write_("exec 1> /data/data/com.sion.sparkle/files/shell_out\n");
+        write_(command .. "\n");
+        write_("echo $? > /data/data/com.sion.sparkle/files/shell_result\n");
+        write_("exec 1>&-\n");
+        local rc, text = read_();
         return rc, text;
     end
 
+    function self.execute1(command)
+        write_("exec 1> /dev/null\n");
+        write_(command .. "\n");
+        write_("exec 1>&-\n");
+    end
+
     function self.critical(command)
-        local rc, text = execute(command);
-        print("critical \"" .. command .. "\" rc: " .. tostring(rc));
+        local rc, text = self.execute(command);
+        print("critical [" .. command .. "] rc: " .. tostring(rc));
         if (rc == 0) then
             return text;
         else
@@ -59,8 +75,8 @@ sparkle.create = function()
     end
 
     function self.critical_conditional(command)
-        local rc, text = execute(command);
-        print("critical_conditional \"" .. command .. "\" rc: " .. tostring(rc));
+        local rc, text = self.execute(command);
+        print("critical_conditional [" .. command .. "] rc: " .. tostring(rc));
         if (rc == 0) then
             return true, text;
         elseif (rc == 1) then
@@ -71,10 +87,12 @@ sparkle.create = function()
     end
 
     function self.optional(command)
-        local rc, text = execute(command);
-        print("optional \"" .. command .. "\" rc: " .. tostring(rc));
+        local rc, text = self.execute(command);
+        print("optional [" .. command .. "] rc: " .. tostring(rc));
         return rc, text;
     end
+
+    ----------------------------------------------------------------------------
 
     function self.sleep(time)
         self.critical("busybox sleep " .. tostring(time));
@@ -127,12 +145,13 @@ sparkle.create = function()
         self.critical(command);
     end
 
+    ----------------------------------------------------------------------------
+
     return self;
+
 end
 
 
---sparkle.static_function()
---end
-
 
 return sparkle;
+
