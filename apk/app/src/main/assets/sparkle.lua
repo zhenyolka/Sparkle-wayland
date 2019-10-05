@@ -26,10 +26,19 @@ function shell.create(shell_command)
 
     ----------------------------------------------------------------------------
 
+    local _, _, test = os.execute("type busybox");
+    if (test ~= 0) then
+        error();
+    end
+
     local id_ = shell.new_id();
     local in_pipe_path_ = home_dir .. "/shell-" .. tostring(id_) .. "-in";
     local out_pipe_path_ = home_dir .. "/shell-" .. tostring(id_) .. "-out";
     local result_pipe_path_ = home_dir .. "/shell-" .. tostring(id_) .. "-result";
+
+    os.execute("busybox unlink " .. in_pipe_path_);
+    os.execute("busybox unlink " .. out_pipe_path_);
+    os.execute("busybox unlink " .. result_pipe_path_);
 
     os.execute("busybox mkfifo -m 0600 " .. in_pipe_path_);
     os.execute("busybox mkfifo -m 0600 " .. out_pipe_path_);
