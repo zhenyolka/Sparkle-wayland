@@ -13,15 +13,15 @@ sparkle_platform::~sparkle_platform()
 {
 }
 
-sparkle_platform::sparkle_platform(were_object_pointer<sparkle> sparkle, were_object_pointer<were_platform_surface_provider> platform_surface_provider) :
-    sparkle_(sparkle), platform_surface_provider_(platform_surface_provider)
+sparkle_platform::sparkle_platform(were_object_pointer<sparkle> sparkle) :
+    sparkle_(sparkle)
 {
     MAKE_THIS_WOP
 
     were_object::connect(sparkle->output(), &sparkle_global<sparkle_output>::instance, this_wop, [this_wop](were_object_pointer<sparkle_output> output)
     {
-        int width = this_wop->platform_surface_provider()->display_width();
-        int height = this_wop->platform_surface_provider()->display_height();
+        int width = were_platform_surface_provider::default_provider()->display_width();
+        int height = were_platform_surface_provider::default_provider()->display_height();
         int dpi = this_wop->sparkle1()->settings()->get_int("DPI", 96);
         int mm_width = width * 254 / (dpi * 10);
         int mm_height = height * 254 / (dpi * 10);

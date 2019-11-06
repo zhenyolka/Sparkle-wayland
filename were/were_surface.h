@@ -13,7 +13,7 @@ class were_surface : public were_object
 {
 public:
     ~were_surface();
-    were_surface(were_object_pointer<were_platform_surface_provider> platform_surface_provider, int width, int height, int format);
+    were_surface(int width, int height, int format);
 
     int width() const;
     int height() const;

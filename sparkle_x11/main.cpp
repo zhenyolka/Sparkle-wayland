@@ -24,12 +24,16 @@ public:
         MAKE_THIS_WOP
 
         were_object_pointer<were_x11_surface_provider> provider__(new were_x11_surface_provider());
-        provider__->add_dependency(this_wop);
+        were_platform_surface_provider::set_default_provider(provider__);
+        were_object::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
+        {
+            were_platform_surface_provider::default_provider().collapse();
+        });
 
         were_object_pointer<sparkle> sparkle__(new sparkle());
         sparkle__->add_dependency(this_wop);
 
-        were_object_pointer<sparkle_platform> sparkle_platform__(new sparkle_platform(sparkle__, provider__));
+        were_object_pointer<sparkle_platform> sparkle_platform__(new sparkle_platform(sparkle__));
         sparkle_platform__->add_dependency(this_wop);
     }
 };
