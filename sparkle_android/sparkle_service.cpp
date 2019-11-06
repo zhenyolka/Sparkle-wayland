@@ -22,10 +22,16 @@ sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
 
     files_dir_ = call_string_method("files_dir", "()Ljava/lang/String;");
 
+    were_platform_surface_provider::set_default_provider(this_wop);
+    were_object::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
+    {
+        were_platform_surface_provider::default_provider().collapse();
+    });
+
     were_object_pointer<sparkle> sparkle__(new sparkle(files_dir_));
     sparkle__->add_dependency(this_wop);
 
-    were_object_pointer<sparkle_platform> sparkle_platform__(new sparkle_platform(sparkle__, this_wop));
+    were_object_pointer<sparkle_platform> sparkle_platform__(new sparkle_platform(sparkle__));
     sparkle_platform__->add_dependency(this_wop);
 
     were_object_pointer<sparkle_audio> sparkle_audio__(new sparkle_audio(files_dir_ + "/audio-0"));
