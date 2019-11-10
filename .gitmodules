@@ -1,0 +1,3 @@
+[submodule "were"]
+	path = were
+	url = git@gitlab.com:mogryph/were.git
