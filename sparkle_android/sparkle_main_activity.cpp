@@ -67,7 +67,7 @@ void sparkle_main_activity::copy_asset(AAssetManager *assets, const char *source
 {
     std::string out__ = files_dir_ + "/" + destination;
 
-    if(access(out__.c_str(), F_OK) != -1)
+    if(::access(out__.c_str(), F_OK) != -1)
         return;
 
     AAsset *asset = AAssetManager_open(assets, source, AASSET_MODE_STREAMING);
@@ -140,7 +140,7 @@ Java_com_sion_sparkle_MainActivity_native_1create(JNIEnv *env, jobject instance)
         were_object_pointer<were_thread> thread(new were_thread());
 
     were_object_pointer<sparkle_main_activity> native__(new sparkle_main_activity(env, instance));
-    native__->increment_reference_count();
+    native__.increment_reference_count();
     sparkle_android_logger::instance().redirect_output(native__->files_dir() + "/log.txt");
 
     were_thread::current_thread()->process_queue(); // XXX2
@@ -152,12 +152,12 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_MainActivity_native_1destroy(JNIEnv *env, jobject instance, jlong native)
 {
     were_object_pointer<sparkle_main_activity> native__(reinterpret_cast<sparkle_main_activity *>(native));
-    native__->decrement_reference_count();
+    native__.decrement_reference_count();
     native__.collapse();
 
     were_thread::current_thread()->run_for(1000);
 
-    if (were_thread::current_thread().reference_count() == 1)
+    if (were_thread::current_thread()->reference_count() == 1) // XXX1 ->
     {
         were_thread::current_thread().collapse();
         fprintf(stdout, "thread collapsed\n");

@@ -29,13 +29,13 @@ sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
     });
 
     were_object_pointer<sparkle> sparkle__(new sparkle(files_dir_));
-    sparkle__->add_dependency(this_wop);
+    sparkle__->link(this_wop);
 
     were_object_pointer<sparkle_platform> sparkle_platform__(new sparkle_platform(sparkle__));
-    sparkle_platform__->add_dependency(this_wop);
+    sparkle_platform__->link(this_wop);
 
     were_object_pointer<sparkle_audio> sparkle_audio__(new sparkle_audio(files_dir_ + "/audio-0"));
-    sparkle_audio__->add_dependency(this_wop);
+    sparkle_audio__->link(this_wop);
 }
 
 int sparkle_service::display_width() const
@@ -95,7 +95,7 @@ Java_com_sion_sparkle_SparkleService_native_1destroy(JNIEnv *env, jobject instan
 
     were_thread::current_thread()->run_for(1000);
 
-    if (were_thread::current_thread().reference_count() == 1)
+    if (were_thread::current_thread()->reference_count() == 1) // XXX1 ->
     {
         were_thread::current_thread().collapse();
         fprintf(stdout, "thread collapsed\n");

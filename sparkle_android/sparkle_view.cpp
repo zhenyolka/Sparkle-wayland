@@ -18,7 +18,7 @@ sparkle_view::sparkle_view(JNIEnv *env, were_object_pointer<sparkle_service> ser
 {
     MAKE_THIS_WOP
 
-    increment_reference_count();
+    reference();
 
     width_ = width;
     height_ = height;
@@ -39,7 +39,7 @@ sparkle_view::sparkle_view(JNIEnv *env, were_object_pointer<sparkle_service> ser
 void sparkle_view::collapse1()
 {
     call_void_method("collapse", "()V");
-    decrement_reference_count();
+    unreference();
 }
 
 void sparkle_view::set_visible(bool visible)
