@@ -31,10 +31,10 @@ public:
         });
 
         were_object_pointer<sparkle> sparkle__(new sparkle());
-        sparkle__->add_dependency(this_wop);
+        sparkle__->link(this_wop);
 
         were_object_pointer<sparkle_platform> sparkle_platform__(new sparkle_platform(sparkle__));
-        sparkle_platform__->add_dependency(this_wop);
+        sparkle_platform__->link(this_wop);
     }
 };
 

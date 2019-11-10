@@ -17,7 +17,7 @@ sparkle_resource::sparkle_resource(struct wl_client *client, const struct wl_int
     if (resource_ == nullptr)
         throw were_exception(WE_SIMPLE);
 
-    increment_reference_count();
+    reference();
     wl_resource_set_implementation(resource_, implementation, this, nullptr);
 
     listener_.notify = sparkle_resource::destroy_;
@@ -32,7 +32,7 @@ void sparkle_resource::destroy_(struct wl_listener *listener, void *data)
     wl_list_remove(&instance->listener_.link); // XXX3
 
     instance->resource_ = nullptr;
-    instance->decrement_reference_count();
+    instance->unreference();
 
     were_object_pointer<sparkle_resource> instance__(instance);
     instance__.collapse(); // XXX3 Signal?

@@ -44,7 +44,7 @@ sparkle_platform::sparkle_platform(were_object_pointer<sparkle> sparkle) :
         were_object::connect(shell, &sparkle_shell::shell_surface_created, this_wop, [this_wop](were_object_pointer<sparkle_shell_surface> shell_surface, were_object_pointer<sparkle_surface> surface)
         {
             were_object_pointer<sparkle_platform_surface> platform_surface(new sparkle_platform_surface(this_wop, surface));
-            platform_surface->add_dependency(surface); // XXX2
+            platform_surface->link(surface);
 
             were_object::connect(this_wop, &sparkle_platform::keyboard_created, platform_surface, [platform_surface](were_object_pointer<sparkle_keyboard> keyboard)
             {
