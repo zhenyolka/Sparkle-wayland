@@ -6,9 +6,10 @@
 #include "sparkle_surface.h"
 #include "sparkle_region.h"
 #include "were_thread.h" // XXX3
+#include "were_surface_producer.h"
 
 
-class sparkle_compositor : public sparkle_wl_compositor
+class sparkle_compositor : public sparkle_wl_compositor, public were_surface_producer
 {
 public:
     sparkle_compositor(struct wl_client *client, int version, uint32_t id, were_object_pointer<sparkle_display> display) :
@@ -20,6 +21,7 @@ public:
         {
             were_object_pointer<sparkle_surface> surface(new sparkle_surface(this_wop->client(), this_wop->version(), id));
             were_object::emit(this_wop, &sparkle_compositor::surface_created, surface);
+            were_object::emit(this_wop, &were_surface_producer::surface_created, surface);
         });
 
         were_object::connect(this_wop, &sparkle_compositor::create_region, this_wop, [this_wop](uint32_t id)

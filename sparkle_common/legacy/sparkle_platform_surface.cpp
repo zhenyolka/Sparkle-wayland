@@ -159,7 +159,7 @@ sparkle_platform_surface::sparkle_platform_surface(were_object_pointer<sparkle_p
         this_wop->commit(true);
     });
 
-    were_object::connect(surface_, &sparkle_surface::attach, this_wop, [this_wop](struct wl_resource *buffer, int32_t x, int32_t y)
+    were_object::connect(surface_, &sparkle_surface:attach, this_wop, [this_wop](struct wl_resource *buffer, int32_t x, int32_t y)
     {
         if (this_wop->buffer_ != nullptr)
             wl_buffer_send_release(this_wop->buffer_);

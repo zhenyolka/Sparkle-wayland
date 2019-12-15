@@ -4,7 +4,7 @@
 #include "were_object.h"
 #include <wayland-server.h>
 
-class sparkle_resource : public were_object
+class sparkle_resource : virtual public were_object
 {
 public:
     ~sparkle_resource();
