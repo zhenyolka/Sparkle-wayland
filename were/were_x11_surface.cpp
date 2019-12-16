@@ -8,7 +8,8 @@ were_x11_surface::~were_x11_surface()
     were1_xcb_window_destroy(window_);
 }
 
-were_x11_surface::were_x11_surface(were_object_pointer<were_x11_compositor> compositor, were_object_pointer<were_surface> surface)
+were_x11_surface::were_x11_surface(were_object_pointer<were_x11_compositor> compositor, were_object_pointer<were_surface> surface) :
+    buffer_(nullptr)
 {
     MAKE_THIS_WOP
 
@@ -21,24 +22,29 @@ were_x11_surface::were_x11_surface(were_object_pointer<were_x11_compositor> comp
         this_wop->process(event);
     });
 
-    were_object::connect(surface, &were_surface::data, this_wop, [this_wop](void *data, int width, int height)
+    were_object::connect(surface, &were_surface::attach, this_wop, [this_wop](void *data, int width, int height, int stride, were_surface::buffer_format format)
     {
-        this_wop->data(data, width, height);
+        this_wop->buffer_ = data;
+
+        if (this_wop->window_->width != width || this_wop->window_->height != height)
+            were1_xcb_window_set_size(this_wop->window_, width, height);
+    });
+
+    were_object::connect(surface, &were_surface::damage, this_wop, [this_wop](int x, int y, int width, int height)
+    {
+    });
+
+    were_object::connect(surface, &were_surface::commit, this_wop, [this_wop]()
+    {
+        if (this_wop->buffer_)
+            std::memcpy(this_wop->window_->data, this_wop->buffer_, this_wop->window_->width * this_wop->window_->height * 4);
+
+        were1_xcb_window_commit(this_wop->window_);
     });
 
 #if TOUCH_MODE
     touch_down_ = false;
 #endif
-}
-
-void were_x11_surface::data(void *data, int width, int height)
-{
-    if (window_->width != width || window_->height != height)
-        were1_xcb_window_set_size(window_, width, height);
-
-    std::memcpy(window_->data, data, width * height * 4);
-
-    were1_xcb_window_commit(window_);
 }
 
 void were_x11_surface::process(xcb_generic_event_t *event)

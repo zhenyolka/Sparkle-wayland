@@ -10,9 +10,6 @@ public:
     sparkle_surface(struct wl_client *client, int version, uint32_t id);
 
 private:
-    void commit();
-
-private:
     struct wl_resource *buffer_; // XXX2 Temporary
     struct wl_resource *callback_; // XXX2 Temporary
 };

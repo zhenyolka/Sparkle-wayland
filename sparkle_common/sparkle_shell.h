@@ -5,9 +5,10 @@
 #include "generated/sparkle_wl_shell.h"
 #include "sparkle_shell_surface.h"
 #include "sparkle_surface.h"
+#include "were_surface_producer.h"
 
 
-class sparkle_shell : public sparkle_wl_shell
+class sparkle_shell : public sparkle_wl_shell, public were_surface_producer
 {
 public:
     sparkle_shell(struct wl_client *client, int version, uint32_t id, were_object_pointer<sparkle_display> display) :
@@ -23,6 +24,7 @@ public:
             were_object_pointer<sparkle_shell_surface> shell_surface(new sparkle_shell_surface(this_wop->client(), this_wop->version(), id));
 
             were_object::emit(this_wop, &sparkle_shell::shell_surface_created, shell_surface, surface___);
+            were_object::emit(this_wop, &were_surface_producer::surface_created, surface__);
         });
     }
 

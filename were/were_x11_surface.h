@@ -20,12 +20,12 @@ public:
     were_x11_surface(were_object_pointer<were_x11_compositor> compositor, were_object_pointer<were_surface> surface);
 
 private:
-    void data(void *data, int width, int height);
     void process(xcb_generic_event_t *event);
 
 private:
     were_object_pointer<x11_display> display_;
     struct were1_xcb_window *window_;
+    void *buffer_;
 #if TOUCH_MODE
     bool touch_down_;
 #endif

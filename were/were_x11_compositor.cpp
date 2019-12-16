@@ -1,6 +1,7 @@
 #include "were_x11_compositor.h"
 #include "were_surface_producer.h"
 #include "were_x11_surface.h"
+#include "were_surface.h"
 
 
 were_x11_compositor::~were_x11_compositor()
@@ -36,6 +37,7 @@ void were_x11_compositor::register_producer(were_object_pointer<were_surface_pro
     were_object::connect(producer, &were_surface_producer::surface_created, this_wop, [this_wop](were_object_pointer<were_surface> surface)
     {
         were_object_pointer<were_x11_surface> x11_surface(new were_x11_surface(this_wop, surface));
+        x11_surface->link(surface);
     });
 }
 

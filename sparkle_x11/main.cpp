@@ -5,7 +5,7 @@
 #include "were_signal_handler.h"
 #include "were_x11_compositor.h"
 #include "sparkle_global.h"
-#include "sparkle_compositor.h"
+#include "sparkle_shell.h"
 #include "sparkle_output.h"
 #include <csignal>
 #include <cstdio>
@@ -31,9 +31,9 @@ public:
         were_object_pointer<were_x11_compositor> compositor__(new were_x11_compositor());
         compositor__->link(this_wop);
 
-        were_object::connect(sparkle__->compositor(), &sparkle_global<sparkle_compositor>::instance, compositor__, [compositor__](were_object_pointer<sparkle_compositor> compositor)
+        were_object::connect(sparkle__->shell(), &sparkle_global<sparkle_shell>::instance, compositor__, [compositor__](were_object_pointer<sparkle_shell> shell)
         {
-            compositor__->register_producer(compositor);
+            compositor__->register_producer(shell);
         });
 
         were_object::connect(sparkle__->output(), &sparkle_global<sparkle_output>::instance, this_wop, [this_wop](were_object_pointer<sparkle_output> output)
