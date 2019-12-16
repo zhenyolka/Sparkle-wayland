@@ -24,6 +24,7 @@ private:
 
 private:
     were_object_pointer<x11_display> display_;
+    were_object_pointer<were_surface> surface_;
     struct were1_xcb_window *window_;
     void *buffer_;
 #if TOUCH_MODE

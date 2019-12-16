@@ -1,5 +1,8 @@
 #include "sparkle_surface.h"
 #include "sparkle.h"
+#include "sparkle_keyboard.h"
+#include "sparkle_pointer.h"
+#include "sparkle_touch.h"
 
 
 sparkle_surface::sparkle_surface(struct wl_client *client, int version, uint32_t id) :
@@ -58,5 +61,85 @@ sparkle_surface::sparkle_surface(struct wl_client *client, int version, uint32_t
         }
 
         this_wop->callback_ = wl_resource_create(this_wop->client(), &wl_callback_interface, 1, callback);
+    });
+}
+
+void sparkle_surface::register_keyboard(were_object_pointer<sparkle_keyboard> keyboard)
+{
+    MAKE_THIS_WOP
+
+    if (keyboard->client() != client())
+        return;
+
+    were_object::connect(this_wop, &were_surface::key_down, keyboard, [keyboard, this_wop](int code)
+    {
+        keyboard->key_press(code);
+        keyboard.thread()->process_idle();
+    });
+
+    were_object::connect(this_wop, &were_surface::key_up, keyboard, [keyboard, this_wop](int code)
+    {
+        keyboard->key_release(code);
+        keyboard.thread()->process_idle();
+    });
+
+    keyboard->enter(this_wop); // XXX2
+}
+
+void sparkle_surface::register_pointer(were_object_pointer<sparkle_pointer> pointer)
+{
+    MAKE_THIS_WOP
+
+    if (pointer->client() != client())
+        return;
+
+    were_object::connect(this_wop, &were_surface::pointer_button_down, pointer, [pointer](int button)
+    {
+        pointer->button_down(button);
+    });
+
+    were_object::connect(this_wop, &were_surface::pointer_button_up, pointer, [pointer](int button)
+    {
+        pointer->button_up(button);
+    });
+
+    were_object::connect(this_wop, &were_surface::pointer_motion, pointer, [pointer](int x, int y)
+    {
+        pointer->motion(x, y);
+    });
+
+    were_object::connect(this_wop, &were_surface::pointer_enter, pointer, [pointer, this_wop]()
+    {
+        pointer->enter(this_wop);
+    });
+
+    were_object::connect(this_wop, &were_surface::pointer_leave, pointer, [pointer, this_wop]()
+    {
+        pointer->leave(this_wop);
+    });
+
+    pointer->enter(this_wop); // XXX2
+}
+
+void sparkle_surface::register_touch(were_object_pointer<sparkle_touch> touch)
+{
+    MAKE_THIS_WOP
+
+    if (touch->client() != client())
+        return;
+
+    were_object::connect(this_wop, &were_surface::touch_down, touch, [touch, this_wop](int id, int x, int y)
+    {
+        touch->down(this_wop, id, x, y);
+    });
+
+    were_object::connect(this_wop, &were_surface::touch_up, touch, [touch, this_wop](int id, int x, int y)
+    {
+        touch->up(this_wop, id, x, y);
+    });
+
+    were_object::connect(this_wop, &were_surface::touch_motion, touch, [touch, this_wop](int id, int x, int y)
+    {
+        touch->motion(this_wop, id, x, y);
     });
 }
