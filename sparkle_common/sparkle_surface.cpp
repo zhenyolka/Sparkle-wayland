@@ -10,12 +10,16 @@ sparkle_surface::sparkle_surface(struct wl_client *client, int version, uint32_t
 {
     MAKE_THIS_WOP
 
+    listener_.notify = sparkle_surface::destroy_;
+
     were_object::connect(this_wop, &sparkle_wl_surface::attach, this_wop, [this_wop](struct wl_resource *buffer, int32_t x, int32_t y)
     {
         if (this_wop->buffer_ != nullptr)
             wl_buffer_send_release(this_wop->buffer_);
 
         this_wop->buffer_ = buffer;
+        wl_resource_add_destroy_listener(this_wop->buffer_, &this_wop->listener_);
+
 
         struct wl_shm_buffer *shm_buffer = wl_shm_buffer_get(this_wop->buffer_);
 
@@ -62,6 +66,17 @@ sparkle_surface::sparkle_surface(struct wl_client *client, int version, uint32_t
 
         this_wop->callback_ = wl_resource_create(this_wop->client(), &wl_callback_interface, 1, callback);
     });
+}
+
+void sparkle_surface::destroy_(struct wl_listener *listener, void *data)
+{
+    sparkle_surface *instance;
+    instance = wl_container_of(listener, instance, listener_); // XXX2
+
+    //wl_list_remove(&instance->listener_.link); // XXX3
+
+    instance->buffer_ = nullptr;
+    //instance->unreference();
 }
 
 void sparkle_surface::register_keyboard(were_object_pointer<sparkle_keyboard> keyboard)

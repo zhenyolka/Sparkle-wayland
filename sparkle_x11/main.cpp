@@ -7,6 +7,10 @@
 #include "sparkle_global.h"
 #include "sparkle_shell.h"
 #include "sparkle_output.h"
+#include "sparkle_seat.h"
+#include "sparkle_keyboard.h"
+#include "sparkle_pointer.h"
+#include "sparkle_touch.h"
 #include <csignal>
 #include <cstdio>
 
@@ -31,9 +35,62 @@ public:
         were_object_pointer<were_x11_compositor> compositor__(new were_x11_compositor());
         compositor__->link(this_wop);
 
-        were_object::connect(sparkle__->shell(), &sparkle_global<sparkle_shell>::instance, compositor__, [compositor__](were_object_pointer<sparkle_shell> shell)
+        were_object::connect(sparkle__->shell(), &sparkle_global<sparkle_shell>::instance, compositor__, [compositor__, this_wop](were_object_pointer<sparkle_shell> shell)
         {
             compositor__->register_producer(shell);
+
+            were_object::connect(shell, &sparkle_shell::shell_surface_created, this_wop, [this_wop](were_object_pointer<sparkle_shell_surface> shell_surface, were_object_pointer<sparkle_surface> surface)
+            {
+                were_object::connect(this_wop, &test::keyboard_created, surface, [surface](were_object_pointer<sparkle_keyboard> keyboard)
+                {
+                    surface->register_keyboard(keyboard);
+                });
+
+                were_object::connect(this_wop, &test::pointer_created, surface, [surface](were_object_pointer<sparkle_pointer> pointer)
+                {
+                    surface->register_pointer(pointer);
+                });
+
+                were_object::connect(this_wop, &test::touch_created, surface, [surface](were_object_pointer<sparkle_touch> touch)
+                {
+                    surface->register_touch(touch);
+                });
+
+                were_object::emit(this_wop, &test::surface_created, surface);
+            });
+        });
+
+        were_object::connect(sparkle__->seat(), &sparkle_global<sparkle_seat>::instance, this_wop, [this_wop](were_object_pointer<sparkle_seat> seat)
+        {
+            were_object::connect(seat, &sparkle_seat::keyboard_created, this_wop, [this_wop](were_object_pointer<sparkle_keyboard> keyboard)
+            {
+                were_object::connect(this_wop, &test::surface_created, keyboard, [keyboard](were_object_pointer<sparkle_surface> surface)
+                {
+                    surface->register_keyboard(keyboard);
+                });
+
+                were_object::emit(this_wop, &test::keyboard_created, keyboard);
+            });
+
+            were_object::connect(seat, &sparkle_seat::pointer_created, this_wop, [this_wop](were_object_pointer<sparkle_pointer> pointer)
+            {
+                were_object::connect(this_wop, &test::surface_created, pointer, [pointer](were_object_pointer<sparkle_surface> surface)
+                {
+                    surface->register_pointer(pointer);
+                });
+
+                were_object::emit(this_wop, &test::pointer_created, pointer);
+            });
+
+            were_object::connect(seat, &sparkle_seat::touch_created, this_wop, [this_wop](were_object_pointer<sparkle_touch> touch)
+            {
+                were_object::connect(this_wop, &test::surface_created, touch, [touch](were_object_pointer<sparkle_surface> surface)
+                {
+                    surface->register_touch(touch);
+                });
+
+                were_object::emit(this_wop, &test::touch_created, touch);
+            });
         });
 
         were_object::connect(sparkle__->output(), &sparkle_global<sparkle_output>::instance, this_wop, [this_wop](were_object_pointer<sparkle_output> output)
@@ -56,7 +113,14 @@ public:
             if (output->version() >= WL_OUTPUT_DONE_SINCE_VERSION)
                 output->send_done();
         });
+
+
     }
+
+    were_signal<void (were_object_pointer<sparkle_surface> surface)> surface_created;
+    were_signal<void (were_object_pointer<sparkle_keyboard> keyboard)> keyboard_created;
+    were_signal<void (were_object_pointer<sparkle_pointer> pointer)> pointer_created;
+    were_signal<void (were_object_pointer<sparkle_touch> touch)> touch_created;
 };
 
 int main(int argc, char *argv[])

@@ -18,8 +18,13 @@ public:
     void register_touch(were_object_pointer<sparkle_touch> touch);
 
 private:
+    // XXX1 Temporary
+    static void destroy_(struct wl_listener *listener, void *data); // Buffer destroy
+
+private:
     struct wl_resource *buffer_; // XXX2 Temporary
     struct wl_resource *callback_; // XXX2 Temporary
+    struct wl_listener listener_; // Buffer destroy
 };
 
 #endif // SPARKLE_SURFACE_H
