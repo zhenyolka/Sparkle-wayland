@@ -5,6 +5,7 @@
 #include "sparkle_java_object.h"
 
 class were_surface_producer;
+class sparkle;
 class sparkle_surface;
 class sparkle_keyboard;
 class sparkle_pointer;
@@ -35,6 +36,7 @@ private:
 
 private:
     std::string files_dir_;
+    were_object_pointer<sparkle> sparkle_;
 };
 
 #endif // SPARKLE_SERVICE_H

@@ -51,7 +51,7 @@ public:
 
     void link(were_object_pointer<were_object> other);
 
-    static uint64_t next_id() // XXX1 make thread safe
+    static uint64_t next_id()
     {
         return next_id_++;
     }
@@ -174,7 +174,7 @@ private:
 
 private:
     std::atomic<int> reference_count_;
-    bool collapsed_;
+    std::atomic<bool> collapsed_;
     were_object_pointer<were_thread> thread_;
     static std::atomic<uint64_t> next_id_;
 };

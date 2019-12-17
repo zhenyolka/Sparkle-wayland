@@ -31,6 +31,7 @@ public:
     void set_position(int x, int y);
     void set_size(int width, int height);
     void set_fast(bool fast);
+    void set_no_damage(bool v) { no_damage_ = v; }
 
 private:
     void set_window(ANativeWindow *window);
@@ -43,6 +44,7 @@ private:
     int format_;
     ANativeWindow *window_;
     were_rect<int> damage_;
+    bool no_damage_;
 };
 
 #endif // SPARKLE_VIEW_H

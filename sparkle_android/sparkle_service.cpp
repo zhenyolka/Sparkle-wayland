@@ -26,14 +26,14 @@ sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
 
     files_dir_ = call_string_method("files_dir", "()Ljava/lang/String;");
 
-    were_object_pointer<sparkle> sparkle__(new sparkle(files_dir_));
-    sparkle__->link(this_wop);
+    sparkle_ = were_object_pointer<sparkle>(new sparkle(files_dir_));
+    sparkle_->link(this_wop);
 
     were_object_pointer<sparkle_audio> sparkle_audio__(new sparkle_audio(files_dir_ + "/audio-0"));
     sparkle_audio__->link(this_wop);
 
 
-    were_object::connect(sparkle__->shell(), &sparkle_global<sparkle_shell>::instance, this_wop, [this_wop](were_object_pointer<sparkle_shell> shell)
+    were_object::connect(sparkle_->shell(), &sparkle_global<sparkle_shell>::instance, this_wop, [this_wop](were_object_pointer<sparkle_shell> shell)
     {
         this_wop->register_producer(shell);
 
@@ -58,7 +58,7 @@ sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
         });
     });
 
-    were_object::connect(sparkle__->seat(), &sparkle_global<sparkle_seat>::instance, this_wop, [this_wop](were_object_pointer<sparkle_seat> seat)
+    were_object::connect(sparkle_->seat(), &sparkle_global<sparkle_seat>::instance, this_wop, [this_wop](were_object_pointer<sparkle_seat> seat)
     {
         were_object::connect(seat, &sparkle_seat::keyboard_created, this_wop, [this_wop](were_object_pointer<sparkle_keyboard> keyboard)
         {
@@ -91,11 +91,11 @@ sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
         });
     });
 
-    were_object::connect(sparkle__->output(), &sparkle_global<sparkle_output>::instance, this_wop, [this_wop, sparkle__](were_object_pointer<sparkle_output> output)
+    were_object::connect(sparkle_->output(), &sparkle_global<sparkle_output>::instance, this_wop, [this_wop](were_object_pointer<sparkle_output> output)
     {
         int width = this_wop->display_width();
         int height = this_wop->display_height();
-        int dpi = sparkle__->settings()->get_int("DPI", 96);
+        int dpi = this_wop->sparkle_->settings()->get_int("DPI", 96);
         int mm_width = width * 254 / (dpi * 10);
         int mm_height = height * 254 / (dpi * 10);
 
@@ -141,6 +141,9 @@ void sparkle_service::register_producer(were_object_pointer<were_surface_produce
     {
         were_object_pointer<sparkle_view> view(new sparkle_view(env(), this_wop, surface));
         view->link(surface);
+
+        view->set_fast(this_wop->sparkle_->settings()->get_bool("fast", false));
+        view->set_no_damage(this_wop->sparkle_->settings()->get_bool("no_damage", false));
     });
 }
 

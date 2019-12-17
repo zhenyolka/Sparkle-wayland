@@ -1,6 +1,1 @@
-sparkle =
-{
-    no_damage = false,
-    upload_mode = 0,
-    DPI = 96,
-};
+../apk/app/src/main/assets/settings.lua

@@ -16,7 +16,8 @@ sparkle_view::~sparkle_view()
 }
 
 sparkle_view::sparkle_view(JNIEnv *env, were_object_pointer<sparkle_service> service, were_object_pointer<were_surface> surface) :
-    sparkle_java_object(env, "com/sion/sparkle/SparkleView", "(Lcom/sion/sparkle/SparkleService;J)V", service->object1(), jlong(this)), window_(nullptr)
+    sparkle_java_object(env, "com/sion/sparkle/SparkleView", "(Lcom/sion/sparkle/SparkleService;J)V", service->object1(), jlong(this)), window_(nullptr),
+    no_damage_(false)
 {
     MAKE_THIS_WOP
 
@@ -112,6 +113,11 @@ void sparkle_view::update(bool full)
         set_size(surface_->width(), surface_->height());
         return;
     }
+
+    if (no_damage_)
+        damage_.expand(0, 0, width_, height_);
+
+    damage_.limit(width_, height_);
 
     ARect rect;
     rect.left = damage_.x1();
