@@ -22,20 +22,10 @@ sparkle_view::sparkle_view(JNIEnv *env, were_object_pointer<sparkle_service> ser
 
     reference();
 
+    surface_ = surface;
     width_ = 100;
     height_ = 100;
-    surface_ = surface;
-
-#if 0
-    if (format == WERE_SURFACE_FORMAT_ARGB8888)
-        format_ = 5;
-    else if (format == WERE_SURFACE_FORMAT_ABGR8888)
-        format_ = WINDOW_FORMAT_RGBX_8888;
-    else
-        throw were_exception(WE_SIMPLE);
-#else
-    format_ = 5;
-#endif
+    format_ = WINDOW_FORMAT_RGBX_8888;
 
     were_object::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
     {
@@ -59,12 +49,10 @@ void sparkle_view::set_visible(bool visible)
     call_void_method("set_visible", "(Z)V", jboolean(visible));
 }
 
-#if 0
 void sparkle_view::set_position(int x, int y)
 {
     call_void_method("set_position", "(II)V", jint(x), jint(y));
 }
-#endif
 
 void sparkle_view::set_size(int width, int height)
 {
@@ -74,6 +62,14 @@ void sparkle_view::set_size(int width, int height)
         width_ = width;
         height_ = height;
     }
+}
+
+void sparkle_view::set_fast(bool fast)
+{
+    if (fast)
+        format_ = 5;
+    else
+        format_ = WINDOW_FORMAT_RGBX_8888;
 }
 
 void sparkle_view::set_window(ANativeWindow *window)
@@ -132,10 +128,16 @@ void sparkle_view::update(bool full)
         throw were_exception(WE_SIMPLE);
 
 
-    were_upload::uploader[0](buffer.bits, data,
-                             surface_->stride(), buffer.stride * 4,
+    if (surface_->format() == were_surface::format_ARGB8888 && format_ == 5)
+    {
+        were_upload::uploader[0](buffer.bits, data, surface_->stride(), buffer.stride * 4,
                              rect.left, rect.top, rect.right, rect.bottom);
-
+    }
+    else if (surface_->format() == were_surface::format_ARGB8888 && format_ == WINDOW_FORMAT_RGBX_8888)
+    {
+        were_upload::uploader[2](buffer.bits, data, surface_->stride(), buffer.stride * 4,
+                             rect.left, rect.top, rect.right, rect.bottom);
+    }
 
     ANativeWindow_unlockAndPost(window_);
 

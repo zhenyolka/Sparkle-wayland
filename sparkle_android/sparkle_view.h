@@ -25,11 +25,12 @@ public:
 
     were_object_pointer<were_surface> surface() const { return surface_; }
 
-    void set_visible(bool visible);
-
     int width() const { return width_; }
     int height() const { return height_; }
+    void set_visible(bool visible);
+    void set_position(int x, int y);
     void set_size(int width, int height);
+    void set_fast(bool fast);
 
 private:
     void set_window(ANativeWindow *window);
