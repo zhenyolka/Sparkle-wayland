@@ -1,8 +1,6 @@
 #include "sparkle_view.h"
 #include "sparkle_keymap.h"
 #include "were_surface.h"
-#include "were_debug.h"
-#include "were_upload.h"
 #include <android/native_window_jni.h>
 #include <linux/input-event-codes.h>
 
@@ -15,43 +13,33 @@ sparkle_view::~sparkle_view()
         ANativeWindow_release(window_);
 }
 
-sparkle_view::sparkle_view(JNIEnv *env, were_object_pointer<sparkle_service> service, were_object_pointer<were_surface> surface) :
-    sparkle_java_object(env, "com/sion/sparkle/SparkleView", "(Lcom/sion/sparkle/SparkleService;J)V", service->object1(), jlong(this)), window_(nullptr)
+sparkle_view::sparkle_view(JNIEnv *env, were_object_pointer<sparkle_service> service, int width, int height, int format) :
+    sparkle_java_object(env, "com/sion/sparkle/SparkleView", "(Lcom/sion/sparkle/SparkleService;JJJ)V", service->object1(), jlong(width), jlong(height), jlong(this)), window_(nullptr)
 {
     MAKE_THIS_WOP
 
     reference();
 
-    width_ = 100;
-    height_ = 100;
-    surface_ = surface;
+    width_ = width;
+    height_ = height;
 
-#if 0
     if (format == WERE_SURFACE_FORMAT_ARGB8888)
         format_ = 5;
     else if (format == WERE_SURFACE_FORMAT_ABGR8888)
         format_ = WINDOW_FORMAT_RGBX_8888;
     else
         throw were_exception(WE_SIMPLE);
-#else
-    format_ = 5;
-#endif
 
     were_object::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
     {
-        this_wop->call_void_method("collapse", "()V");
-        this_wop->unreference();
+        this_wop->collapse1();
     });
+}
 
-    were_object::connect(surface, &were_surface::damage, this_wop, [this_wop](int x, int y, int width, int height)
-    {
-        this_wop->damage_.expand(x, y, x + width, y + height);
-    });
-
-    were_object::connect(surface, &were_surface::commit, this_wop, [this_wop]()
-    {
-        this_wop->update(false);
-    });
+void sparkle_view::collapse1()
+{
+    call_void_method("collapse", "()V");
+    unreference();
 }
 
 void sparkle_view::set_visible(bool visible)
@@ -76,6 +64,42 @@ void sparkle_view::set_size(int width, int height)
     }
 }
 
+bool sparkle_view::lock(char **data, int *x1, int *y1, int *x2, int *y2, int *stride)
+{
+    if (window_ == nullptr)
+        return false;
+
+    ARect rect;
+    rect.left = *x1;
+    rect.top = *y1;
+    rect.right = *x2;
+    rect.bottom = *y2;
+
+    ANativeWindow_Buffer buffer;
+
+    if (ANativeWindow_lock(window_, &buffer, &rect) != 0)
+        throw were_exception(WE_SIMPLE);
+
+    if (buffer.width != width_ || buffer.height != height_)
+        throw were_exception(WE_SIMPLE);
+
+    *x1 = rect.left;
+    *y1 = rect.top;
+    *x2 = rect.right;
+    *y2 = rect.bottom;
+    *stride = buffer.stride * 4;
+    *data = (char *)buffer.bits;
+
+    return true;
+}
+
+bool sparkle_view::unlock_and_post()
+{
+    ANativeWindow_unlockAndPost(window_);
+
+    return true;
+}
+
 void sparkle_view::set_window(ANativeWindow *window)
 {
     MAKE_THIS_WOP
@@ -98,50 +122,9 @@ void sparkle_view::set_window(ANativeWindow *window)
 
         if (ANativeWindow_setBuffersGeometry(window_, w_width, w_height, format_) != 0)
             throw were_exception(WE_SIMPLE);
+
+        were_object::emit(this_wop->callbacks(), &were_surface::expose);
     }
-}
-
-void sparkle_view::update(bool full)
-{
-    void *data = surface_->data();
-
-    if (data == nullptr)
-        return;
-
-    if (window_ == nullptr)
-        return;
-
-    if (width_ != surface_->width() || height_ != surface_->height())
-    {
-        set_size(surface_->width(), surface_->height());
-        return;
-    }
-
-    ARect rect;
-    rect.left = damage_.x1();
-    rect.top = damage_.y1();
-    rect.right = damage_.x2();
-    rect.bottom = damage_.y2();
-
-    ANativeWindow_Buffer buffer;
-
-    if (ANativeWindow_lock(window_, &buffer, &rect) != 0)
-        throw were_exception(WE_SIMPLE);
-
-    if (buffer.width != width_ || buffer.height != height_)
-        throw were_exception(WE_SIMPLE);
-
-
-    were_upload::uploader[0](buffer.bits, data,
-                             surface_->stride(), buffer.stride * 4,
-                             rect.left, rect.top, rect.right, rect.bottom);
-
-
-    ANativeWindow_unlockAndPost(window_);
-
-    damage_.reset();
-
-    were_debug::instance().frame();
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -170,7 +153,7 @@ Java_com_sion_sparkle_SparkleView_key_1down(JNIEnv *env, jobject instance, jlong
     were_object_pointer<sparkle_view> view(reinterpret_cast<sparkle_view *>(user));
     int x = sparkle_keymap[code];
     if (x != 0)
-        were_object::emit(view->surface(), &were_surface::key_down, x);
+        were_object::emit(view->callbacks(), &were_surface::key_down, x);
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -179,7 +162,7 @@ Java_com_sion_sparkle_SparkleView_key_1up(JNIEnv *env, jobject instance, jlong u
     were_object_pointer<sparkle_view> view(reinterpret_cast<sparkle_view *>(user));
     int x = sparkle_keymap[code];
     if (x != 0)
-        were_object::emit(view->surface(), &were_surface::key_up, x);
+        were_object::emit(view->callbacks(), &were_surface::key_up, x);
 }
 
 /* Pointer */
@@ -188,35 +171,35 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleView_pointer_1button_1down(JNIEnv *env, jobject instance, jlong user, jint button)
 {
     were_object_pointer<sparkle_view> view(reinterpret_cast<sparkle_view *>(user));
-    were_object::emit(view->surface(), &were_surface::pointer_button_down, button_map[button]);
+    were_object::emit(view->callbacks(), &were_surface::pointer_button_down, button_map[button]);
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleView_pointer_1button_1up(JNIEnv *env, jobject instance, jlong user, jint button)
 {
     were_object_pointer<sparkle_view> view(reinterpret_cast<sparkle_view *>(user));
-    were_object::emit(view->surface(), &were_surface::pointer_button_up, button_map[button]);
+    were_object::emit(view->callbacks(), &were_surface::pointer_button_up, button_map[button]);
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleView_pointer_1motion(JNIEnv *env, jobject instance, jlong user, jfloat x, jfloat y)
 {
     were_object_pointer<sparkle_view> view(reinterpret_cast<sparkle_view *>(user));
-    were_object::emit(view->surface(), &were_surface::pointer_motion, x, y);
+    were_object::emit(view->callbacks(), &were_surface::pointer_motion, x, y);
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleView_pointer_1enter(JNIEnv *env, jobject instance, jlong user)
 {
     were_object_pointer<sparkle_view> view(reinterpret_cast<sparkle_view *>(user));
-    were_object::emit(view->surface(), &were_surface::pointer_enter);
+    were_object::emit(view->callbacks(), &were_surface::pointer_enter);
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleView_pointer_1leave(JNIEnv *env, jobject instance, jlong user)
 {
     were_object_pointer<sparkle_view> view(reinterpret_cast<sparkle_view *>(user));
-    were_object::emit(view->surface(), &were_surface::pointer_leave);
+    were_object::emit(view->callbacks(), &were_surface::pointer_leave);
 }
 
 /* Touch */
@@ -225,19 +208,19 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleView_touch_1down(JNIEnv *env, jobject instance, jlong user, jint id, jfloat x, jfloat y)
 {
     were_object_pointer<sparkle_view> view(reinterpret_cast<sparkle_view *>(user));
-    were_object::emit(view->surface(), &were_surface::touch_down, id, x, y);
+    were_object::emit(view->callbacks(), &were_surface::touch_down, id, x, y);
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleView_touch_1up(JNIEnv *env, jobject instance, jlong user, jint id, jfloat x, jfloat y)
 {
     were_object_pointer<sparkle_view> view(reinterpret_cast<sparkle_view *>(user));
-    were_object::emit(view->surface(), &were_surface::touch_up, id, x, y);
+    were_object::emit(view->callbacks(), &were_surface::touch_up, id, x, y);
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleView_touch_1motion(JNIEnv *env, jobject instance, jlong user, jint id, jfloat x, jfloat y)
 {
     were_object_pointer<sparkle_view> view(reinterpret_cast<sparkle_view *>(user));
-    were_object::emit(view->surface(), &were_surface::touch_motion, id, x, y);
+    were_object::emit(view->callbacks(), &were_surface::touch_motion, id, x, y);
 }

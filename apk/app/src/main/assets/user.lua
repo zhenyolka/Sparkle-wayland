@@ -18,12 +18,12 @@ function start()
 
     -- NOTE: you need to uncomment create/destroy if you want to enable any other procedures here
 
-    --s = sparkle.create("su");
-    --prepare_generic_container({source="/dev/block/mmcblk0p36", point="/data/local/tmp/fedora"});
-    --start_service({process="sshd", user="root", command="/sbin/sshd"});
-    --start_service({process="Xwayland", user="sion", command=xwayland_start});
-    --setup_rndis();
-    --s.destroy();
+    s = sparkle.create("su");
+    prepare_generic_container({source="/dev/block/mmcblk0p36", point="/data/local/tmp/fedora"});
+    start_service({process="sshd", user="root", command="/sbin/sshd"});
+    start_service({process="Xwayland", user="sion", command=xwayland_start});
+    setup_rndis();
+    s.destroy();
 end
 
 --------------------------------------------------------------------------------

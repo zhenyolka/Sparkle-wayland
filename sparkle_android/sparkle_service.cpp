@@ -3,8 +3,12 @@
 #include "sparkle_android_logger.h"
 #include "were_thread.h"
 #include "sparkle.h"
-#include "sparkle_platform.h"
 #include "sparkle_audio.h"
+#include "sparkle_global.h"
+#include "sparkle_shell.h"
+#include "sparkle_seat.h"
+#include "sparkle_output.h"
+#include "sparkle_settings.h"
 #include "were_debug.h"
 #include "were_backtrace.h"
 #include <unistd.h> // dup()
@@ -22,20 +26,91 @@ sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
 
     files_dir_ = call_string_method("files_dir", "()Ljava/lang/String;");
 
-    were_platform_surface_provider::set_default_provider(this_wop);
-    were_object::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
-    {
-        were_platform_surface_provider::default_provider().collapse();
-    });
-
     were_object_pointer<sparkle> sparkle__(new sparkle(files_dir_));
     sparkle__->link(this_wop);
 
-    were_object_pointer<sparkle_platform> sparkle_platform__(new sparkle_platform(sparkle__));
-    sparkle_platform__->link(this_wop);
-
     were_object_pointer<sparkle_audio> sparkle_audio__(new sparkle_audio(files_dir_ + "/audio-0"));
     sparkle_audio__->link(this_wop);
+
+
+    were_object::connect(sparkle__->shell(), &sparkle_global<sparkle_shell>::instance, this_wop, [this_wop](were_object_pointer<sparkle_shell> shell)
+    {
+        this_wop->register_producer(shell);
+
+        were_object::connect(shell, &sparkle_shell::shell_surface_created, this_wop, [this_wop](were_object_pointer<sparkle_shell_surface> shell_surface, were_object_pointer<sparkle_surface> surface)
+        {
+            were_object::connect(this_wop, &sparkle_service::keyboard_created, surface, [surface](were_object_pointer<sparkle_keyboard> keyboard)
+            {
+                surface->register_keyboard(keyboard);
+            });
+
+            were_object::connect(this_wop, &sparkle_service::pointer_created, surface, [surface](were_object_pointer<sparkle_pointer> pointer)
+            {
+                surface->register_pointer(pointer);
+            });
+
+            were_object::connect(this_wop, &sparkle_service::touch_created, surface, [surface](were_object_pointer<sparkle_touch> touch)
+            {
+                surface->register_touch(touch);
+            });
+
+            were_object::emit(this_wop, &sparkle_service::surface_created, surface);
+        });
+    });
+
+    were_object::connect(sparkle__->seat(), &sparkle_global<sparkle_seat>::instance, this_wop, [this_wop](were_object_pointer<sparkle_seat> seat)
+    {
+        were_object::connect(seat, &sparkle_seat::keyboard_created, this_wop, [this_wop](were_object_pointer<sparkle_keyboard> keyboard)
+        {
+            were_object::connect(this_wop, &sparkle_service::surface_created, keyboard, [keyboard](were_object_pointer<sparkle_surface> surface)
+            {
+                surface->register_keyboard(keyboard);
+            });
+
+            were_object::emit(this_wop, &sparkle_service::keyboard_created, keyboard);
+        });
+
+        were_object::connect(seat, &sparkle_seat::pointer_created, this_wop, [this_wop](were_object_pointer<sparkle_pointer> pointer)
+        {
+            were_object::connect(this_wop, &sparkle_service::surface_created, pointer, [pointer](were_object_pointer<sparkle_surface> surface)
+            {
+                surface->register_pointer(pointer);
+            });
+
+            were_object::emit(this_wop, &sparkle_service::pointer_created, pointer);
+        });
+
+        were_object::connect(seat, &sparkle_seat::touch_created, this_wop, [this_wop](were_object_pointer<sparkle_touch> touch)
+        {
+            were_object::connect(this_wop, &sparkle_service::surface_created, touch, [touch](were_object_pointer<sparkle_surface> surface)
+            {
+                surface->register_touch(touch);
+            });
+
+            were_object::emit(this_wop, &sparkle_service::touch_created, touch);
+        });
+    });
+
+    were_object::connect(sparkle__->output(), &sparkle_global<sparkle_output>::instance, this_wop, [this_wop, sparkle__](were_object_pointer<sparkle_output> output)
+    {
+        int width = this_wop->display_width();
+        int height = this_wop->display_height();
+        int dpi = sparkle__->settings()->get_int("DPI", 96);
+        int mm_width = width * 254 / (dpi * 10);
+        int mm_height = height * 254 / (dpi * 10);
+
+        fprintf(stdout, "display size: %dx%d %dx%d\n", width, height, mm_width, mm_height);
+
+        output->send_geometry(0, 0, mm_width, mm_height, 0, "Barely working solutions", "Sparkle", 0);
+
+        if (output->version() >= WL_OUTPUT_SCALE_SINCE_VERSION)
+            output->send_scale(1);
+
+        output->send_mode(WL_OUTPUT_MODE_CURRENT | WL_OUTPUT_MODE_PREFERRED, width, height, 60000);
+
+        if (output->version() >= WL_OUTPUT_DONE_SINCE_VERSION)
+            output->send_done();
+    });
 }
 
 int sparkle_service::display_width() const
@@ -48,15 +123,6 @@ int sparkle_service::display_height() const
     return const_cast<sparkle_service *>(this)->call_int_method("display_height", "()I");
 }
 
-were_object_pointer<were_platform_surface> sparkle_service::create_surface(int width, int height, int format)
-{
-    MAKE_THIS_WOP
-
-    were_object_pointer<sparkle_view> surface(new sparkle_view(env(), this_wop, width, height, format));
-
-    return surface;
-}
-
 void sparkle_service::enable_native_loop(int fd)
 {
     call_void_method("enable_native_loop", "(I)V", jint(fd));
@@ -65,6 +131,17 @@ void sparkle_service::enable_native_loop(int fd)
 void sparkle_service::disable_native_loop()
 {
     call_void_method("disable_native_loop", "()V");
+}
+
+void sparkle_service::register_producer(were_object_pointer<were_surface_producer> producer)
+{
+    MAKE_THIS_WOP
+
+    were_object::connect(producer, &were_surface_producer::surface_created, this_wop, [this_wop](were_object_pointer<were_surface> surface)
+    {
+        were_object_pointer<sparkle_view> view(new sparkle_view(env(), this_wop, surface));
+        view->link(surface);
+    });
 }
 
 extern "C" JNIEXPORT jlong JNICALL

@@ -1,19 +1,17 @@
 #ifndef SPARKLE_VIEW_H
 #define SPARKLE_VIEW_H
 
-#include "were_object.h"
+#include "were_platform_surface.h"
 #include "sparkle_java_object.h"
 #include "sparkle_service.h"
-#include "were_rect.h"
 
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleView_surface_1changed(JNIEnv *env, jobject instance, jlong user, jobject surface);
 
 class ANativeWindow;
-class were_surface;
 
-class sparkle_view : public were_object, public sparkle_java_object
+class sparkle_view : public were_platform_surface, public sparkle_java_object
 {
     friend
     JNIEXPORT void JNICALL
@@ -21,27 +19,26 @@ class sparkle_view : public were_object, public sparkle_java_object
 
 public:
     ~sparkle_view();
-    sparkle_view(JNIEnv *env, were_object_pointer<sparkle_service> service, were_object_pointer<were_surface> surface);
+    sparkle_view(JNIEnv *env, were_object_pointer<sparkle_service> service, int width, int height, int format);
 
-    were_object_pointer<were_surface> surface() const { return surface_; }
+    void collapse1();
 
     void set_visible(bool visible);
 
     int width() const { return width_; }
     int height() const { return height_; }
     void set_size(int width, int height);
+    bool lock(char **data, int *x1, int *y1, int *x2, int *y2, int *stride);
+    bool unlock_and_post();
 
 private:
     void set_window(ANativeWindow *window);
-    void update(bool full = false);
 
 private:
-    were_object_pointer<were_surface> surface_;
     int width_;
     int height_;
     int format_;
     ANativeWindow *window_;
-    were_rect<int> damage_;
 };
 
 #endif // SPARKLE_VIEW_H

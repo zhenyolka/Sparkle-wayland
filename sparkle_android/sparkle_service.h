@@ -1,12 +1,16 @@
 #ifndef SPARKLE_SERVICE_H
 #define SPARKLE_SERVICE_H
 
-#include "were_platform_surface_provider.h"
+#include "were_object.h"
 #include "sparkle_java_object.h"
 
-class were_platform_surface;
+class were_surface_producer;
+class sparkle_surface;
+class sparkle_keyboard;
+class sparkle_pointer;
+class sparkle_touch;
 
-class sparkle_service : public were_platform_surface_provider, public sparkle_java_object
+class sparkle_service : public were_object, public sparkle_java_object
 {
 public:
     ~sparkle_service();
@@ -14,15 +18,20 @@ public:
 
     int display_width() const;
     int display_height() const;
-    were_object_pointer<were_platform_surface> create_surface(int width, int height, int format);
 
     std::string files_dir() const { return files_dir_; }
 
     void enable_native_loop(int fd);
     void disable_native_loop();
 
-    int display_width();
-    int display_height();
+signals:
+    were_signal<void (were_object_pointer<sparkle_surface> surface)> surface_created;
+    were_signal<void (were_object_pointer<sparkle_keyboard> keyboard)> keyboard_created;
+    were_signal<void (were_object_pointer<sparkle_pointer> pointer)> pointer_created;
+    were_signal<void (were_object_pointer<sparkle_touch> touch)> touch_created;
+
+private:
+    void register_producer(were_object_pointer<were_surface_producer> producer);
 
 private:
     std::string files_dir_;

@@ -29,15 +29,6 @@ were_x11_surface::were_x11_surface(were_object_pointer<were_x11_compositor> comp
         this_wop->process(event);
     });
 
-#if 0
-    were_object::connect(surface, &were_surface::attach, this_wop, [this_wop](void *data, int width, int height, int stride, were_surface::buffer_format format)
-    {
-        this_wop->buffer_ = data;
-
-
-    });
-#endif
-
     were_object::connect(surface, &were_surface::damage, this_wop, [this_wop](int x, int y, int width, int height)
     {
         this_wop->damage_.expand(x, y, x + width, y + height);
@@ -164,14 +155,14 @@ void were_x11_surface::update(bool full)
     void *data = surface_->data();
 
     if (data == nullptr)
-            return;
+        return;
 
     if (window_->width != surface_->width() || window_->height != surface_->height())
         were1_xcb_window_set_size(window_, surface_->width(), surface_->height());
 
     //std::memcpy(window_->data, data, window_->width * window_->height * 4);
     were_upload::uploader[0](window_->data, data,
-                             surface_->width() * 4, surface_->width() * 4,
+                             surface_->stride(), surface_->width() * 4,
                              damage_.x1(), damage_.y1(), damage_.x2(), damage_.y2());
 
     were1_xcb_window_commit_with_damage(window_, damage_.x1(), damage_.y1(), damage_.x2(), damage_.y2());
