@@ -4,6 +4,7 @@
 #include "were_object.h"
 #include "were_object_wrapper.h"
 #include "were1_xcb.h"
+#include "were_rect.h"
 
 #define TOUCH_MODE 0
 #define TOUCH_ID 0
@@ -21,12 +22,13 @@ public:
 
 private:
     void process(xcb_generic_event_t *event);
+    void update(bool full = false);
 
 private:
     were_object_pointer<x11_display> display_;
     were_object_pointer<were_surface> surface_;
     struct were1_xcb_window *window_;
-    void *buffer_;
+    were_rect<int> damage_;
 #if TOUCH_MODE
     bool touch_down_;
 #endif

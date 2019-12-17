@@ -1,7 +1,10 @@
 #include "were_x11_surface.h"
 #include "were_x11_compositor.h"
 #include "were_surface.h"
+#include "were_debug.h"
+#include "were_upload.h"
 #include <linux/input-event-codes.h>
+
 
 
 static const int button_map[6] = {0, BTN_LEFT, BTN_MIDDLE, BTN_RIGHT, BTN_GEAR_UP, BTN_GEAR_DOWN};
@@ -12,8 +15,7 @@ were_x11_surface::~were_x11_surface()
     were1_xcb_window_destroy(window_);
 }
 
-were_x11_surface::were_x11_surface(were_object_pointer<were_x11_compositor> compositor, were_object_pointer<were_surface> surface) :
-    buffer_(nullptr)
+were_x11_surface::were_x11_surface(were_object_pointer<were_x11_compositor> compositor, were_object_pointer<were_surface> surface)
 {
     MAKE_THIS_WOP
 
@@ -27,24 +29,23 @@ were_x11_surface::were_x11_surface(were_object_pointer<were_x11_compositor> comp
         this_wop->process(event);
     });
 
+#if 0
     were_object::connect(surface, &were_surface::attach, this_wop, [this_wop](void *data, int width, int height, int stride, were_surface::buffer_format format)
     {
         this_wop->buffer_ = data;
 
-        if (this_wop->window_->width != width || this_wop->window_->height != height)
-            were1_xcb_window_set_size(this_wop->window_, width, height);
+
     });
+#endif
 
     were_object::connect(surface, &were_surface::damage, this_wop, [this_wop](int x, int y, int width, int height)
     {
+        this_wop->damage_.expand(x, y, x + width, y + height);
     });
 
     were_object::connect(surface, &were_surface::commit, this_wop, [this_wop]()
     {
-        if (this_wop->buffer_)
-            std::memcpy(this_wop->window_->data, this_wop->buffer_, this_wop->window_->width * this_wop->window_->height * 4);
-
-        were1_xcb_window_commit(this_wop->window_);
+        this_wop->update(false);
     });
 
 #if TOUCH_MODE
@@ -63,7 +64,7 @@ void were_x11_surface::process(xcb_generic_event_t *event)
             xcb_expose_event_t *ev = (xcb_expose_event_t *)event;
             if (ev->window == window_->window)
             {
-                //were_object::emit(surface_, &were_surface::expose);
+                update(true);
             }
             break;
         }
@@ -156,4 +157,26 @@ void were_x11_surface::process(xcb_generic_event_t *event)
             break;
 
     }
+}
+
+void were_x11_surface::update(bool full)
+{
+    void *data = surface_->data();
+
+    if (data == nullptr)
+            return;
+
+    if (window_->width != surface_->width() || window_->height != surface_->height())
+        were1_xcb_window_set_size(window_, surface_->width(), surface_->height());
+
+    //std::memcpy(window_->data, data, window_->width * window_->height * 4);
+    were_upload::uploader[0](window_->data, data,
+                             surface_->width() * 4, surface_->width() * 4,
+                             damage_.x1(), damage_.y1(), damage_.x2(), damage_.y2());
+
+    were1_xcb_window_commit_with_damage(window_, damage_.x1(), damage_.y1(), damage_.x2(), damage_.y2());
+
+    damage_.reset();
+
+    were_debug::instance().frame();
 }

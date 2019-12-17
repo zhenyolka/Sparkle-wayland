@@ -9,11 +9,15 @@ public:
 
     enum buffer_format {format_ARGB8888, format_ABGR8888};
 
+    virtual void *data() = 0;
+    virtual int width() = 0;
+    virtual int height() = 0;
+    virtual int stride() = 0;
+    virtual were_surface::buffer_format format() = 0;
+
 signals:
-    were_signal<void (void *data, int width, int height, int stride, were_surface::buffer_format format)> attach;
     were_signal<void (int x, int y, int width, int height)> damage;
     were_signal<void ()> commit;
-
 
     were_signal<void (int code)> key_down;
     were_signal<void (int code)> key_up;

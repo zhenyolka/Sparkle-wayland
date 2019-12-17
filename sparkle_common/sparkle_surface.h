@@ -13,6 +13,12 @@ class sparkle_surface : public sparkle_wl_surface, public were_surface
 public:
     sparkle_surface(struct wl_client *client, int version, uint32_t id);
 
+    void *data(); // XXX2 Currently also used to check if data exists
+    int width();
+    int height();
+    int stride();
+    were_surface::buffer_format format();
+
     void register_keyboard(were_object_pointer<sparkle_keyboard> keyboard);
     void register_pointer(were_object_pointer<sparkle_pointer> pointer);
     void register_touch(were_object_pointer<sparkle_touch> touch);
