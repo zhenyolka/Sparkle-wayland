@@ -51,7 +51,13 @@ public:
     void collapse() override { collapsed_ = true; }
     void access() const override {}
     void reference() override { reference_count_++; }
-    void unreference() override { reference_count_--; }
+    void unreference() override
+    {
+        if (reference_count_ == 1 && collapsed_)
+            delete this;
+        else
+            reference_count_--;
+    }
     int reference_count() const override { return reference_count_.load(); }
     were_object_pointer<were_thread> thread() const override;
     void post(const std::function<void ()> &call) override;
