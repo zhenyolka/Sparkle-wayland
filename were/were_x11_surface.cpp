@@ -160,6 +160,11 @@ void were_x11_surface::update(bool full)
     if (window_->width != surface_->width() || window_->height != surface_->height())
         were1_xcb_window_set_size(window_, surface_->width(), surface_->height());
 
+    if (full)
+        damage_.expand(0, 0, surface_->width(), surface_->height());
+
+    damage_.limit(surface_->width(), surface_->height());
+
     //std::memcpy(window_->data, data, window_->width * window_->height * 4);
     were_upload::uploader[0](window_->data, data,
                              surface_->stride(), surface_->width() * 4,

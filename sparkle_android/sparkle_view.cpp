@@ -95,6 +95,8 @@ void sparkle_view::set_window(ANativeWindow *window)
 
         if (ANativeWindow_setBuffersGeometry(window_, w_width, w_height, format_) != 0)
             throw were_exception(WE_SIMPLE);
+
+        update(true);
     }
 }
 
@@ -114,7 +116,7 @@ void sparkle_view::update(bool full)
         return;
     }
 
-    if (no_damage_)
+    if (full || no_damage_)
         damage_.expand(0, 0, width_, height_);
 
     damage_.limit(width_, height_);
