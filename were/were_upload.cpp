@@ -38,8 +38,8 @@ static void uploader_1(void *destination, const void *source,
 
     for (int y = y1; y < y2; ++y)
     {
-        const uint32_t *source_i_l = &source_i[source_stride_bytes / 4 * y];
-        uint32_t *destination_i_l = &destination_i[destination_stride_bytes / 4 * y];
+        const uint32_t *source_i_l = &source_i[source_stride_bytes * y / 4];
+        uint32_t *destination_i_l = &destination_i[destination_stride_bytes * y / 4];
         for (int x = x1; x < x2; ++x)
             destination_i_l[x] = source_i_l[x] | 0xFF000000;
     }
@@ -50,8 +50,8 @@ static void uploader_1(void *destination, const void *source,
 
     for (int y = y1; y < y2; ++y)
     {
-        const uint64_t *source_i_l = &source_i[source_stride_bytes / 8 * y];
-        uint64_t *destination_i_l = &destination_i[destination_stride_bytes / 8 * y];
+        const uint64_t *source_i_l = &source_i[source_stride_bytes * y / 8];
+        uint64_t *destination_i_l = &destination_i[destination_stride_bytes * y / 8];
         for (int x = x1 / 2; x < (x2 + 1) / 2; ++x)
             destination_i_l[x] = source_i_l[x] | 0xFF000000FF000000ULL;
     }
@@ -68,8 +68,8 @@ static void uploader_2(void *destination, const void *source,
 
     for (int y = y1; y < y2; ++y)
     {
-        const sparkle_pixel *source_p_l = &source_p[source_stride_bytes / 4 * y];
-        sparkle_pixel *destination_p_l = &destination_p[destination_stride_bytes / 4 * y];
+        const sparkle_pixel *source_p_l = &source_p[source_stride_bytes * y / 4];
+        sparkle_pixel *destination_p_l = &destination_p[destination_stride_bytes * y / 4];
         for (int x = x1; x < x2; ++x)
         {
             output.v1 = source_p_l[x].v3;
@@ -85,8 +85,8 @@ static void uploader_2(void *destination, const void *source,
 
     for (int y = y1; y < y2; ++y)
     {
-        const uint32_t *source_i_l = &source_i[source_stride_bytes / 4 * y];
-        uint32_t *destination_i_l = &destination_i[destination_stride_bytes / 4 * y];
+        const uint32_t *source_i_l = &source_i[source_stride_bytes * y / 4];
+        uint32_t *destination_i_l = &destination_i[destination_stride_bytes * y / 4];
         for (int x = x1; x < x2; ++x)
         {
             destination_i_l[x] =
@@ -102,8 +102,8 @@ static void uploader_2(void *destination, const void *source,
 
     for (int y = y1; y < y2; ++y)
     {
-        const uint64_t *source_i_l = &source_i[source_stride_bytes / 8 * y];
-        uint64_t *destination_i_l = &destination_i[destination_stride_bytes / 8 * y];
+        const uint64_t *source_i_l = &source_i[source_stride_bytes * y / 8];
+        uint64_t *destination_i_l = &destination_i[destination_stride_bytes * y / 8];
         for (int x = x1 / 2; x < (x2 + 1) / 2; ++x)
         {
             destination_i_l[x] =

@@ -91,9 +91,13 @@ void sparkle_view::set_window(ANativeWindow *window)
         //int w_format = ANativeWindow_getFormat(window_);
 
         if (w_width != width_ || w_height != height_)
-            throw were_exception(WE_SIMPLE);
+        {
+            fprintf(stdout, "WARNING! Wrong window size (%dx%d, expected %dx%d)\n",
+                    w_width, w_height, width_, height_);
+            //throw were_exception(WE_SIMPLE);
+        }
 
-        if (ANativeWindow_setBuffersGeometry(window_, w_width, w_height, format_) != 0)
+        if (ANativeWindow_setBuffersGeometry(window_, width_, height_, format_) != 0)
             throw were_exception(WE_SIMPLE);
 
         update(true);
@@ -133,7 +137,11 @@ void sparkle_view::update(bool full)
         throw were_exception(WE_SIMPLE);
 
     if (buffer.width != width_ || buffer.height != height_)
-        throw were_exception(WE_SIMPLE);
+    {
+        fprintf(stdout, "WARNING! Wrong buffer size (%dx%d, expected %dx%d)\n",
+                    buffer.width, buffer.height, width_, height_);
+        //throw were_exception(WE_SIMPLE);
+    }
 
 
     if (surface_->format() == were_surface::format_ARGB8888 && format_ == 5)
