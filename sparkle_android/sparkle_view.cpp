@@ -141,6 +141,7 @@ void sparkle_view::update(bool full)
         fprintf(stdout, "WARNING! Wrong buffer size (%dx%d, expected %dx%d)\n",
                     buffer.width, buffer.height, width_, height_);
         //throw were_exception(WE_SIMPLE);
+        return;
     }
 
 
