@@ -5,20 +5,8 @@
 class were_backtrace
 {
 public:
-
-    static were_backtrace &instance()
-    {
-        static were_backtrace instance;
-        return instance;
-    }
-
-private:
     ~were_backtrace();
     were_backtrace();
-
-public:
-    were_backtrace(const were_backtrace &other) = delete;
-    void operator=(const were_backtrace &other) = delete;
 
 public:
     void enable();

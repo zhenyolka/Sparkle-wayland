@@ -6,6 +6,7 @@
 #include "were_x11_compositor.h"
 #include "sparkle_global.h"
 #include "sparkle_shell.h"
+#include "were_registry.h"
 #include <csignal>
 #include <cstdio>
 
@@ -44,7 +45,11 @@ public:
 
 int main(int argc, char *argv[])
 {
-    were_backtrace::instance().enable();
+    were_backtrace backtrace;
+    backtrace.enable();
+
+    were_debug debug;
+    were_registry<were_debug>::set(&debug);
 
     {
         were_object_pointer<were_thread> thread(new were_thread());
@@ -63,13 +68,13 @@ int main(int argc, char *argv[])
         }
     });
 
-    were_debug::instance().start();
+    debug.start();
 
     were_thread::current_thread()->run();
 
     were_thread::current_thread().collapse();
 
-    were_debug::instance().stop();
+    debug.stop();
 
     fprintf(stdout, "Done.\n");
 

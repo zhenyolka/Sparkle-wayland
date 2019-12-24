@@ -6,6 +6,7 @@
 #include "sparkle_compositor.h"
 #include "sparkle_seat.h"
 #include "sparkle_shell.h"
+#include "were_registry.h"
 
 #include <wayland-server.h>
 #include <sys/stat.h>
@@ -40,6 +41,7 @@ sparkle::sparkle(const std::string &home_dir) :
         settings_ = were_object_pointer<sparkle_settings>(new sparkle_settings(home_dir + "/settings.lua"));
     else
         settings_ = were_object_pointer<sparkle_settings>(new sparkle_settings("settings.lua"));
+    were_registry<sparkle_settings>::set(settings_.access());
 
     display_ = were_object_pointer<sparkle_display>(new sparkle_display(wl_display_create()));
     display_->set_destructor([](struct wl_display *&display)

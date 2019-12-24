@@ -22,20 +22,8 @@ class were_object_base;
 class were_debug
 {
 public:
-
-    static were_debug &instance()
-    {
-        static were_debug instance;
-        return instance;
-    }
-
-private:
     ~were_debug();
     were_debug();
-
-public:
-    were_debug(const were_debug &other) = delete;
-    void operator=(const were_debug &other) = delete;
 
 public:
     void start();

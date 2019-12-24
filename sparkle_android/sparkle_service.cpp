@@ -9,6 +9,7 @@
 #include "sparkle_settings.h"
 #include "were_debug.h"
 #include "were_backtrace.h"
+#include "were_registry.h"
 #include <unistd.h> // dup()
 //#include <csignal> // SIGINT
 
@@ -67,22 +68,34 @@ void sparkle_service::register_producer(were_object_pointer<were_surface_produce
         were_object_pointer<sparkle_view> view(new sparkle_view(env(), this_wop, surface));
         view->link(surface);
 
-        view->set_fast(this_wop->sparkle_->settings()->get_bool("fast", false));
-        view->set_no_damage(this_wop->sparkle_->settings()->get_bool("no_damage", false));
+        view->set_fast(were_registry<sparkle_settings>::get()->get_bool("fast", false));
+        view->set_no_damage(were_registry<sparkle_settings>::get()->get_bool("no_damage", false));
     });
 }
 
 extern "C" JNIEXPORT jlong JNICALL
 Java_com_sion_sparkle_SparkleService_native_1create(JNIEnv *env, jobject instance)
 {
-    were_backtrace::instance().enable();
-    were_debug::instance().start();
+    were_backtrace *backtrace = new were_backtrace();
+    backtrace->enable();
+    were_registry<were_backtrace>::set(backtrace);
+
+    were_debug *debug = new were_debug();
+    debug->start();
+    were_registry<were_debug>::set(debug);
+
+    sparkle_android_logger *logger = new sparkle_android_logger();
+    were_registry<sparkle_android_logger>::set(logger);
+
+    //XXX1 stop/delete/already created
 
     if (!were_thread::current_thread())
         were_object_pointer<were_thread> thread(new were_thread());
 
     were_object_pointer<sparkle_service> native__(new sparkle_service(env, instance));
-    sparkle_android_logger::instance().redirect_output(native__->files_dir() + "/log.txt");
+
+    logger->redirect_output(native__->files_dir() + "/log.txt");
+
     native__->enable_native_loop(dup(were_thread::current_thread()->fd()));
 
     were_thread::current_thread()->process_queue(); // XXX2
@@ -104,7 +117,6 @@ Java_com_sion_sparkle_SparkleService_native_1destroy(JNIEnv *env, jobject instan
     {
         were_thread::current_thread().collapse();
         fprintf(stdout, "thread collapsed\n");
-        were_debug::instance().stop();
     }
 
     //fprintf(stdout, "SIGINT\n");

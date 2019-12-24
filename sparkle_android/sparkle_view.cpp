@@ -160,7 +160,9 @@ void sparkle_view::update(bool full)
 
     damage_.reset();
 
-    were_debug::instance().frame();
+    were_debug *debug = were_registry<were_debug>::get();
+    if (debug)
+        debug->frame();
 }
 
 extern "C" JNIEXPORT void JNICALL
