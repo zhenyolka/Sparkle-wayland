@@ -7,9 +7,8 @@ were_object::~were_object()
 }
 
 were_object::were_object() :
-    reference_count_(0), collapsed_(false)
+    reference_count_(0), collapsed_(false), thread_(were_thread::current_thread())
 {
-    thread_ = were_thread::current_thread();
 }
 
 void were_object::link(were_object_pointer<were_object> other)

@@ -18,32 +18,28 @@
 
 sparkle::~sparkle()
 {
-    //thread()->remove_idle_handler(this);
-    //struct wl_event_loop *loop = wl_display_get_event_loop(display_->get());
-    //int fd = wl_event_loop_get_fd(loop);
-    //thread()->remove_fd_listener(fd);
-
     shell_.collapse();
     seat_.collapse();
     compositor_.collapse();
     output_.collapse();
     display_.collapse();
-
     settings_.collapse();
 }
 
 sparkle::sparkle(const std::string &home_dir) :
+    settings_(new sparkle_settings(home_dir + "/settings.lua")),
+    display_(new sparkle_display(wl_display_create())),
+    output_(new sparkle_global<sparkle_output>(display_, &wl_output_interface, 3)),
+    compositor_(new sparkle_global<sparkle_compositor>(display_, &wl_compositor_interface, 4)),
+    seat_(new sparkle_global<sparkle_seat>(display_, &wl_seat_interface, 5)),
+    shell_(new sparkle_global<sparkle_shell>(display_, &wl_shell_interface, 1)),
     width_(1280), height_(720)
+
 {
     MAKE_THIS_WOP
 
-    if (!home_dir.empty())
-        settings_ = were_object_pointer<sparkle_settings>(new sparkle_settings(home_dir + "/settings.lua"));
-    else
-        settings_ = were_object_pointer<sparkle_settings>(new sparkle_settings("settings.lua"));
     were_registry<sparkle_settings>::set(settings_.access());
 
-    display_ = were_object_pointer<sparkle_display>(new sparkle_display(wl_display_create()));
     display_->set_destructor([](struct wl_display *&display)
     {
         wl_display_destroy(display);
@@ -69,10 +65,6 @@ sparkle::sparkle(const std::string &home_dir) :
     }
 #endif
 
-    output_ = were_object_pointer<sparkle_global<sparkle_output>>(new sparkle_global<sparkle_output>(display_, &wl_output_interface, 3));
-    compositor_ = were_object_pointer<sparkle_global<sparkle_compositor>>(new sparkle_global<sparkle_compositor>(display_, &wl_compositor_interface, 4));
-    seat_ = were_object_pointer<sparkle_global<sparkle_seat>>(new sparkle_global<sparkle_seat>(display_, &wl_seat_interface, 5));
-    shell_ = were_object_pointer<sparkle_global<sparkle_shell>>(new sparkle_global<sparkle_shell>(display_, &wl_shell_interface, 1));
 
     struct wl_event_loop *loop = wl_display_get_event_loop(display_->get());
     int fd = wl_event_loop_get_fd(loop);

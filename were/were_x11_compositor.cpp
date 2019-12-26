@@ -9,13 +9,11 @@ were_x11_compositor::~were_x11_compositor()
     display_.collapse();
 }
 
-were_x11_compositor::were_x11_compositor()
+were_x11_compositor::were_x11_compositor() :
+    display_(new x11_display(were1_xcb_display_open()))
 {
     MAKE_THIS_WOP
 
-    display_ = were_object_pointer<x11_display>(new x11_display(were1_xcb_display_open()));
-    if (display_->get() == nullptr)
-        throw were_exception(WE_SIMPLE);
     display_->set_destructor([](struct were1_xcb_display *&display)
     {
         were1_xcb_display_close(display);

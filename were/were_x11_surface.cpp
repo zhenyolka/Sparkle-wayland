@@ -15,12 +15,11 @@ were_x11_surface::~were_x11_surface()
     were1_xcb_window_destroy(window_);
 }
 
-were_x11_surface::were_x11_surface(were_object_pointer<were_x11_compositor> compositor, were_object_pointer<were_surface> surface)
+were_x11_surface::were_x11_surface(were_object_pointer<were_x11_compositor> compositor, were_object_pointer<were_surface> surface) :
+    display_(compositor->display()),
+    surface_(surface)
 {
     MAKE_THIS_WOP
-
-    display_ = compositor->display();
-    surface_ = surface;
 
     window_ = were1_xcb_window_create(display_->get(), 1280, 720);
 

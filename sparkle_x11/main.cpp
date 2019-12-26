@@ -51,9 +51,6 @@ int main(int argc, char *argv[])
     were_debug debug;
     were_registry<were_debug>::set(&debug);
 
-    {
-        were_object_pointer<were_thread> thread(new were_thread());
-    }
 
     were_object_pointer<test> t(new test());
 
@@ -72,7 +69,6 @@ int main(int argc, char *argv[])
 
     were_thread::current_thread()->run();
 
-    were_thread::current_thread().collapse();
 
     debug.stop();
 

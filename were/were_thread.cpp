@@ -7,7 +7,7 @@
 
 const int MAX_EVENTS = 16;
 
-thread_local were_object_pointer<were_thread> were_thread::current_thread_;
+thread_local were_object_pointer<were_thread> were_thread::current_thread_(new were_thread());
 
 were_thread::~were_thread()
 {
@@ -31,11 +31,6 @@ were_thread::were_thread() :
         throw were_exception(WE_SIMPLE);
 
     add_fd_listener_(event_fd_, EPOLLIN | EPOLLET, this);
-
-    if (!current_thread_)
-        current_thread_ = this_wop;
-    else
-        throw were_exception(WE_SIMPLE);
 }
 
 void were_thread::add_fd_listener(int fd, uint32_t events, were_object_pointer<were_thread_fd_listener> listener)
