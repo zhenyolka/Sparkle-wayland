@@ -134,26 +134,23 @@ void sparkle_main_activity::stop()
 extern "C" JNIEXPORT jlong JNICALL
 Java_com_sion_sparkle_MainActivity_native_1create(JNIEnv *env, jobject instance)
 {
-    were_backtrace *backtrace = new were_backtrace();
-    backtrace->enable();
-    were_registry<were_backtrace>::set(backtrace);
+    if (!were_registry<were_backtrace>::get())
+        were_registry<were_backtrace>::set(new were_backtrace());
+    were_registry<were_backtrace>::get()->enable();
 
-    were_debug *debug = new were_debug();
-    debug->start();
-    were_registry<were_debug>::set(debug);
+    if (!were_registry<were_debug>::get())
+        were_registry<were_debug>::set(new were_debug());
+    were_registry<were_debug>::get()->start();
 
-    sparkle_android_logger *logger = new sparkle_android_logger();
-    were_registry<sparkle_android_logger>::set(logger);
+    if (!were_registry<sparkle_android_logger>::get())
+        were_registry<sparkle_android_logger>::set(new sparkle_android_logger());
 
     //XXX1 stop/delete/already created
-
-    if (!were_thread::current_thread())
-        were_object_pointer<were_thread> thread(new were_thread());
 
     were_object_pointer<sparkle_main_activity> native__(new sparkle_main_activity(env, instance));
     native__.increment_reference_count();
 
-    logger->redirect_output(native__->files_dir() + "/log.txt");
+    were_registry<sparkle_android_logger>::get()->redirect_output(native__->files_dir() + "/log.txt");
 
     were_thread::current_thread()->process_queue(); // XXX2
 
@@ -169,11 +166,13 @@ Java_com_sion_sparkle_MainActivity_native_1destroy(JNIEnv *env, jobject instance
 
     were_thread::current_thread()->run_for(1000);
 
+#if 0
     if (were_thread::current_thread()->reference_count() == 1) // XXX1 ->
     {
         were_thread::current_thread().collapse();
         fprintf(stdout, "thread collapsed\n");
     }
+#endif
 }
 
 extern "C" JNIEXPORT void JNICALL

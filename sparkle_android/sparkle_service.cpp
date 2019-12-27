@@ -19,15 +19,13 @@ sparkle_service::~sparkle_service()
 }
 
 sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
-    sparkle_java_object(env, instance)
+    sparkle_java_object(env, instance),
+    files_dir_(call_string_method("files_dir", "()Ljava/lang/String;")),
+    sparkle_(new sparkle(files_dir_))
 {
     MAKE_THIS_WOP
 
-    files_dir_ = call_string_method("files_dir", "()Ljava/lang/String;");
-
-    sparkle_ = were_object_pointer<sparkle>(new sparkle(files_dir_));
     sparkle_->link(this_wop);
-
     sparkle_->set_size(display_width(), display_height());
 
     were_object_pointer<sparkle_audio> sparkle_audio__(new sparkle_audio(files_dir_ + "/audio-0"));
@@ -76,25 +74,22 @@ void sparkle_service::register_producer(were_object_pointer<were_surface_produce
 extern "C" JNIEXPORT jlong JNICALL
 Java_com_sion_sparkle_SparkleService_native_1create(JNIEnv *env, jobject instance)
 {
-    were_backtrace *backtrace = new were_backtrace();
-    backtrace->enable();
-    were_registry<were_backtrace>::set(backtrace);
+    if (!were_registry<were_backtrace>::get())
+        were_registry<were_backtrace>::set(new were_backtrace());
+    were_registry<were_backtrace>::get()->enable();
 
-    were_debug *debug = new were_debug();
-    debug->start();
-    were_registry<were_debug>::set(debug);
+    if (!were_registry<were_debug>::get())
+        were_registry<were_debug>::set(new were_debug());
+    were_registry<were_debug>::get()->start();
 
-    sparkle_android_logger *logger = new sparkle_android_logger();
-    were_registry<sparkle_android_logger>::set(logger);
+    if (!were_registry<sparkle_android_logger>::get())
+        were_registry<sparkle_android_logger>::set(new sparkle_android_logger());
 
     //XXX1 stop/delete/already created
 
-    if (!were_thread::current_thread())
-        were_object_pointer<were_thread> thread(new were_thread());
-
     were_object_pointer<sparkle_service> native__(new sparkle_service(env, instance));
 
-    logger->redirect_output(native__->files_dir() + "/log.txt");
+    were_registry<sparkle_android_logger>::get()->redirect_output(native__->files_dir() + "/log.txt");
 
     native__->enable_native_loop(dup(were_thread::current_thread()->fd()));
 
@@ -113,11 +108,13 @@ Java_com_sion_sparkle_SparkleService_native_1destroy(JNIEnv *env, jobject instan
 
     were_thread::current_thread()->run_for(1000);
 
+#if 0
     if (were_thread::current_thread()->reference_count() == 1) // XXX1 ->
     {
         were_thread::current_thread().collapse();
         fprintf(stdout, "thread collapsed\n");
     }
+#endif
 
     //fprintf(stdout, "SIGINT\n");
     //raise(SIGINT); /* That is how we deal with program termination and proper resource deallocation! Yeah! */

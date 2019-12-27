@@ -38,6 +38,7 @@ sparkle::sparkle(const std::string &home_dir) :
 {
     MAKE_THIS_WOP
 
+    were_registry<sparkle_settings>::unset();
     were_registry<sparkle_settings>::set(settings_.access());
 
     display_->set_destructor([](struct wl_display *&display)

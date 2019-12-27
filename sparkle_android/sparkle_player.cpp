@@ -14,7 +14,8 @@ sparkle_player::~sparkle_player()
 }
 
 sparkle_player::sparkle_player() :
-    buffer_(nullptr)
+    buffer_(nullptr),
+    check_timer_(new were_timer(1000))
 {
     SLresult result;
 
@@ -72,7 +73,6 @@ sparkle_player::sparkle_player() :
 
     MAKE_THIS_WOP
 
-    check_timer_ = were_object_pointer<were_timer>(new were_timer(1000));
     were_object::connect(check_timer_, &were_timer::timeout, this_wop, [this_wop]()
     {
         this_wop->check();

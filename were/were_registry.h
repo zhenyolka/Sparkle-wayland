@@ -21,6 +21,11 @@ public:
         return instance_;
     }
 
+    static void unset()
+    {
+        instance_ = nullptr;
+    }
+
 private:
     static T *instance_;
 };
