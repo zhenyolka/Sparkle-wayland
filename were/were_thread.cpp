@@ -191,12 +191,14 @@ void were_thread::post(const std::function<void ()> &call)
     call_queue_.push(call);
     call_queue_mutex_.unlock();
 
+#if 0 // XXX1 Causes thread init
     if (were_thread::current_thread() != this_wop)
     {
         uint64_t add = 1;
         if (write(event_fd_, &add, sizeof(uint64_t)) != sizeof(uint64_t))
             throw were_exception(WE_SIMPLE);
     }
+#endif
 }
 
 void were_thread::event(uint32_t events)
