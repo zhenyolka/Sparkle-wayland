@@ -36,11 +36,6 @@ public:
             compositor__->register_producer(shell);
         });
     }
-
-    were_signal<void (were_object_pointer<sparkle_surface> surface)> surface_created;
-    were_signal<void (were_object_pointer<sparkle_keyboard> keyboard)> keyboard_created;
-    were_signal<void (were_object_pointer<sparkle_pointer> pointer)> pointer_created;
-    were_signal<void (were_object_pointer<sparkle_touch> touch)> touch_created;
 };
 
 int main(int argc, char *argv[])
@@ -51,19 +46,20 @@ int main(int argc, char *argv[])
     were_debug debug;
     were_registry<were_debug>::set(&debug);
 
-
-    were_object_pointer<test> t(new test());
-
-
-    were_object_pointer<were_signal_handler> sh(new were_signal_handler());
-    were_object::connect(sh, &were_signal_handler::signal, sh, [&t, &sh](uint32_t number)
     {
-        if (number == SIGINT)
+        were_object_pointer<test> t(new test());
+
+
+        were_object_pointer<were_signal_handler> sh(new were_signal_handler());
+        were_object::connect(sh, &were_signal_handler::signal, sh, [&t, &sh](uint32_t number)
         {
-            sh.collapse();
-            t.collapse();
-        }
-    });
+            if (number == SIGINT)
+            {
+                sh.collapse();
+                t.collapse();
+            }
+        });
+    }
 
     debug.start();
 
