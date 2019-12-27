@@ -2,10 +2,13 @@
 all: debug
 install: install-debug
 
-debug:
+update-version:
+	./update_version.sh
+
+debug: update-version
 	./gradlew assembleDebug
 
-release:
+release: update-version
 	#./gradlew lint
 	./gradlew assembleRelease
 
@@ -19,6 +22,7 @@ install-release: release
 
 uninstall:
 	adb uninstall com.sion.sparkle > /dev/null 2>&1
+
 clean:
 	rm -rf .gradle/ app/.externalNativeBuild/ app/build/ build/
 

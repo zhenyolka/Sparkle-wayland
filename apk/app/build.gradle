@@ -1,38 +1,13 @@
 apply plugin: 'com.android.application'
 
-class MyVersion
-{
-    def revision
-    MyVersion()
-    {
-        def out = new StringBuilder()
-        def err = new StringBuilder()
-        def p = "git rev-list --count HEAD".execute()
-        p.consumeProcessOutput(out, err)
-        p.waitForProcessOutput(out, err)
-        p.waitFor()
-        revision = out.toInteger()
-    }
-    String toString()
-    {
-        return "0.${revision}"
-    }
-    int toInteger()
-    {
-        return revision
-    }
-}
 
 android {
-
-    MyVersion v = new MyVersion()
-
     compileSdkVersion 28
     defaultConfig {
         minSdkVersion 23
         targetSdkVersion 28
-        versionCode = v.toInteger()
-        versionName = v.toString()
+        versionCode = 243
+        versionName = "0.243"
     }
     buildTypes {
         release {
