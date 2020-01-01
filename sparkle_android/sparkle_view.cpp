@@ -160,10 +160,6 @@ void sparkle_view::update(bool full)
     ANativeWindow_unlockAndPost(window_);
 
     damage_.reset();
-
-    were_debug *debug = were_registry<were_debug>::get();
-    if (debug)
-        debug->frame();
 }
 
 extern "C" JNIEXPORT void JNICALL

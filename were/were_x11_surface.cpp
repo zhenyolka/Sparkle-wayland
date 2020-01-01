@@ -172,8 +172,4 @@ void were_x11_surface::update(bool full)
     were1_xcb_window_commit_with_damage(window_, damage_.x1(), damage_.y1(), damage_.x2(), damage_.y2());
 
     damage_.reset();
-
-    were_debug *debug = were_registry<were_debug>::get();
-    if (debug)
-        debug->frame();
 }

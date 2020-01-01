@@ -7,7 +7,6 @@
 #include "sparkle_android_logger.h"
 #include "were_backtrace.h"
 #include "were_thread.h"
-#include "were_registry.h"
 
 extern "C"
 {
@@ -134,23 +133,8 @@ void sparkle_main_activity::stop()
 extern "C" JNIEXPORT jlong JNICALL
 Java_com_sion_sparkle_MainActivity_native_1create(JNIEnv *env, jobject instance)
 {
-    if (!were_registry<were_backtrace>::get())
-        were_registry<were_backtrace>::set(new were_backtrace());
-    were_registry<were_backtrace>::get()->enable();
-
-    if (!were_registry<were_debug>::get())
-        were_registry<were_debug>::set(new were_debug());
-    were_registry<were_debug>::get()->start();
-
-    if (!were_registry<sparkle_android_logger>::get())
-        were_registry<sparkle_android_logger>::set(new sparkle_android_logger());
-
-    //XXX1 stop/delete/already created
-
     were_object_pointer<sparkle_main_activity> native__(new sparkle_main_activity(env, instance));
     native__.increment_reference_count();
-
-    were_registry<sparkle_android_logger>::get()->redirect_output(native__->files_dir() + "/log.txt");
 
     were_thread::current_thread()->process_queue(); // XXX2
 

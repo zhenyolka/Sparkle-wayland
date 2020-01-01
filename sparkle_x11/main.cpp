@@ -6,7 +6,6 @@
 #include "were_x11_compositor.h"
 #include "sparkle_global.h"
 #include "sparkle_shell.h"
-#include "were_registry.h"
 #include <csignal>
 #include <cstdio>
 
@@ -40,12 +39,6 @@ public:
 
 int main(int argc, char *argv[])
 {
-    were_backtrace backtrace;
-    backtrace.enable();
-
-    were_debug debug;
-    were_registry<were_debug>::set(&debug);
-
     {
         were_object_pointer<test> t(new test());
 
@@ -61,12 +54,9 @@ int main(int argc, char *argv[])
         });
     }
 
-    debug.start();
 
     were_thread::current_thread()->run();
 
-
-    debug.stop();
 
     fprintf(stdout, "Done.\n");
 

@@ -9,7 +9,6 @@
 #include "sparkle_settings.h"
 #include "were_debug.h"
 #include "were_backtrace.h"
-#include "were_registry.h"
 #include <unistd.h> // dup()
 //#include <csignal> // SIGINT
 
@@ -66,30 +65,15 @@ void sparkle_service::register_producer(were_object_pointer<were_surface_produce
         were_object_pointer<sparkle_view> view(new sparkle_view(env(), this_wop, surface));
         view->link(surface);
 
-        view->set_fast(were_registry<sparkle_settings>::get()->get_bool("fast", false));
-        view->set_no_damage(were_registry<sparkle_settings>::get()->get_bool("no_damage", false));
+        view->set_fast(false);
+        view->set_no_damage(false);
     });
 }
 
 extern "C" JNIEXPORT jlong JNICALL
 Java_com_sion_sparkle_SparkleService_native_1create(JNIEnv *env, jobject instance)
 {
-    if (!were_registry<were_backtrace>::get())
-        were_registry<were_backtrace>::set(new were_backtrace());
-    were_registry<were_backtrace>::get()->enable();
-
-    if (!were_registry<were_debug>::get())
-        were_registry<were_debug>::set(new were_debug());
-    were_registry<were_debug>::get()->start();
-
-    if (!were_registry<sparkle_android_logger>::get())
-        were_registry<sparkle_android_logger>::set(new sparkle_android_logger());
-
-    //XXX1 stop/delete/already created
-
     were_object_pointer<sparkle_service> native__(new sparkle_service(env, instance));
-
-    were_registry<sparkle_android_logger>::get()->redirect_output(native__->files_dir() + "/log.txt");
 
     native__->enable_native_loop(dup(were_thread::current_thread()->fd()));
 

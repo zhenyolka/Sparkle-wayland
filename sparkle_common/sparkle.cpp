@@ -6,7 +6,6 @@
 #include "sparkle_compositor.h"
 #include "sparkle_seat.h"
 #include "sparkle_shell.h"
-#include "were_registry.h"
 
 #include <wayland-server.h>
 #include <sys/stat.h>
@@ -37,9 +36,6 @@ sparkle::sparkle(const std::string &home_dir) :
 
 {
     MAKE_THIS_WOP
-
-    were_registry<sparkle_settings>::unset();
-    were_registry<sparkle_settings>::set(settings_.access());
 
     display_->set_destructor([](struct wl_display *&display)
     {
