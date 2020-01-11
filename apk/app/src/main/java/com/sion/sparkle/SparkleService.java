@@ -39,7 +39,7 @@ public class SparkleService extends Service
     @Override
     public void onDestroy()
     {
-        Log.i("Sparkle", "Stopping service...");
+        Log.i("Sparkle", "Stopping SparkleService");
 
         unregisterReceiver(receiver_);
 
@@ -49,7 +49,7 @@ public class SparkleService extends Service
     @Override
     public void onCreate()
     {
-        Log.i("Sparkle", "Starting service...");
+        Log.i("Sparkle", "Starting SparkleService");
 
         WereApplication.getInstance(this);
 

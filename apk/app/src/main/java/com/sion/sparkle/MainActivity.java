@@ -28,6 +28,8 @@ public class MainActivity extends Activity
     @Override
     protected void onDestroy()
     {
+        Log.i("Sparkle", "Stopping SparkleMainActivity");
+
         native_destroy(native_);
 
         super.onDestroy();
@@ -36,6 +38,8 @@ public class MainActivity extends Activity
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+        Log.i("Sparkle", "Starting SparkleMainActivity");
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 

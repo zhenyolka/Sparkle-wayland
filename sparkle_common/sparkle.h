@@ -32,10 +32,11 @@ public:
     ~sparkle();
     sparkle(const std::string &home_dir = std::string());
 
-    were_object_pointer<sparkle_global<sparkle_output>> output() const {return output_;}
-    were_object_pointer<sparkle_global<sparkle_compositor>> compositor() const {return compositor_;}
-    were_object_pointer<sparkle_global<sparkle_seat>> seat() const {return seat_;}
-    were_object_pointer<sparkle_global<sparkle_shell>> shell() const {return shell_;}
+    were_object_pointer<sparkle_settings> settings() const { return settings_; }
+    were_object_pointer<sparkle_global<sparkle_output>> output() const { return output_; }
+    were_object_pointer<sparkle_global<sparkle_compositor>> compositor() const { return compositor_; }
+    were_object_pointer<sparkle_global<sparkle_seat>> seat() const { return seat_; }
+    were_object_pointer<sparkle_global<sparkle_shell>> shell() const { return shell_; }
 
     static uint32_t next_serial(were_object_pointer<sparkle_display> display)
     {

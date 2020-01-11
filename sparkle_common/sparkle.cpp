@@ -6,6 +6,7 @@
 #include "sparkle_compositor.h"
 #include "sparkle_seat.h"
 #include "sparkle_shell.h"
+#include "were_registry.h"
 
 #include <wayland-server.h>
 #include <sys/stat.h>
@@ -154,6 +155,8 @@ sparkle::sparkle(const std::string &home_dir) :
             were_object::emit(this_wop, &sparkle::touch_created, touch);
         });
     });
+
+    were_registry<sparkle_settings *>::set(settings_.access()); //XXX1 Unsafe
 }
 
 void sparkle::event(uint32_t events)

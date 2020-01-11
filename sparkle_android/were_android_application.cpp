@@ -1,12 +1,10 @@
 #include "were_android_application.h"
+#include "were_backtrace.h"
 #include "sparkle_android_logger.h"
 #include "were_debug.h"
-#include "were_backtrace.h"
 #include "were_registry.h"
-#include "were_timer.h"
-
 #include <unistd.h> // dup()
-#include <csignal> // SIGINT
+//#include <csignal> // SIGINT
 
 
 were_android_application::~were_android_application()
@@ -24,13 +22,15 @@ were_android_application::were_android_application(JNIEnv *env, jobject instance
     files_dir_ = call_string_method("files_dir", "()Ljava/lang/String;");
     home_dir_ = call_string_method("home_dir", "()Ljava/lang/String;");
 
-    sparkle_android_logger *logger = new sparkle_android_logger();
-    logger->redirect_output(files_dir_ + "/log.txt");
+    //XXX2 Delete
 
     were_backtrace *backtrace = new were_backtrace();
     backtrace->enable();
 
-    were_debug *debug = new were_debug(); // XXX1 delete
+    sparkle_android_logger *logger = new sparkle_android_logger();
+    logger->redirect_output(files_dir_ + "/log.txt");
+
+    were_debug *debug = new were_debug();
     were_registry<were_debug *>::set(debug);
     debug->start();
 }
@@ -52,7 +52,7 @@ Java_com_sion_sparkle_WereApplication_native_1create(JNIEnv *env, jobject instan
     native__.increment_reference_count();
 
     native__->enable_native_loop(dup(were_thread::current_thread()->fd()));
-    were_thread::current_thread()->process_queue(); // XXX1
+    were_thread::current_thread()->process_queue();
 
     were_registry<were_android_application *>::set(native__.access());
 
@@ -66,7 +66,7 @@ Java_com_sion_sparkle_WereApplication_native_1destroy(JNIEnv *env, jobject insta
     native__.decrement_reference_count();
 
     native__->disable_native_loop();
-    //were_thread::current_thread()->run_for(1000); // XXX1
+    //were_thread::current_thread()->run_for(1000);
 
     were_registry<were_android_application *>::clear();
 

@@ -26,7 +26,7 @@ public class WereApplication
 
     WereApplication(Context context)
     {
-        Log.i("Sparkle", "WereApplication");
+        Log.i("Sparkle", "Creating WereApplication");
 
         context_ = context;
 
