@@ -44,7 +44,6 @@ public class SparkleService extends Service
         unregisterReceiver(receiver_);
 
         native_destroy(native_);
-        WereApplication.getInstance().unreference();
     }
 
     @Override
@@ -52,8 +51,7 @@ public class SparkleService extends Service
     {
         Log.i("Sparkle", "Starting service...");
 
-        WereApplication.getInstance().set_files_dir(getFilesDir().getAbsolutePath());
-        WereApplication.getInstance().set_home_dir(getApplicationInfo().dataDir);
+        WereApplication.getInstance(this);
 
         window_manager_ = (WindowManager)getSystemService(Context.WINDOW_SERVICE);
 
@@ -75,7 +73,6 @@ public class SparkleService extends Service
         filter.addAction(ACTION_STOP);
         registerReceiver(receiver_, filter);
 
-        WereApplication.getInstance().reference();
         native_ = native_create();
     }
 

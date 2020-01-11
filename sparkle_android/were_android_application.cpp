@@ -52,7 +52,7 @@ Java_com_sion_sparkle_WereApplication_native_1create(JNIEnv *env, jobject instan
     native__.increment_reference_count();
 
     native__->enable_native_loop(dup(were_thread::current_thread()->fd()));
-    were_thread::current_thread()->process_queue(); // XXX2
+    were_thread::current_thread()->process_queue(); // XXX1
 
     were_registry<were_android_application *>::set(native__.access());
 

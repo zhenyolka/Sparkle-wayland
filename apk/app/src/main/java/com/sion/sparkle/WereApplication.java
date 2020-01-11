@@ -2,6 +2,7 @@ package com.sion.sparkle;
 
 // Basic
 import androidx.annotation.Keep;
+import android.content.Context;
 import android.util.Log;
 
 // Queue
@@ -16,40 +17,24 @@ import java.io.FileDescriptor;
 public class WereApplication
 {
     private static WereApplication instance_ = null;
-    public static synchronized WereApplication getInstance()
+    public static synchronized WereApplication getInstance(Context context)
     {
         if (instance_ == null)
-            instance_ = new WereApplication();
+            instance_ = new WereApplication(context);
         return instance_;
     }
 
-    WereApplication()
+    WereApplication(Context context)
     {
         Log.i("Sparkle", "WereApplication");
+
+        context_ = context;
 
         queue_ = Looper.myQueue();
         fd_listener_ = new MyOnFileDescriptorEventListener();
         idle_handler_ = new MyIdleHandler();
-    }
 
-    void reference()
-    {
-        if (reference_count_ == 0)
-        {
-            native_ = native_create();
-            Log.i("Sparkle", "WereApplication native created");
-        }
-        reference_count_ += 1;
-    }
-
-    void unreference()
-    {
-        reference_count_ -= 1;
-        if (reference_count_ == 0)
-        {
-            native_destroy(native_);
-            Log.i("Sparkle", "WereApplication native destroyed");
-        }
+        native_ = native_create();
     }
 
     @Keep
@@ -69,26 +54,16 @@ public class WereApplication
         fd_listener_fd_ = null;
     }
 
-    public void set_files_dir(String path)
-    {
-        files_dir_ = path;
-    }
-
-    public void set_home_dir(String path)
-    {
-        home_dir_ = path;
-    }
-
     @Keep
     public String files_dir()
     {
-        return files_dir_;
+        return context_.getFilesDir().getAbsolutePath();
     }
 
     @Keep
     public String home_dir()
     {
-        return home_dir_;
+        return context_.getApplicationInfo().dataDir;
     }
 
     private native long native_create();
@@ -96,15 +71,12 @@ public class WereApplication
     public native void native_loop_fd_event();
     public native void native_loop_idle_event();
 
-    private int reference_count_ = 0;
+    Context context_;
     long native_ = 0;
-
     MessageQueue queue_;
     MyOnFileDescriptorEventListener fd_listener_ = null;
     FileDescriptor fd_listener_fd_ = null;
     MyIdleHandler idle_handler_ = null;
-    String files_dir_;
-    String home_dir_;
 
     public class MyOnFileDescriptorEventListener implements MessageQueue.OnFileDescriptorEventListener
     {
