@@ -29,6 +29,7 @@ public class MainActivity extends Activity
     protected void onDestroy()
     {
         native_destroy(native_);
+        WereApplication.getInstance().unreference();
 
         super.onDestroy();
     }
@@ -38,6 +39,9 @@ public class MainActivity extends Activity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
+        WereApplication.getInstance().set_files_dir(getFilesDir().getAbsolutePath());
+        WereApplication.getInstance().set_home_dir(getApplicationInfo().dataDir);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this))
         {
@@ -122,6 +126,7 @@ public class MainActivity extends Activity
             }
         });
 
+        WereApplication.getInstance().reference();
         native_ = native_create();
         native_setup(native_);
 
@@ -134,18 +139,6 @@ public class MainActivity extends Activity
                 startService(intent);
             finish();
         }
-    }
-
-    @Keep
-    public String files_dir()
-    {
-        return getFilesDir().getAbsolutePath();
-    }
-
-    @Keep
-    public String home_dir()
-    {
-        return getApplicationInfo().dataDir;
     }
 
     static

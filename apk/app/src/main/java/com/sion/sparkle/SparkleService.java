@@ -18,14 +18,6 @@ import android.app.NotificationChannel;
 import android.app.PendingIntent; // Actions
 import android.widget.RemoteViews; // Custom notification
 
-// Queue
-import android.os.MessageQueue;
-import android.os.Looper;
-
-// FD listener
-import android.os.ParcelFileDescriptor;
-import java.io.FileDescriptor;
-
 // Window manager
 import android.view.WindowManager;
 
@@ -35,17 +27,6 @@ import android.util.DisplayMetrics;
 // Broadcast receiver
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
-
-// Map
-//import java.util.Map;
-//import java.util.HashMap;
-//map.put(k, v);
-//map.remove(k);
-//Map<Long, MyIdleHandler> idle_handlers_ = new HashMap<Long, MyIdleHandler>();
-
-// Timer
-//import java.util.Timer;
-//import java.util.TimerTask;
 
 
 public class SparkleService extends Service
@@ -63,6 +44,7 @@ public class SparkleService extends Service
         unregisterReceiver(receiver_);
 
         native_destroy(native_);
+        WereApplication.getInstance().unreference();
     }
 
     @Override
@@ -70,16 +52,10 @@ public class SparkleService extends Service
     {
         Log.i("Sparkle", "Starting service...");
 
-        queue_ = Looper.myQueue();
-
-        //notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-        //notificationManager.notify(1, notification);
-        //notificationManager.cancel(1);
+        WereApplication.getInstance().set_files_dir(getFilesDir().getAbsolutePath());
+        WereApplication.getInstance().set_home_dir(getApplicationInfo().dataDir);
 
         window_manager_ = (WindowManager)getSystemService(Context.WINDOW_SERVICE);
-
-
-
 
         receiver_ = new BroadcastReceiver()
         {
@@ -96,32 +72,11 @@ public class SparkleService extends Service
         };
 
         IntentFilter filter = new IntentFilter();
-        //filter.addAction(ACTION_HIDE);
-        //filter.addAction(ACTION_SHOW);
         filter.addAction(ACTION_STOP);
         registerReceiver(receiver_, filter);
 
-
-        fd_listener_ = new MyOnFileDescriptorEventListener(0);
-        idle_handler_ = new MyIdleHandler(0);
-
-
+        WereApplication.getInstance().reference();
         native_ = native_create();
-
-
-        /*
-        Timer myTimer = new Timer();
-        myTimer.schedule(new TimerTask()
-        {
-            @Override
-            public void run()
-            {
-                Log.i("Sparkle", "Timer");
-            }
-
-        }, 0, 1000);
-        */
-
     }
 
     @Override
@@ -190,29 +145,6 @@ public class SparkleService extends Service
     }
 
     @Keep
-    public String files_dir()
-    {
-        return getFilesDir().getAbsolutePath();
-    }
-
-    @Keep
-    public void enable_native_loop(int fd)
-    {
-        ParcelFileDescriptor parcel_fd = ParcelFileDescriptor.adoptFd(fd);
-        fd_listener_fd_ = parcel_fd.getFileDescriptor();
-        queue_.addOnFileDescriptorEventListener(fd_listener_fd_, MessageQueue.OnFileDescriptorEventListener.EVENT_INPUT, fd_listener_);
-        queue_.addIdleHandler(idle_handler_);
-    }
-
-    @Keep
-    public void disable_native_loop()
-    {
-        queue_.removeIdleHandler(idle_handler_);
-        queue_.removeOnFileDescriptorEventListener(fd_listener_fd_);
-        fd_listener_fd_ = null;
-    }
-
-    @Keep
     public int display_width()
     {
         DisplayMetrics display_metrics = new DisplayMetrics();
@@ -238,55 +170,13 @@ public class SparkleService extends Service
 
     private native long native_create();
     private native void native_destroy(long native__);
-    public native void native_loop_fd_event();
-    public native void native_loop_idle_event();
 
-    MessageQueue queue_;
-    //NotificationManager notificationManager;
     long native_;
     WindowManager window_manager_;
     BroadcastReceiver receiver_;
 
-    MyOnFileDescriptorEventListener fd_listener_ = null;
-    FileDescriptor fd_listener_fd_ = null;
-    MyIdleHandler idle_handler_ = null;
-
     static
     {
         System.loadLibrary("sparkle");
-    }
-
-    public class MyOnFileDescriptorEventListener implements MessageQueue.OnFileDescriptorEventListener
-    {
-        MyOnFileDescriptorEventListener(long user)
-        {
-            user_ = user;
-        }
-
-        @Override
-        public int onFileDescriptorEvents(FileDescriptor fd, int events)
-        {
-            native_loop_fd_event();
-            return EVENT_INPUT;
-        }
-
-        long user_;
-    }
-
-    public class MyIdleHandler implements MessageQueue.IdleHandler
-    {
-        MyIdleHandler(long user)
-        {
-            user_ = user;
-        }
-
-        @Override
-        public boolean queueIdle()
-        {
-            native_loop_idle_event();
-            return true;
-        }
-
-        long user_;
     }
 }

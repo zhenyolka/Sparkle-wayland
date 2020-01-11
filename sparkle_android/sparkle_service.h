@@ -16,16 +16,10 @@ public:
     int display_width() const;
     int display_height() const;
 
-    std::string files_dir() const { return files_dir_; }
-
-    void enable_native_loop(int fd);
-    void disable_native_loop();
-
 private:
     void register_producer(were_object_pointer<were_surface_producer> producer);
 
 private:
-    std::string files_dir_;
     were_object_pointer<sparkle> sparkle_;
 };
 

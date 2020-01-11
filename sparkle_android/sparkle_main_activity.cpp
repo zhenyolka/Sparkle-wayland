@@ -4,9 +4,9 @@
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
 
-#include "sparkle_android_logger.h"
-#include "were_backtrace.h"
+
 #include "were_thread.h"
+#include "were_registry.h"
 
 extern "C"
 {
@@ -19,6 +19,10 @@ extern "C"
 #include <unistd.h> // chdir
 
 
+#include "were_android_application.h"
+
+#define app() were_registry<were_android_application *>::get()
+
 
 sparkle_main_activity::~sparkle_main_activity()
 {
@@ -29,15 +33,14 @@ sparkle_main_activity::~sparkle_main_activity()
 sparkle_main_activity::sparkle_main_activity(JNIEnv *env, jobject instance) :
     sparkle_java_object(env, instance), lua_done_(true)
 {
-    files_dir_ = call_string_method("files_dir", "()Ljava/lang/String;");
-    home_dir_ = call_string_method("home_dir", "()Ljava/lang/String;");
+
 }
 
 void sparkle_main_activity::lua()
 {
     int status;
 
-    if (chdir(files_dir_.c_str()) == -1)
+    if (chdir(app()->files_dir().c_str()) == -1)
         throw were_exception(WE_SIMPLE);
 
     lua_State *L = luaL_newstate();
@@ -65,7 +68,7 @@ finish:
 
 void sparkle_main_activity::copy_asset(AAssetManager *assets, const char *source, const char *destination, mode_t mode)
 {
-    std::string out__ = files_dir_ + "/" + destination;
+    std::string out__ = app()->files_dir() + "/" + destination;
 
     if(::access(out__.c_str(), F_OK) != -1)
         return;
@@ -94,9 +97,9 @@ void sparkle_main_activity::copy_asset(AAssetManager *assets, const char *source
 
 void sparkle_main_activity::setup()
 {
-    if (chmod(home_dir_.c_str(), 0755) == -1)
+    if (chmod(app()->home_dir().c_str(), 0755) == -1)
         throw were_exception(WE_SIMPLE);
-    if (chmod(files_dir_.c_str(), 0755) == -1)
+    if (chmod(app()->files_dir().c_str(), 0755) == -1)
         throw were_exception(WE_SIMPLE);
 
 
@@ -135,9 +138,6 @@ Java_com_sion_sparkle_MainActivity_native_1create(JNIEnv *env, jobject instance)
 {
     were_object_pointer<sparkle_main_activity> native__(new sparkle_main_activity(env, instance));
     native__.increment_reference_count();
-
-    were_thread::current_thread()->process_queue(); // XXX2
-
     return jlong(native__.access());
 }
 
@@ -147,16 +147,6 @@ Java_com_sion_sparkle_MainActivity_native_1destroy(JNIEnv *env, jobject instance
     were_object_pointer<sparkle_main_activity> native__(reinterpret_cast<sparkle_main_activity *>(native));
     native__.decrement_reference_count();
     native__.collapse();
-
-    were_thread::current_thread()->run_for(1000);
-
-#if 0
-    if (were_thread::current_thread()->reference_count() == 1) // XXX1 ->
-    {
-        were_thread::current_thread().collapse();
-        fprintf(stdout, "thread collapsed\n");
-    }
-#endif
 }
 
 extern "C" JNIEXPORT void JNICALL

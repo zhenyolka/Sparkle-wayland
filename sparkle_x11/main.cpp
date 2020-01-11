@@ -9,6 +9,9 @@
 #include <csignal>
 #include <cstdio>
 
+#include "were_optional.h"
+#include "were_registry.h"
+
 
 
 class test : public were_object
@@ -39,6 +42,12 @@ public:
 
 int main(int argc, char *argv[])
 {
+    were_backtrace backtrace;
+    backtrace.enable();
+
+    were_debug *debug = new were_debug();
+    were_registry<were_debug *>::set(debug);
+
     {
         were_object_pointer<test> t(new test());
 
@@ -54,8 +63,14 @@ int main(int argc, char *argv[])
         });
     }
 
+    debug->start();
 
     were_thread::current_thread()->run();
+
+    debug->stop();
+
+    were_registry<were_debug *>::clear();
+    delete debug;
 
 
     fprintf(stdout, "Done.\n");
