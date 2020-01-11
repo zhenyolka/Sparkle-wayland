@@ -43,7 +43,7 @@ public class MainActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        WereApplication.getInstance(this);
+        WereApplication.getInstance(getApplicationContext());
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this))
         {

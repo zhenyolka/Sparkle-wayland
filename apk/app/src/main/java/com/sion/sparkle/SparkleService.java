@@ -51,7 +51,7 @@ public class SparkleService extends Service
     {
         Log.i("Sparkle", "Starting SparkleService");
 
-        WereApplication.getInstance(this);
+        WereApplication.getInstance(getApplicationContext());
 
         window_manager_ = (WindowManager)getSystemService(Context.WINDOW_SERVICE);
 
