@@ -10,6 +10,8 @@ add_subdirectory(${SPARKLE_ROOT}/sparkle_common sparkle_common)
 file(GLOB EVERYTHING
     "sparkle_*.cpp"
     "sparkle_*.h"
+    "were_*.cpp"
+    "were_*.h"
 )
 
 #HACK

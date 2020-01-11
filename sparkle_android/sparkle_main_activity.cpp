@@ -26,6 +26,8 @@ extern "C"
 
 sparkle_main_activity::~sparkle_main_activity()
 {
+    fprintf(stdout, "~sparkle_main_activity\n");
+
     if (lua_thread_.joinable())
         lua_thread_.join();
 }
@@ -33,7 +35,7 @@ sparkle_main_activity::~sparkle_main_activity()
 sparkle_main_activity::sparkle_main_activity(JNIEnv *env, jobject instance) :
     sparkle_java_object(env, instance), lua_done_(true)
 {
-
+    fprintf(stdout, "sparkle_main_activity\n");
 }
 
 void sparkle_main_activity::lua()

@@ -190,16 +190,19 @@ void were_debug::remove_object(were_object_base *object__)
     auto search = object_set_.find(object__);
     if (search == object_set_.end())
     {
-        const char *state;
 
+        const char *state = "Unknown"; // XXX2 It is already half-deleted
+
+#if 0
         if (object__->collapsed())
             state = state_collapsed;
         else if (object__->reference_count() == 0)
             state = state_lost;
         else
             state = state_normal;
+#endif
 
-        fprintf(stdout, "%-20p%-45.44s%-5d%-10s\n", object__, typeid(*object__).name(), object__->reference_count(), state);
+        fprintf(stdout, "%-20p%-45.44s%-5d%-10s\n", object__, typeid(*object__).name(), 0, state);
 
         throw were_exception(WE_SIMPLE);
     }

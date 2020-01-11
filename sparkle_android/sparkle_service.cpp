@@ -16,12 +16,15 @@
 
 sparkle_service::~sparkle_service()
 {
+    fprintf(stdout, "~sparkle_service\n");
 }
 
 sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
     sparkle_java_object(env, instance),
     sparkle_(new sparkle(app()->files_dir()))
 {
+    fprintf(stdout, "sparkle_service\n");
+
     MAKE_THIS_WOP
 
     sparkle_->link(this_wop);

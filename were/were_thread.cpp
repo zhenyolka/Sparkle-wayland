@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <sys/eventfd.h>
 #include <ctime>
+#include <cstdio>
 
 
 const int MAX_EVENTS = 16;
@@ -193,12 +194,12 @@ void were_thread::post(const std::function<void ()> &call)
 
 #if 0 // XXX1 Causes thread init
     if (were_thread::current_thread() != this_wop)
+#endif
     {
         uint64_t add = 1;
         if (write(event_fd_, &add, sizeof(uint64_t)) != sizeof(uint64_t))
             throw were_exception(WE_SIMPLE);
     }
-#endif
 }
 
 void were_thread::event(uint32_t events)
