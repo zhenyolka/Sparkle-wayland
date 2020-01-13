@@ -3,9 +3,11 @@
 #include "sparkle_android_logger.h"
 #include "were_debug.h"
 #include "were_registry.h"
+#include "were_exception.h"
 #include <unistd.h> // dup()
 //#include <csignal> // SIGINT
 
+static bool created = false;
 
 were_android_application::~were_android_application()
 {
@@ -18,6 +20,10 @@ were_android_application::were_android_application(JNIEnv *env, jobject instance
     sparkle_java_object(env, instance)
 {
     fprintf(stdout, "were_android_application\n");
+
+    if (created)
+        throw were_exception(WE_SIMPLE);
+    created = true;
 
     files_dir_ = call_string_method("files_dir", "()Ljava/lang/String;");
     home_dir_ = call_string_method("home_dir", "()Ljava/lang/String;");
