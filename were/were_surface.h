@@ -7,7 +7,7 @@ class were_surface : virtual public were_object
 {
 public:
 
-    enum buffer_format {format_ARGB8888, format_ABGR8888};
+    enum class buffer_format { ARGB8888, ABGR8888 };
 
     virtual void *data() = 0;
     virtual int width() = 0;

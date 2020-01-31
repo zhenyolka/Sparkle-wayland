@@ -110,8 +110,8 @@ void were_thread::process_events(int timeout)
 void were_thread::process_idle()
 {
     //idle_handlers_mutex_.lock();
-    for (auto it = idle_handlers_.begin(); it != idle_handlers_.end(); ++it)
-        (*it)->idle();
+    for (auto &handler : idle_handlers_)
+        handler->idle();
     //idle_handlers_mutex_.unlock();
 }
 
@@ -171,7 +171,7 @@ void were_thread::run_for(int ms)
         uint64_t elapsed = 0;
         elapsed += 1000ULL * (ts2.tv_sec - ts1.tv_sec);
         elapsed += (ts2.tv_nsec - ts1.tv_nsec) / 1000000ULL;
-        if (elapsed > ms)
+        if (elapsed > static_cast<uint64_t>(ms))
             break;
     }
 }

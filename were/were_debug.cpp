@@ -148,7 +148,13 @@ void were_debug::print_now()
         fps = 1.0 * frames_ / elapsed_real_secs;
     frames_ = 0;
 
-    fprintf(stdout, "| CPU: %5.1f%% %5.1f%% | OC: %3d | CC: %3d | PWR: %4d | FPS: %2.1f |\n", cpu_load, load1, object_count_, connection_count_, get_power(), fps);
+#ifdef X_DEBUG
+    if (true)
+#else
+    if (object_count_ > 0)
+#endif
+        fprintf(stdout, "| CPU: %5.1f%% %5.1f%% | OC: %3d | CC: %3d | PWR: %4d | FPS: %2.1f |\n", cpu_load, load1, object_count_, connection_count_, get_power(), fps);
+
 #ifdef X_DEBUG
     print_objects();
     fprintf(stdout, "\n");
@@ -236,9 +242,8 @@ void were_debug::print_objects()
 
     fprintf(stdout, "%-20s%-45s%-5s%-10s\n", "Pointer", "Type", "RC", "State");
 
-    for (auto it = object_set_.begin(); it != object_set_.end(); ++it)
+    for (auto &object__ : object_set_)
     {
-        were_object_base *object__ = (*it);
         const char *state;
 
         if (object__->collapsed())

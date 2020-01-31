@@ -58,15 +58,10 @@ void were_signal<void (Args...)>::remove_connection(uint64_t id)
     if (emitting_)
         throw were_exception(WE_SIMPLE);
 
-    for (auto it = connections_.begin(); it != connections_.end(); ++it)
+    connections_.remove_if([id](connection_type &connection)
     {
-        if ((*it).id_ == id)
-        {
-            connections_.erase(it);
-
-            break;
-        }
-    }
+        return connection.id_ == id;
+    });
 }
 
 template <typename Signature> class were_signal;
@@ -74,8 +69,8 @@ template <typename ...Args>
 void were_signal<void (Args...)>::emit(Args... args)
 {
     emitting_ = true;
-    for (auto it = connections_.begin(); it != connections_.end(); ++it)
-        (*it).call_(args...);
+    for (auto &connection : connections_)
+        connection.call_(args...);
     emitting_ = false;
 }
 

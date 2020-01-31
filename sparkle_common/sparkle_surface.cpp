@@ -97,7 +97,7 @@ int sparkle_surface::stride()
 
 were_surface::buffer_format sparkle_surface::format()
 {
-    return were_surface::format_ARGB8888;
+    return were_surface::buffer_format::ARGB8888;
 }
 
 void sparkle_surface::destroy_(struct wl_listener *listener, void *data)

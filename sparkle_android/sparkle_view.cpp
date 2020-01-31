@@ -146,12 +146,12 @@ void sparkle_view::update(bool full)
     }
 
 
-    if (surface_->format() == were_surface::format_ARGB8888 && format_ == 5)
+    if (surface_->format() == were_surface::buffer_format::ARGB8888 && format_ == 5)
     {
         were_upload::uploader[0](buffer.bits, data, surface_->stride(), buffer.stride * 4,
                              rect.left, rect.top, rect.right, rect.bottom);
     }
-    else if (surface_->format() == were_surface::format_ARGB8888 && format_ == WINDOW_FORMAT_RGBX_8888)
+    else if (surface_->format() == were_surface::buffer_format::ARGB8888 && format_ == WINDOW_FORMAT_RGBX_8888)
     {
         were_upload::uploader[2](buffer.bits, data, surface_->stride(), buffer.stride * 4,
                              rect.left, rect.top, rect.right, rect.bottom);
