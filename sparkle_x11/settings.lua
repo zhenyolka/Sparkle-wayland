@@ -1,1 +1,0 @@
-../apk/app/src/main/assets/settings.lua

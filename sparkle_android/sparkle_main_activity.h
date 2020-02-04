@@ -19,11 +19,11 @@ public:
 
 private:
     void copy_asset(AAssetManager *assets, const char *source, const char *destination, mode_t mode);
-    void lua();
+    void user();
 
 private:
-    std::thread lua_thread_;
-    bool lua_done_;
+    std::thread user_thread_;
+    bool user_busy_;
 };
 
 #endif // SPARKLE_MAIN_ACTIVITY_H

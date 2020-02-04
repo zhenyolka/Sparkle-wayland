@@ -4,20 +4,12 @@
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
 
-
 #include "were_thread.h"
 #include "were_registry.h"
 
-extern "C"
-{
-#include <lauxlib.h>
-#include <lualib.h>
-#include <lua.h>
-}
-
-#include <sys/stat.h> // chmod
-#include <unistd.h> // chdir
-
+#include <sys/stat.h> // chmod()
+#include <unistd.h> // chdir()
+#include <cstdlib> // system()
 
 #include "were_android_application.h"
 
@@ -28,44 +20,25 @@ sparkle_main_activity::~sparkle_main_activity()
 {
     fprintf(stdout, "~sparkle_main_activity\n");
 
-    if (lua_thread_.joinable())
-        lua_thread_.join();
+    if (user_thread_.joinable())
+        user_thread_.join();
 }
 
 sparkle_main_activity::sparkle_main_activity(JNIEnv *env, jobject instance) :
-    sparkle_java_object(env, instance), lua_done_(true)
+    sparkle_java_object(env, instance), user_busy_(false)
 {
     fprintf(stdout, "sparkle_main_activity\n");
 }
 
-void sparkle_main_activity::lua()
+void sparkle_main_activity::user()
 {
-    int status;
+    std::string command;
+    command += "/system/bin/sh ";
+    command += app()->files_dir() + "/user.sh";
 
-    if (chdir(app()->files_dir().c_str()) == -1)
-        throw were_exception(WE_SIMPLE);
+    std::system(command.c_str());
 
-    lua_State *L = luaL_newstate();
-    luaL_openlibs(L);
-
-    status = luaL_loadfile(L, "user.lua");
-    if (status) goto finish;
-
-    status = lua_pcall(L, 0, 0, 0);
-    if (status) goto finish;
-
-    lua_getglobal(L, "start");
-    status = lua_pcall(L, 0, 0, 0);
-    if (status) goto finish;
-
-finish:
-
-    if (status)
-        fprintf(stderr, "%s\n", lua_tostring(L, -1));
-
-    lua_close(L);
-
-    lua_done_ = true;
+    user_busy_ = false;
 }
 
 void sparkle_main_activity::copy_asset(AAssetManager *assets, const char *source, const char *destination, mode_t mode)
@@ -111,23 +84,23 @@ void sparkle_main_activity::setup()
     if (assets == nullptr)
         throw were_exception(WE_SIMPLE);
 
-    copy_asset(assets, "settings.lua", "settings.lua", 0644);
-    copy_asset(assets, "sparkle.lua", "sparkle.lua", 0644);
-    copy_asset(assets, "user.lua", "user.lua", 0644);
+    copy_asset(assets, "sparkle.config", "sparkle.config", 0644);
+    copy_asset(assets, "sparkle.sh", "sparkle.sh", 0644);
+    copy_asset(assets, "user.sh", "user.sh", 0644);
 
     env()->DeleteLocalRef(java_assets);
 }
 
 void sparkle_main_activity::start()
 {
-    if (lua_done_)
+    if (!user_busy_)
     {
-        lua_done_ = false;
+        user_busy_ = true;
 
-        if (lua_thread_.joinable())
-            lua_thread_.join();
+        if (user_thread_.joinable())
+            user_thread_.join();
 
-        lua_thread_ = std::thread(&sparkle_main_activity::lua, this);
+        user_thread_ = std::thread(&sparkle_main_activity::user, this);
     }
 }
 

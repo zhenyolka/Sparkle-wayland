@@ -93,7 +93,7 @@ public class MainActivity extends Activity
             public void onClick(View v)
             {
                 Intent intent = new Intent(MainActivity.this, SparkleEditorActivity.class);
-                String file = "settings.lua";
+                String file = "sparkle.config";
                 intent.putExtra(EXTRA_FILE, file);
                 intent.putExtra(EXTRA_FILE_LOG, false);
                 startActivity(intent);
@@ -107,7 +107,7 @@ public class MainActivity extends Activity
             public void onClick(View v)
             {
                 Intent intent = new Intent(MainActivity.this, SparkleEditorActivity.class);
-                String file = "user.lua";
+                String file = "user.sh";
                 intent.putExtra(EXTRA_FILE, file);
                 intent.putExtra(EXTRA_FILE_LOG, false);
                 startActivity(intent);

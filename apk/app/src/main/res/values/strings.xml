@@ -5,8 +5,8 @@
 
     <string name="start">Start</string>
     <string name="stop">Stop</string>
-    <string name="e_settings">Edit settings.lua</string>
-    <string name="e_user">Edit user.lua</string>
+    <string name="e_settings">Edit sparkle.config</string>
+    <string name="e_user">Edit user.sh</string>
     <string name="e_log">Check log</string>
 
     <string name="save">Save</string>

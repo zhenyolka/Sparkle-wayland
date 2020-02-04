@@ -46,4 +46,4 @@ function start_generic_container()
     }
 }
 
-user_$1
+user_start

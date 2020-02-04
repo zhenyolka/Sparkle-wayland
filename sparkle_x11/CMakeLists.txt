@@ -31,7 +31,6 @@ target_link_libraries(sparkle LINK_PUBLIC
     wayland-server
     xcb
     xcb-shm
-    lua
     pthread
     dl
     -rdynamic
