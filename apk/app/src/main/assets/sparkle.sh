@@ -86,15 +86,28 @@ function is_mounted()
 
 function check_mount()
 {
-    local point
+    local $*
+    local command
 
-    point=$1
-    shift
-
-    is_mounted ${point} ||
+    is_mounted ${point?} ||
     {
-        critical "busybox mkdir -p ${point}"
-        critical "busybox mount $* ${point}"
+        critical "busybox mkdir -p ${point?}"
+
+        command="busybox mount"
+
+        if [ "${type}" != "" ]
+        then
+            command="${command} -t ${type}"
+        fi
+
+        if [ "${options}" != "" ]
+        then
+            command="${command} -o ${options}"
+        fi
+
+        command="${command} ${source?} ${point?}"
+
+        critical "${command}"
     }
 }
 

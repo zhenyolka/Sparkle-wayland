@@ -12,17 +12,17 @@ function start_generic_container()
 
     check_root
 
-    exists "${point?}/bin/su" || check_mount ${point?} -o noatime ${source?}
+    exists "${point?}/bin/su" || check_mount options=noatime source=${source?} point=${point?}
 
     critical "cd ${point?}"
 
-    check_mount dev -o bind /dev
-    check_mount dev/pts -t devpts devpts
-    check_mount proc -t proc proc
-    check_mount sys -t sysfs sysfs
-    check_mount tmp -t tmpfs tmpfs
-    check_mount dev/shm -t tmpfs tmpfs
-    check_mount data -o bind /data
+    check_mount options=bind source=/dev point=dev
+    check_mount type=devpts source=devpts point=dev/pts
+    check_mount type=proc source=proc point=proc
+    check_mount type=sysfs source=sysfs point=sys
+    check_mount type=tmpfs source=tmpfs point=tmp
+    check_mount type=tmpfs source=tmpfs point=dev/shm
+    check_mount options=bind source=/data point=data
 
     optional "chcon u:object_r:app_data_file:s0 tmp"
 
