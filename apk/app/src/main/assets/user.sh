@@ -42,7 +42,7 @@ function check_service()
 xwayland_command=\
 "
     mkdir -p /tmp/sparkle
-    ln -s /data/data/com.sion.sparkle/files/wayland-0 tmp/sparkle/wayland-0
+    ln -s /data/data/com.sion.sparkle/files/wayland-0 /tmp/sparkle/wayland-0
     XDG_RUNTIME_DIR=/tmp/sparkle Xwayland :0 -noreset &
     sleep 1
     DISPLAY=:0 /bin/sh ~/.xinitrc &
