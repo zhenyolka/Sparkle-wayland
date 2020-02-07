@@ -3,10 +3,10 @@ function critical()
 {
     local rc
 
-    eval $1
+    eval "$1"
     rc=$?
 
-    echo "critical: \"$1\" rc: ${rc}"
+    echo "critical: [$1] rc: ${rc}"
 
     if [ "${rc}" == "0" ]
     then
@@ -20,10 +20,10 @@ function critical_conditional()
 {
     local rc
 
-    eval $1
+    eval "$1"
     rc=$?
 
-    echo "critical_conditional: \"$1\" rc: ${rc}"
+    echo "critical_conditional: [$1] rc: ${rc}"
 
     if [ "${rc}" == "0" -o "${rc}" == "1" ]
     then
@@ -37,10 +37,10 @@ function optional()
 {
     local rc
 
-    eval $1
+    eval "$1"
     rc=$?
 
-    echo "optional: \"$1\" rc: ${rc}"
+    echo "optional: [$1] rc: ${rc}"
 
     return ${rc}
 }
@@ -86,7 +86,7 @@ function is_mounted()
 
 function check_mount()
 {
-    local $*
+    local "$@"
     local command
 
     is_mounted ${point?} ||
@@ -119,11 +119,12 @@ function is_running()
 
 function sparkle_chroot()
 {
-    local user=$1
-    local command=$2
+    local "$@"
 
-    critical "busybox chroot . /bin/su - ${user} -c \"${command}\""
+    critical "busybox chroot . /bin/su - ${user?} -c \"${command?}\""
 }
 
-ARGS=$*
+ARGS="$@"
+
 type busybox
+
