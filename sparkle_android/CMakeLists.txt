@@ -34,7 +34,8 @@ target_include_directories(sparkle_common PUBLIC
     ${SPARKLE_ROOT}/foreign/install/${ANDROID_ABI}/usr/include
 )
 
-set_target_properties(sparkle PROPERTIES COMPILE_FLAGS "-Wall -Wextra -Wno-unused-parameter -std=c++11 -O2")
+set_target_properties(sparkle PROPERTIES COMPILE_FLAGS "-Wall -Wextra -Wno-unused-parameter -O2")
+target_compile_options(sparkle PUBLIC $<$<COMPILE_LANGUAGE:CXX>:-std=c++17>)
 
 target_link_libraries(sparkle LINK_PUBLIC
     were

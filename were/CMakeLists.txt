@@ -17,3 +17,4 @@ add_library(were STATIC
 )
 
 set_target_properties(were PROPERTIES COMPILE_FLAGS "-Wall -Wextra -Wno-unused-parameter -O2")
+target_compile_options(were PUBLIC $<$<COMPILE_LANGUAGE:CXX>:-std=c++17>)
