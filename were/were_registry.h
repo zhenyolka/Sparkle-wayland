@@ -1,7 +1,8 @@
 #ifndef WERE_REGISTRY_H
 #define WERE_REGISTRY_H
 
-#include "were_optional.h"
+#include <optional>
+#include <mutex>
 
 template <typename T>
 class were_registry
@@ -10,35 +11,50 @@ public:
 
     static void set(const T &value)
     {
-        value_.set(value);
+        mutex_.lock();
+        value_ = value;
+        mutex_.unlock();
     }
 
     static void clear()
     {
-        value_.clear();
+        mutex_.lock();
+        value_.reset();
+        mutex_.unlock();
     }
 
     static T &get()
     {
-        return value_.operator*();
+        return value_.value();
     }
 
     static bool lock()
     {
-        return value_.lock();
+        mutex_.lock();
+
+        if (!value_.has_value())
+        {
+            mutex_.unlock();
+            return false;
+        }
+
+        return true;
     }
 
     static void unlock()
     {
-        return value_.unlock();
+        mutex_.unlock();
     }
 
-
 private:
-    static were_optional<T> value_;
+    static std::optional<T> value_;
+    static std::mutex mutex_;
 };
 
 template <typename T>
-were_optional<T> were_registry<T>::value_;
+std::optional<T> were_registry<T>::value_;
+
+template <typename T>
+std::mutex were_registry<T>::mutex_;
 
 #endif // WERE_REGISTRY_H

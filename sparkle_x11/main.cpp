@@ -9,7 +9,6 @@
 #include <csignal>
 #include <cstdio>
 
-#include "were_optional.h"
 #include "were_registry.h"
 
 
