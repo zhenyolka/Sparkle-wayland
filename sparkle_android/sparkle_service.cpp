@@ -58,8 +58,8 @@ void sparkle_service::register_producer(were_object_pointer<were_surface_produce
         were_object_pointer<sparkle_view> view(new sparkle_view(env(), this_wop, surface));
         view->link(surface);
 
-        view->set_fast(this_wop->sparkle_->settings()->get_bool("fast", false));
-        view->set_no_damage(this_wop->sparkle_->settings()->get_bool("no_damage", false));
+        view->set_fast(this_wop->sparkle_->settings()->get<bool>("fast", false));
+        view->set_no_damage(this_wop->sparkle_->settings()->get<bool>("no_damage", false));
     });
 }
 

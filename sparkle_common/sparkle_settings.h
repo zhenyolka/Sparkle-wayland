@@ -2,8 +2,8 @@
 #define SPARKLE_SETTINGS_H
 
 #include "were_object.h"
-#include "were_variant.h"
 #include <string>
+#include <variant>
 #include <map>
 
 
@@ -13,17 +13,18 @@ public:
     ~sparkle_settings();
     sparkle_settings(const std::string &file);
 
-    std::string get_string(const std::string &key, const std::string &default_value);
-    bool get_bool(const std::string &key, bool default_value);
-    int get_int(const std::string &key, int default_value);
-    double get_float(const std::string &key, double default_value);
+    template <typename T>
+    T get(const std::string &key, const T &default_value)
+    {
+        auto it = settings_.find(key);
+        if (it == settings_.end())
+            return default_value;
+
+        return std::get<T>(it->second);
+    }
 
 private:
-    void load();
-
-private:
-    std::string file_;
-    std::map<std::string, were_variant> settings_;
+    std::map<std::string, std::variant<std::string, bool, int, double>> settings_;
 };
 
 #endif // SPARKLE_SETTINGS_H
