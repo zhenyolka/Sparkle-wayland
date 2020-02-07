@@ -18,7 +18,7 @@ public:
 
     void collapse() override
     {
-        MAKE_THIS_WOP
+        auto this_wop = make_wop(this);
 
         were_object::emit(this_wop, &were_object::destroyed);
         collapsed_ = true;

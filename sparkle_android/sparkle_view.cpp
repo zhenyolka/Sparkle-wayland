@@ -21,7 +21,7 @@ sparkle_view::sparkle_view(JNIEnv *env, were_object_pointer<sparkle_service> ser
     window_(nullptr),
     no_damage_(false)
 {
-    MAKE_THIS_WOP
+    auto this_wop = make_wop(this);
 
     reference();
 
@@ -76,7 +76,7 @@ void sparkle_view::set_fast(bool fast)
 
 void sparkle_view::set_window(ANativeWindow *window)
 {
-    MAKE_THIS_WOP
+    auto this_wop = make_wop(this);
 
     if (window_ != nullptr)
         ANativeWindow_release(window_);

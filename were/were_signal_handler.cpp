@@ -20,7 +20,7 @@ were_signal_handler::~were_signal_handler()
 
 were_signal_handler::were_signal_handler()
 {
-    MAKE_THIS_WOP
+    auto this_wop = make_wop(this);
 
     sigset_t mask;
     sigemptyset(&mask);
@@ -42,7 +42,7 @@ were_signal_handler::were_signal_handler()
 
 void were_signal_handler::event(uint32_t events)
 {
-    MAKE_THIS_WOP
+    auto this_wop = make_wop(this);
 
     if (events == EPOLLIN)
     {

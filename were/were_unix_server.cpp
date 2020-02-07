@@ -13,7 +13,7 @@ were_unix_server::~were_unix_server()
 were_unix_server::were_unix_server(const std::string &path) :
     path_(path)
 {
-    MAKE_THIS_WOP
+    auto this_wop = make_wop(this);
 
     fd_ = were1_unix_server_create(path_.c_str());
     if (fd_ == -1)
@@ -28,7 +28,7 @@ were_unix_server::were_unix_server(const std::string &path) :
 
 void were_unix_server::event(uint32_t events)
 {
-    MAKE_THIS_WOP
+    auto this_wop = make_wop(this);
 
     if (events == EPOLLIN)
         were_object::emit(this_wop, &were_unix_server::new_connection);

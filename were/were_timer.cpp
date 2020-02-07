@@ -13,7 +13,7 @@ were_timer::~were_timer()
 were_timer::were_timer(int interval, bool single_shot) :
     interval_(interval), single_shot_(single_shot)
 {
-    MAKE_THIS_WOP
+    auto this_wop = make_wop(this);
 
     fd_ = timerfd_create(CLOCK_MONOTONIC, 0);
     if (fd_ == -1)
@@ -63,7 +63,7 @@ void were_timer::stop()
 
 void were_timer::event(uint32_t events)
 {
-    MAKE_THIS_WOP
+    auto this_wop = make_wop(this);
 
     if (events == EPOLLIN)
     {

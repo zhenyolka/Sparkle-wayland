@@ -21,7 +21,7 @@ were_thread::~were_thread()
 were_thread::were_thread() :
     reference_count_(0), collapsed_(false)
 {
-    MAKE_THIS_WOP
+    auto this_wop = make_wop(this);
 
     epoll_fd_ = epoll_create1(0);
     if (epoll_fd_ == -1)
@@ -36,7 +36,7 @@ were_thread::were_thread() :
 
 void were_thread::add_fd_listener(int fd, uint32_t events, were_object_pointer<were_thread_fd_listener> listener)
 {
-    MAKE_THIS_WOP
+    auto this_wop = make_wop(this);
 
     listener.increment_reference_count();
 
@@ -74,7 +74,7 @@ void were_thread::remove_fd_listener_(int fd)
 
 void were_thread::add_idle_handler(were_object_pointer<were_thread_idle_handler> handler)
 {
-    MAKE_THIS_WOP
+    auto this_wop = make_wop(this);
 
     handler.increment_reference_count();
 
@@ -186,7 +186,7 @@ were_object_pointer<were_thread> were_thread::thread() const
 
 void were_thread::post(const std::function<void ()> &call)
 {
-    MAKE_THIS_WOP
+    auto this_wop = make_wop(this);
 
     call_queue_mutex_.lock();
     call_queue_.push(call);

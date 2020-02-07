@@ -14,7 +14,7 @@ public:
     sparkle_compositor(struct wl_client *client, int version, uint32_t id, were_object_pointer<sparkle_display> display) :
         sparkle_wl_compositor(client, version, id)
     {
-        MAKE_THIS_WOP
+        auto this_wop = make_wop(this);
 
         were_object::connect(this_wop, &sparkle_compositor::create_surface, this_wop, [this_wop](uint32_t id)
         {

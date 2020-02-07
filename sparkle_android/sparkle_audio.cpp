@@ -21,7 +21,7 @@ sparkle_audio::sparkle_audio(const std::string &path) :
     server_(new were_unix_server(path)),
     buffer_fd_(-1), buffer_(nullptr), connected_(false)
 {
-    MAKE_THIS_WOP
+    auto this_wop = make_wop(this);
 
     chmod(path.c_str(), 0666);
 
@@ -33,7 +33,7 @@ sparkle_audio::sparkle_audio(const std::string &path) :
 
 void sparkle_audio::connect_client()
 {
-    MAKE_THIS_WOP
+    auto this_wop = make_wop(this);
 
     if (connected_)
     {

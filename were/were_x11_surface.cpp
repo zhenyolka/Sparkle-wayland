@@ -19,7 +19,7 @@ were_x11_surface::were_x11_surface(were_object_pointer<were_x11_compositor> comp
     display_(compositor->display()),
     surface_(surface)
 {
-    MAKE_THIS_WOP
+    auto this_wop = make_wop(this);
 
     window_ = were1_xcb_window_create(display_->get(), 1280, 720);
 
@@ -45,7 +45,7 @@ were_x11_surface::were_x11_surface(were_object_pointer<were_x11_compositor> comp
 
 void were_x11_surface::process(xcb_generic_event_t *event)
 {
-    MAKE_THIS_WOP
+    auto this_wop = make_wop(this);
 
     switch (event->response_type & ~0x80)
     {

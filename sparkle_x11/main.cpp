@@ -25,7 +25,7 @@ public:
 
     test()
     {
-        MAKE_THIS_WOP
+        auto this_wop = make_wop(this);
 
         were_object_pointer<sparkle> sparkle__(new sparkle());
         sparkle__->link(this_wop);

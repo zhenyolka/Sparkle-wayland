@@ -17,7 +17,7 @@ public:
     {
         // XXX3 Move to cpp
 
-        MAKE_THIS_WOP
+        auto this_wop = make_wop(this);
 
         int caps = 0;
         caps |= WL_SEAT_CAPABILITY_KEYBOARD;

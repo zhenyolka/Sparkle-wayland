@@ -8,7 +8,7 @@
 sparkle_surface::sparkle_surface(struct wl_client *client, int version, uint32_t id) :
     sparkle_wl_surface(client, version, id), buffer_(nullptr), callback_(nullptr)
 {
-    MAKE_THIS_WOP
+    auto this_wop = make_wop(this);
 
     listener_.notify = sparkle_surface::destroy_;
 
@@ -113,7 +113,7 @@ void sparkle_surface::destroy_(struct wl_listener *listener, void *data)
 
 void sparkle_surface::register_keyboard(were_object_pointer<sparkle_keyboard> keyboard)
 {
-    MAKE_THIS_WOP
+    auto this_wop = make_wop(this);
 
     if (keyboard->client() != client())
         return;
@@ -135,7 +135,7 @@ void sparkle_surface::register_keyboard(were_object_pointer<sparkle_keyboard> ke
 
 void sparkle_surface::register_pointer(were_object_pointer<sparkle_pointer> pointer)
 {
-    MAKE_THIS_WOP
+    auto this_wop = make_wop(this);
 
     if (pointer->client() != client())
         return;
@@ -170,7 +170,7 @@ void sparkle_surface::register_pointer(were_object_pointer<sparkle_pointer> poin
 
 void sparkle_surface::register_touch(were_object_pointer<sparkle_touch> touch)
 {
-    MAKE_THIS_WOP
+    auto this_wop = make_wop(this);
 
     if (touch->client() != client())
         return;

@@ -13,7 +13,7 @@ were_object::were_object() :
 
 void were_object::link(were_object_pointer<were_object> other)
 {
-    MAKE_THIS_WOP
+    auto this_wop = make_wop(this);
 
     were_object::connect(other, &were_object::destroyed, this_wop, [this_wop]() mutable
     {

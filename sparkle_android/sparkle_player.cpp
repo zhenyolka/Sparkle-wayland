@@ -71,7 +71,7 @@ sparkle_player::sparkle_player() :
     check_result(result);
 
 
-    MAKE_THIS_WOP
+    auto this_wop = make_wop(this);
 
     were_object::connect(check_timer_, &were_timer::timeout, this_wop, [this_wop]()
     {
@@ -146,7 +146,7 @@ void sparkle_player::callback(BufferQueueItf playerBufferqueue, void *data)
 
 void sparkle_player::callback()
 {
-    MAKE_THIS_WOP
+    auto this_wop = make_wop(this);
 
     if (state_ != SL_PLAYSTATE_PLAYING)
         return;

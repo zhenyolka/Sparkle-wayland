@@ -25,7 +25,7 @@ sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
 {
     fprintf(stdout, "sparkle_service\n");
 
-    MAKE_THIS_WOP
+    auto this_wop = make_wop(this);
 
     sparkle_->link(this_wop);
     sparkle_->set_size(display_width(), display_height());
@@ -51,7 +51,7 @@ int sparkle_service::display_height() const
 
 void sparkle_service::register_producer(were_object_pointer<were_surface_producer> producer)
 {
-    MAKE_THIS_WOP
+    auto this_wop = make_wop(this);
 
     were_object::connect(producer, &were_surface_producer::surface_created, this_wop, [this_wop](were_object_pointer<were_surface> surface)
     {

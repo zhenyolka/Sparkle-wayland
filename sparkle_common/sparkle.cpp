@@ -36,7 +36,7 @@ sparkle::sparkle(const std::string &home_dir) :
     width_(1280), height_(720)
 
 {
-    MAKE_THIS_WOP
+    auto this_wop = make_wop(this);
 
     display_->set_destructor([](struct wl_display *&display)
     {

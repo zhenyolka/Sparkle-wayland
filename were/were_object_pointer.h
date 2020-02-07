@@ -4,8 +4,13 @@
 #include "were_object_base.h"
 #include "were_exception.h"
 
-#define MAKE_THIS_WOP \
-were_object_pointer<std::remove_pointer<decltype(this)>::type> this_wop(this);
+
+template <typename T>
+were_object_pointer<T> make_wop(T *object__)
+{
+    return were_object_pointer<T>(object__);
+}
+
 
 template <typename T>
 class were_object_pointer

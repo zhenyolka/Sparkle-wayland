@@ -12,7 +12,7 @@ were_x11_compositor::~were_x11_compositor()
 were_x11_compositor::were_x11_compositor() :
     display_(new x11_display(were1_xcb_display_open()))
 {
-    MAKE_THIS_WOP
+    auto this_wop = make_wop(this);
 
     display_->set_destructor([](struct were1_xcb_display *&display)
     {
@@ -30,7 +30,7 @@ were_x11_compositor::were_x11_compositor() :
 
 void were_x11_compositor::register_producer(were_object_pointer<were_surface_producer> producer)
 {
-    MAKE_THIS_WOP
+    auto this_wop = make_wop(this);
 
     were_object::connect(producer, &were_surface_producer::surface_created, this_wop, [this_wop](were_object_pointer<were_surface> surface)
     {
