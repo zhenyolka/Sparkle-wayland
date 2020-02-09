@@ -30,7 +30,7 @@ class sparkle : public were_object, public were_thread_fd_listener, public were_
 {
 public:
     ~sparkle();
-    sparkle(const std::string &home_dir = std::string());
+    sparkle(const std::string &home_dir = std::string("."));
 
     were_object_pointer<sparkle_settings> settings() const { return settings_; }
     were_object_pointer<sparkle_global<sparkle_output>> output() const { return output_; }

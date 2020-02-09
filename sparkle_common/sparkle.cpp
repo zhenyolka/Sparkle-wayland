@@ -27,7 +27,7 @@ sparkle::~sparkle()
 }
 
 sparkle::sparkle(const std::string &home_dir) :
-    settings_(new sparkle_settings(home_dir + "/settings.lua")),
+    settings_(new sparkle_settings()),
     display_(new sparkle_display(wl_display_create())),
     output_(new sparkle_global<sparkle_output>(display_, &wl_output_interface, 3)),
     compositor_(new sparkle_global<sparkle_compositor>(display_, &wl_compositor_interface, 4)),
@@ -37,6 +37,8 @@ sparkle::sparkle(const std::string &home_dir) :
 
 {
     auto this_wop = make_wop(this);
+
+    settings_->load(home_dir + "/sparkle.config");
 
     display_->set_destructor([](struct wl_display *&display)
     {
