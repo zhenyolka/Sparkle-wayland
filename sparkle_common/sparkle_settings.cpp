@@ -10,6 +10,10 @@ sparkle_settings::~sparkle_settings()
 
 sparkle_settings::sparkle_settings()
 {
+    register_handler("#.*", [this](const std::smatch &match)
+    {
+    });
+
     register_handler("(\\w+) = (\\d+)", [this](const std::smatch &match)
     {
         settings_[match.str(1)] = std::stoi(match.str(2));
