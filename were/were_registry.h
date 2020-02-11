@@ -57,4 +57,31 @@ std::optional<T> were_registry<T>::value_;
 template <typename T>
 std::mutex were_registry<T>::mutex_;
 
+template <typename T>
+class were_t_l_registry
+{
+public:
+
+    static void set(const T &value)
+    {
+        value_ = value;
+    }
+
+    static void clear()
+    {
+        value_.reset();
+    }
+
+    static T &get()
+    {
+        return value_.value();
+    }
+
+private:
+    static thread_local std::optional<T> value_;
+};
+
+template <typename T>
+thread_local std::optional<T> were_t_l_registry<T>::value_;
+
 #endif // WERE_REGISTRY_H

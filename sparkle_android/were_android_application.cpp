@@ -54,6 +54,9 @@ void were_android_application::disable_native_loop()
 extern "C" JNIEXPORT jlong JNICALL
 Java_com_sion_sparkle_WereApplication_native_1create(JNIEnv *env, jobject instance)
 {
+    were_t_l_registry<were_object_pointer<were_thread>>::set(
+        were_object_pointer<were_thread>(new were_thread()));
+
     were_object_pointer<were_android_application> native__(new were_android_application(env, instance));
     native__.increment_reference_count();
 

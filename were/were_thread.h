@@ -2,6 +2,7 @@
 #define WERE_THREAD_H
 
 #include "were_object_pointer.h"
+#include "were_registry.h"
 #include <cstdint>
 #include <sys/epoll.h> // XXX3
 #include <set>
@@ -31,8 +32,11 @@ public:
     ~were_thread();
     were_thread();
 
-    static were_object_pointer<were_thread> &current_thread() {return current_thread_;}
-    int fd() const {return epoll_fd_;}
+    static were_object_pointer<were_thread> &current_thread()
+    {
+        return were_t_l_registry<were_object_pointer<were_thread>>::get();
+    }
+    int fd() const { return epoll_fd_; }
 
     void add_fd_listener(int fd, uint32_t events, were_object_pointer<were_thread_fd_listener> listener);
     void remove_fd_listener(int fd, were_object_pointer<were_thread_fd_listener> listener);
@@ -70,7 +74,6 @@ private:
 private:
     std::atomic<int> reference_count_;
     bool collapsed_;
-    static thread_local were_object_pointer<were_thread> current_thread_;
     int epoll_fd_;
     std::set< were_object_pointer<were_thread_idle_handler> > idle_handlers_;
     //std::mutex idle_handlers_mutex_;

@@ -8,7 +8,6 @@
 
 const int MAX_EVENTS = 16;
 
-thread_local were_object_pointer<were_thread> were_thread::current_thread_(new were_thread());
 
 were_thread::~were_thread()
 {
