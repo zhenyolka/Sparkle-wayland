@@ -6,6 +6,7 @@ function user_start()
     #check_generic_container source="/dev/block/mmcblk0p36" point="/data/local/tmp/fedora" user="sion"
     #check_service user="root" process_name="sshd" command="/sbin/sshd"
     #check_service user="sion" process_name="Xwayland" command="${xwayland_command?}"
+    #check_rndis
 }
 
 function check_generic_container()
@@ -37,6 +38,24 @@ function check_service()
     {
         sparkle_chroot user="${user?}" command="${command?}"
     }
+}
+
+function check_rndis()
+{
+    local rndis_config
+    local current_config
+
+    rndis_config="rndis,adb"
+    critical "current_config=\$(getprop sys.usb.config)"
+
+    if [ "${current_config}" != "${rndis_config}" ]
+    then
+        critical "setprop sys.usb.config ${rndis_config}"
+        critical "sleep 1"
+        critical "busybox ip link set rndis0 up"
+        critical "busybox ip addr add 192.168.10.2/24 dev rndis0"
+        critical "busybox ip route add default via 192.168.10.1"
+    fi
 }
 
 xwayland_command=\
