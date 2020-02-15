@@ -11,8 +11,6 @@
 
 typedef were_object_wrapper<were_object_wrapper_primitive<struct wl_display *>> sparkle_display;
 
-class sparkle_settings;
-
 template <typename T>
 class sparkle_global;
 
@@ -32,7 +30,6 @@ public:
     ~sparkle();
     sparkle(const std::string &home_dir = std::string("."));
 
-    were_object_pointer<sparkle_settings> settings() const { return settings_; }
     were_object_pointer<sparkle_global<sparkle_output>> output() const { return output_; }
     were_object_pointer<sparkle_global<sparkle_compositor>> compositor() const { return compositor_; }
     were_object_pointer<sparkle_global<sparkle_seat>> seat() const { return seat_; }
@@ -68,7 +65,6 @@ private:
     void idle();
 
 private:
-    were_object_pointer<sparkle_settings> settings_;
     were_object_pointer<sparkle_display> display_;
     were_object_pointer<sparkle_global<sparkle_output>> output_;
     were_object_pointer<sparkle_global<sparkle_compositor>> compositor_;

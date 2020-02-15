@@ -3,6 +3,7 @@
 
 #include "were_object_base.h"
 #include "were_exception.h"
+#include "were_registry.h"
 
 
 template <typename T>
@@ -11,6 +12,17 @@ were_object_pointer<T> make_wop(T *object__)
     return were_object_pointer<T>(object__);
 }
 
+template <typename T>
+were_object_pointer<T> &t_l_global()
+{
+    return were_t_l_registry<were_object_pointer<T>>::get();
+}
+
+template <typename T>
+void t_l_global_set(const were_object_pointer<T> &v)
+{
+    return were_t_l_registry<were_object_pointer<T>>::set(v);
+}
 
 template <typename T>
 class were_object_pointer

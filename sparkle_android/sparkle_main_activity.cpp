@@ -13,8 +13,6 @@
 
 #include "were_android_application.h"
 
-#define app() were_registry<were_android_application *>::get()
-
 
 sparkle_main_activity::~sparkle_main_activity()
 {
@@ -34,7 +32,7 @@ void sparkle_main_activity::user()
 {
     std::string command;
     command += "/system/bin/sh ";
-    command += app()->files_dir() + "/user.sh";
+    command += t_l_global<were_android_application>()->files_dir() + "/user.sh";
 
     std::system(command.c_str());
 
@@ -43,7 +41,7 @@ void sparkle_main_activity::user()
 
 void sparkle_main_activity::copy_asset(AAssetManager *assets, const char *source, const char *destination, mode_t mode)
 {
-    std::string out__ = app()->files_dir() + "/" + destination;
+    std::string out__ = t_l_global<were_android_application>()->files_dir() + "/" + destination;
 
     if(::access(out__.c_str(), F_OK) != -1)
         return;
@@ -72,9 +70,9 @@ void sparkle_main_activity::copy_asset(AAssetManager *assets, const char *source
 
 void sparkle_main_activity::setup()
 {
-    if (chmod(app()->home_dir().c_str(), 0755) == -1)
+    if (chmod(t_l_global<were_android_application>()->home_dir().c_str(), 0755) == -1)
         throw were_exception(WE_SIMPLE);
-    if (chmod(app()->files_dir().c_str(), 0755) == -1)
+    if (chmod(t_l_global<were_android_application>()->files_dir().c_str(), 0755) == -1)
         throw were_exception(WE_SIMPLE);
 
 

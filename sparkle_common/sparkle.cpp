@@ -1,12 +1,12 @@
 #include "sparkle.h"
 
-#include "sparkle_settings.h"
 #include "sparkle_global.h"
 #include "sparkle_output.h"
 #include "sparkle_compositor.h"
 #include "sparkle_seat.h"
 #include "sparkle_shell.h"
 #include "were_registry.h"
+#include "sparkle_settings.h"
 
 #include <wayland-server.h>
 #include <sys/stat.h>
@@ -23,11 +23,9 @@ sparkle::~sparkle()
     compositor_.collapse();
     output_.collapse();
     display_.collapse();
-    settings_.collapse();
 }
 
 sparkle::sparkle(const std::string &home_dir) :
-    settings_(new sparkle_settings()),
     display_(new sparkle_display(wl_display_create())),
     output_(new sparkle_global<sparkle_output>(display_, &wl_output_interface, 3)),
     compositor_(new sparkle_global<sparkle_compositor>(display_, &wl_compositor_interface, 4)),
@@ -37,8 +35,6 @@ sparkle::sparkle(const std::string &home_dir) :
 
 {
     auto this_wop = make_wop(this);
-
-    settings_->load(home_dir + "/sparkle.config");
 
     display_->set_destructor([](struct wl_display *&display)
     {
@@ -85,7 +81,7 @@ sparkle::sparkle(const std::string &home_dir) :
     {
         int width = this_wop->width_;
         int height = this_wop->height_;
-        int dpi = this_wop->settings_->get<int>("DPI", 96);
+        int dpi = were_t_l_registry<were_object_pointer<sparkle_settings>>::get()->get<int>("DPI", 96);
         int mm_width = width * 254 / (dpi * 10);
         int mm_height = height * 254 / (dpi * 10);
 
@@ -157,8 +153,6 @@ sparkle::sparkle(const std::string &home_dir) :
             were_object::emit(this_wop, &sparkle::touch_created, touch);
         });
     });
-
-    were_registry<sparkle_settings *>::set(settings_.access()); //XXX1 Unsafe
 }
 
 void sparkle::event(uint32_t events)

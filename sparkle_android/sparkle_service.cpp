@@ -11,9 +11,6 @@
 #include "were_android_application.h"
 
 
-#define app() were_registry<were_android_application *>::get()
-
-
 sparkle_service::~sparkle_service()
 {
     fprintf(stdout, "~sparkle_service\n");
@@ -21,7 +18,7 @@ sparkle_service::~sparkle_service()
 
 sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
     sparkle_java_object(env, instance),
-    sparkle_(new sparkle(app()->files_dir()))
+    sparkle_(new sparkle(t_l_global<were_android_application>()->files_dir()))
 {
     fprintf(stdout, "sparkle_service\n");
 
@@ -30,7 +27,7 @@ sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
     sparkle_->link(this_wop);
     sparkle_->set_size(display_width(), display_height());
 
-    were_object_pointer<sparkle_audio> sparkle_audio__(new sparkle_audio(app()->files_dir() + "/audio-0"));
+    were_object_pointer<sparkle_audio> sparkle_audio__(new sparkle_audio(t_l_global<were_android_application>()->files_dir() + "/audio-0"));
     sparkle_audio__->link(this_wop);
 
     were_object::connect(sparkle_->shell(), &sparkle_global<sparkle_shell>::instance, this_wop, [this_wop](were_object_pointer<sparkle_shell> shell)
@@ -57,9 +54,6 @@ void sparkle_service::register_producer(were_object_pointer<were_surface_produce
     {
         were_object_pointer<sparkle_view> view(new sparkle_view(env(), this_wop, surface));
         view->link(surface);
-
-        view->set_fast(this_wop->sparkle_->settings()->get<bool>("fast", false));
-        view->set_no_damage(this_wop->sparkle_->settings()->get<bool>("no_damage", false));
     });
 }
 

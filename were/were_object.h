@@ -26,7 +26,7 @@ public:
 
     void access() const override
     {
-        if (were_thread::current_thread() != thread())
+        if (t_l_global<were_thread>() != thread())
             throw were_exception(WE_SIMPLE);
     }
 
@@ -35,7 +35,7 @@ public:
     {
         if (reference_count_ == 1 && collapsed_)
         {
-            if (were_thread::current_thread() == thread())
+            if (t_l_global<were_thread>() == thread())
                 delete this;
             else
                 post([this](){ delete this; });
@@ -120,7 +120,7 @@ private:
                                         uint64_t id,
                                         were_object_pointer<were_object> context)
     {
-        if (were_thread::current_thread() == context.thread() && !signal->emitting())
+        if (t_l_global<were_thread>() == context.thread() && !signal->emitting())
             signal->add_connection(call, id);
         else
             context.post([context, signal, call, id]()
@@ -134,7 +134,7 @@ private:
                                         uint64_t id,
                                         were_object_pointer<were_object> context)
     {
-        if (were_thread::current_thread() == context.thread() && !signal->emitting())
+        if (t_l_global<were_thread>() == context.thread() && !signal->emitting())
             signal->remove_connection(id);
         else
             context.post([context, signal, id]()

@@ -32,10 +32,6 @@ public:
     ~were_thread();
     were_thread();
 
-    static were_object_pointer<were_thread> &current_thread()
-    {
-        return were_t_l_registry<were_object_pointer<were_thread>>::get();
-    }
     int fd() const { return epoll_fd_; }
 
     void add_fd_listener(int fd, uint32_t events, were_object_pointer<were_thread_fd_listener> listener);

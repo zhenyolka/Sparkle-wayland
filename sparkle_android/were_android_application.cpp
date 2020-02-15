@@ -1,9 +1,10 @@
 #include "were_android_application.h"
+#include "were_exception.h"
 #include "were_backtrace.h"
 #include "sparkle_android_logger.h"
 #include "were_debug.h"
 #include "were_registry.h"
-#include "were_exception.h"
+#include "sparkle_settings.h"
 #include <unistd.h> // dup()
 //#include <csignal> // SIGINT
 
@@ -12,8 +13,6 @@ static bool created = false;
 were_android_application::~were_android_application()
 {
     fprintf(stdout, "~were_android_application\n");
-
-    were_registry<were_debug *>::clear();
 }
 
 were_android_application::were_android_application(JNIEnv *env, jobject instance) :
@@ -60,10 +59,14 @@ Java_com_sion_sparkle_WereApplication_native_1create(JNIEnv *env, jobject instan
     were_object_pointer<were_android_application> native__(new were_android_application(env, instance));
     native__.increment_reference_count();
 
-    native__->enable_native_loop(dup(were_thread::current_thread()->fd()));
-    were_thread::current_thread()->process_queue();
+    were_t_l_registry<were_object_pointer<sparkle_settings>>::set(
+        were_object_pointer<sparkle_settings>(new sparkle_settings()));
+    were_t_l_registry<were_object_pointer<sparkle_settings>>::get()->load(native__->files_dir() + "/sparkle.config");
 
-    were_registry<were_android_application *>::set(native__.access());
+    native__->enable_native_loop(dup(t_l_global<were_thread>()->fd()));
+    t_l_global<were_thread>()->process_queue();
+
+    t_l_global_set<were_android_application>(native__);
 
     return jlong(native__.access());
 }
@@ -75,9 +78,7 @@ Java_com_sion_sparkle_WereApplication_native_1destroy(JNIEnv *env, jobject insta
     native__.decrement_reference_count();
 
     native__->disable_native_loop();
-    //were_thread::current_thread()->run_for(1000);
-
-    were_registry<were_android_application *>::clear();
+    //t_l_global<were_thread>()->run_for(1000);
 
     native__.collapse();
 
@@ -88,11 +89,11 @@ Java_com_sion_sparkle_WereApplication_native_1destroy(JNIEnv *env, jobject insta
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_WereApplication_native_1loop_1fd_1event(JNIEnv *env, jobject instance, jlong user)
 {
-    were_thread::current_thread()->run_once();
+    t_l_global<were_thread>()->run_once();
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_WereApplication_native_1loop_1idle_1event(JNIEnv *env, jobject instance, jlong user)
 {
-    were_thread::current_thread()->process_idle();
+    t_l_global<were_thread>()->process_idle();
 }

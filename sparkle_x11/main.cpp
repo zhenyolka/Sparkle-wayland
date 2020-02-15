@@ -9,6 +9,7 @@
 #include <csignal>
 #include <cstdio>
 #include "were_registry.h"
+#include "sparkle_settings.h"
 
 
 
@@ -43,11 +44,15 @@ int main(int argc, char *argv[])
     were_backtrace backtrace;
     backtrace.enable();
 
+    were_debug *debug = new were_debug();
+    were_registry<were_debug *>::set(debug);
+
     were_t_l_registry<were_object_pointer<were_thread>>::set(
         were_object_pointer<were_thread>(new were_thread()));
 
-    were_debug *debug = new were_debug();
-    were_registry<were_debug *>::set(debug);
+    were_t_l_registry<were_object_pointer<sparkle_settings>>::set(
+        were_object_pointer<sparkle_settings>(new sparkle_settings()));
+    were_t_l_registry<were_object_pointer<sparkle_settings>>::get()->load("./sparkle.config");
 
     {
         were_object_pointer<test> t(new test());
@@ -66,7 +71,7 @@ int main(int argc, char *argv[])
 
     debug->start();
 
-    were_thread::current_thread()->run();
+    t_l_global<were_thread>()->run();
 
     debug->stop();
 

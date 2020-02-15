@@ -3,6 +3,8 @@
 #include "were_surface.h"
 #include "were_debug.h"
 #include "were_upload.h"
+#include "were_registry.h"
+#include "sparkle_settings.h"
 #include <android/native_window_jni.h>
 #include <linux/input-event-codes.h>
 
@@ -18,8 +20,7 @@ sparkle_view::~sparkle_view()
 sparkle_view::sparkle_view(JNIEnv *env, were_object_pointer<sparkle_service> service, were_object_pointer<were_surface> surface) :
     sparkle_java_object(env, "com/sion/sparkle/SparkleView", "(Lcom/sion/sparkle/SparkleService;J)V", service->object1(), jlong(this)),
     surface_(surface),
-    window_(nullptr),
-    no_damage_(false)
+    window_(nullptr)
 {
     auto this_wop = make_wop(this);
 
@@ -27,7 +28,14 @@ sparkle_view::sparkle_view(JNIEnv *env, were_object_pointer<sparkle_service> ser
 
     width_ = 100;
     height_ = 100;
-    format_ = WINDOW_FORMAT_RGBX_8888;
+
+    bool fast = t_l_global<sparkle_settings>()->get<bool>("fast", false);
+    if (fast)
+        format_ = 5;
+    else
+        format_ = WINDOW_FORMAT_RGBX_8888;
+
+    no_damage_ = t_l_global<sparkle_settings>()->get<bool>("no_damage", false);
 
     were_object::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
     {
@@ -64,14 +72,6 @@ void sparkle_view::set_size(int width, int height)
         width_ = width;
         height_ = height;
     }
-}
-
-void sparkle_view::set_fast(bool fast)
-{
-    if (fast)
-        format_ = 5;
-    else
-        format_ = WINDOW_FORMAT_RGBX_8888;
 }
 
 void sparkle_view::set_window(ANativeWindow *window)

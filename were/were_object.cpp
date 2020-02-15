@@ -7,7 +7,7 @@ were_object::~were_object()
 }
 
 were_object::were_object() :
-    reference_count_(0), collapsed_(false), thread_(were_thread::current_thread())
+    reference_count_(0), collapsed_(false), thread_(t_l_global<were_thread>())
 {
 }
 
