@@ -20,6 +20,8 @@ public:
     ~sparkle_settings();
     sparkle_settings();
 
+    void access() const override {}
+
     void load(const std::string &path);
 
     template <typename T>

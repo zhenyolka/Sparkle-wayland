@@ -129,7 +129,6 @@ public class MainActivity extends Activity
         });
 
         native_ = native_create();
-        native_setup(native_);
 
         if (quiet)
         {
@@ -149,7 +148,6 @@ public class MainActivity extends Activity
 
     private native long native_create();
     private native void native_destroy(long native__);
-    private native void native_setup(long native__);
     private native void native_start(long native__);
     private native void native_stop(long native__);
 

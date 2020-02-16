@@ -81,7 +81,7 @@ sparkle::sparkle(const std::string &home_dir) :
     {
         int width = this_wop->width_;
         int height = this_wop->height_;
-        int dpi = were_t_l_registry<were_object_pointer<sparkle_settings>>::get()->get<int>("DPI", 96);
+        int dpi = global<sparkle_settings>()->get<int>("DPI", 96);
         int mm_width = width * 254 / (dpi * 10);
         int mm_height = height * 254 / (dpi * 10);
 

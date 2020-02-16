@@ -13,6 +13,8 @@ import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import java.io.FileDescriptor;
 
+import android.content.res.AssetManager;
+
 
 public class WereApplication
 {
@@ -35,6 +37,12 @@ public class WereApplication
         idle_handler_ = new MyIdleHandler();
 
         native_ = native_create();
+    }
+
+    @Keep
+    public AssetManager getAssets()
+    {
+        return context_.getAssets();
     }
 
     @Keep

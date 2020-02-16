@@ -13,6 +13,24 @@ were_object_pointer<T> make_wop(T *object__)
 }
 
 template <typename T>
+were_object_pointer<T> &global()
+{
+    return were_registry<were_object_pointer<T>>::get();
+}
+
+template <typename T>
+void global_set(const were_object_pointer<T> &v)
+{
+    return were_registry<were_object_pointer<T>>::set(v);
+}
+
+template <typename T>
+void global_clear()
+{
+    return were_registry<were_object_pointer<T>>::clear();
+}
+
+template <typename T>
 were_object_pointer<T> &t_l_global()
 {
     return were_t_l_registry<were_object_pointer<T>>::get();
@@ -22,6 +40,12 @@ template <typename T>
 void t_l_global_set(const were_object_pointer<T> &v)
 {
     return were_t_l_registry<were_object_pointer<T>>::set(v);
+}
+
+template <typename T>
+void t_l_global_clear()
+{
+    return were_t_l_registry<were_object_pointer<T>>::clear();
 }
 
 template <typename T>

@@ -2,6 +2,7 @@
 #include "were_exception.h"
 #include <fstream>
 #include <regex>
+#include <cstdio>
 
 
 sparkle_settings::~sparkle_settings()

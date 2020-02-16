@@ -29,13 +29,13 @@ sparkle_view::sparkle_view(JNIEnv *env, were_object_pointer<sparkle_service> ser
     width_ = 100;
     height_ = 100;
 
-    bool fast = t_l_global<sparkle_settings>()->get<bool>("fast", false);
+    bool fast = global<sparkle_settings>()->get<bool>("fast", false);
     if (fast)
         format_ = 5;
     else
         format_ = WINDOW_FORMAT_RGBX_8888;
 
-    no_damage_ = t_l_global<sparkle_settings>()->get<bool>("no_damage", false);
+    no_damage_ = global<sparkle_settings>()->get<bool>("no_damage", false);
 
     were_object::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
     {

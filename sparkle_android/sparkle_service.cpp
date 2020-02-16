@@ -18,7 +18,7 @@ sparkle_service::~sparkle_service()
 
 sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
     sparkle_java_object(env, instance),
-    sparkle_(new sparkle(t_l_global<were_android_application>()->files_dir()))
+    sparkle_(new sparkle(global<were_android_application>()->files_dir()))
 {
     fprintf(stdout, "sparkle_service\n");
 
@@ -27,7 +27,7 @@ sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
     sparkle_->link(this_wop);
     sparkle_->set_size(display_width(), display_height());
 
-    were_object_pointer<sparkle_audio> sparkle_audio__(new sparkle_audio(t_l_global<were_android_application>()->files_dir() + "/audio-0"));
+    were_object_pointer<sparkle_audio> sparkle_audio__(new sparkle_audio(global<were_android_application>()->files_dir() + "/audio-0"));
     sparkle_audio__->link(this_wop);
 
     were_object::connect(sparkle_->shell(), &sparkle_global<sparkle_shell>::instance, this_wop, [this_wop](were_object_pointer<sparkle_shell> shell)
