@@ -35,9 +35,9 @@ were_android_application::were_android_application(JNIEnv *env, jobject instance
     setup();
 
 
-    were_object_pointer<sparkle_settings> settings(new sparkle_settings());
+    were_object_pointer<sparkle_settings> settings(new sparkle_settings(files_dir_ + "/sparkle.config"));
     settings->link(this_wop);
-    settings->load(files_dir_ + "/sparkle.config");
+    settings->load();
     global_set<sparkle_settings>(settings);
     were_object::connect(settings, &were_object::destroyed, settings, []()
     {

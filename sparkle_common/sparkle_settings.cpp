@@ -9,18 +9,19 @@ sparkle_settings::~sparkle_settings()
 {
 }
 
-sparkle_settings::sparkle_settings()
+sparkle_settings::sparkle_settings(const std::string &path) :
+    path_(path)
 {
     register_handler("#.*", [this](const std::smatch &match)
     {
     });
 
-    register_handler("(\\w+) = (\\d+)", [this](const std::smatch &match)
+    register_handler("(\\w+) = (\\d+);", [this](const std::smatch &match)
     {
         settings_[match.str(1)] = std::stoi(match.str(2));
     });
 
-    register_handler("(\\w+) = (true|false)", [this](const std::smatch &match)
+    register_handler("(\\w+) = (true|false);", [this](const std::smatch &match)
     {
         if (match.str(2) == "true")
             settings_[match.str(1)] = true;
@@ -30,7 +31,7 @@ sparkle_settings::sparkle_settings()
             throw were_exception(WE_SIMPLE);
     });
 
-    register_handler("(\\w+) = \"(.+)\"", [this](const std::smatch &match)
+    register_handler("(\\w+) = \"(.+)\";", [this](const std::smatch &match)
     {
         settings_[match.str(1)] = match.str(2);
     });
@@ -61,9 +62,13 @@ void sparkle_settings::process_line(const std::string &line)
         throw were_exception(WE_SIMPLE);
 }
 
-void sparkle_settings::load(const std::string &path)
+void sparkle_settings::load()
 {
-    std::ifstream file(path);
+    mutex_.lock();
+
+    settings_.clear();
+
+    std::ifstream file(path_);
 
     if (file.is_open())
     {
@@ -76,4 +81,6 @@ void sparkle_settings::load(const std::string &path)
     }
     else
         throw were_exception(WE_SIMPLE);
+
+    mutex_.unlock();
 }

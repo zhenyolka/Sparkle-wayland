@@ -26,9 +26,9 @@ public:
     {
         auto this_wop = make_wop(this);
 
-        were_object_pointer<sparkle_settings> settings(new sparkle_settings());
+        were_object_pointer<sparkle_settings> settings(new sparkle_settings("./sparkle.config"));
         settings->link(this_wop);
-        settings->load("./sparkle.config");
+        settings->load();
         global_set<sparkle_settings>(settings);
         were_object::connect(settings, &were_object::destroyed, settings, []()
         {

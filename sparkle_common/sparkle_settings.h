@@ -6,6 +6,7 @@
 #include <variant>
 #include <map>
 #include <regex>
+#include <mutex>
 
 
 struct sparkle_settings_handler
@@ -18,20 +19,30 @@ class sparkle_settings : public were_object
 {
 public:
     ~sparkle_settings();
-    sparkle_settings();
+    sparkle_settings(const std::string &path);
 
     void access() const override {}
 
-    void load(const std::string &path);
+    void load();
 
     template <typename T>
     T get(const std::string &key, const T &default_value)
     {
+        mutex_.lock();
+
         auto it = settings_.find(key);
         if (it == settings_.end())
-            return default_value;
+        {
+            mutex_.unlock();
 
-        return std::get<T>(it->second);
+            return default_value;
+        }
+
+        T value = std::get<T>(it->second);
+
+        mutex_.unlock();
+
+        return value;
     }
 
 private:
@@ -40,8 +51,10 @@ private:
     void process_line(const std::string &line);
 
 private:
+    std::string path_;
     std::map<std::string, std::variant<std::string, bool, int, double>> settings_;
     std::vector<sparkle_settings_handler> handlers_;
+    std::mutex mutex_;
 };
 
 #endif // SPARKLE_SETTINGS_H

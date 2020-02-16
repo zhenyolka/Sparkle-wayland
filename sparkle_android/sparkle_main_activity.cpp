@@ -29,11 +29,9 @@ sparkle_main_activity::sparkle_main_activity(JNIEnv *env, jobject instance) :
 
 void sparkle_main_activity::user()
 {
-    std::string default_command;
-    default_command += "/system/bin/sh ";
-    default_command += global<were_android_application>()->files_dir() + "/user.sh";
+    chdir(global<were_android_application>()->files_dir().c_str());
 
-    std::string command = global<sparkle_settings>()->get<std::string>("on_start", default_command);
+    std::string command = global<sparkle_settings>()->get<std::string>("on_start", "");
 
     std::system(command.c_str());
 
@@ -42,6 +40,8 @@ void sparkle_main_activity::user()
 
 void sparkle_main_activity::start()
 {
+    global<sparkle_settings>()->load(); // XXX2 Auto reload based on timestamp?
+
     if (!user_busy_)
     {
         user_busy_ = true;
