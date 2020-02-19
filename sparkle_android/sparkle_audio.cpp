@@ -5,7 +5,6 @@
 #include "were1_unix_socket.h"
 #include "were1_tmpfile.h"
 #include <sys/stat.h> // chmod
-#include "were_log.h"
 #include <unistd.h> // XXX3 TMP
 
 
@@ -62,8 +61,6 @@ void sparkle_audio::connect_client()
     });
 
     connected_ = true;
-
-    were_log("audio connected\n");
 }
 
 void sparkle_audio::disconnect_client(were_object_pointer<were_unix_socket> client)
@@ -92,8 +89,6 @@ void sparkle_audio::disconnect_client(were_object_pointer<were_unix_socket> clie
     client.collapse();
 
     connected_ = false;
-
-    were_log("audio disconnected\n");
 }
 
 void sparkle_audio::read(were_object_pointer<were_unix_socket> client)

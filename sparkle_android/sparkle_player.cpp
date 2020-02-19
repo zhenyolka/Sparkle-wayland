@@ -1,6 +1,5 @@
 #include "sparkle_player.h"
 #include "were_timer.h"
-#include "were_log.h"
 
 #define UNSAFE 1
 
@@ -88,8 +87,6 @@ void sparkle_player::start()
     {
         SLresult result;
 
-        were_log("starting player\n");
-
         state_ = SL_PLAYSTATE_PLAYING;
 
         result = (*player_play_)->SetPlayState(player_play_, state_);
@@ -110,8 +107,6 @@ void sparkle_player::stop()
         SLresult result;
 
         check_timer_->stop();
-
-        were_log("stopping player\n");
 
         state_ = SL_PLAYSTATE_STOPPED;
 
