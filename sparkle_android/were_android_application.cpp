@@ -1,9 +1,9 @@
 #include "were_android_application.h"
 #include "were_exception.h"
 #include "were_backtrace.h"
-#include "sparkle_android_logger.h"
 #include "were_debug.h"
 #include "were_registry.h"
+#include "were_log.h"
 #include "sparkle_settings.h"
 #include <unistd.h> // dup()
 #include <android/asset_manager.h>
@@ -28,9 +28,16 @@ were_android_application::were_android_application(JNIEnv *env, jobject instance
     files_dir_ = call_string_method("files_dir", "()Ljava/lang/String;");
     home_dir_ = call_string_method("home_dir", "()Ljava/lang/String;");
 
+    were_object_pointer<were_log> logger(new were_log());
+    logger->link(this_wop);
+    logger->capture_stdout();
+    logger->enable_file(files_dir_ + "/log.txt");
+    global_set<were_log>(logger);
+    were_object::connect(logger, &were_object::destroyed, logger, []()
+    {
+        global_clear<were_log>();
+    });
 
-    sparkle_android_logger *logger = new sparkle_android_logger();
-    logger->redirect_output(files_dir_ + "/log.txt");
 
     setup();
 

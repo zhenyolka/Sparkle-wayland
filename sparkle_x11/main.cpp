@@ -10,6 +10,7 @@
 #include <cstdio>
 #include "were_registry.h"
 #include "sparkle_settings.h"
+#include "were_log.h"
 
 
 
@@ -25,6 +26,17 @@ public:
     test()
     {
         auto this_wop = make_wop(this);
+
+        were_object_pointer<were_log> logger(new were_log());
+        logger->link(this_wop);
+        logger->capture_stdout();
+        logger->enable_stdout();
+        logger->enable_file("/tmp/sparkle.log");
+        global_set<were_log>(logger);
+        were_object::connect(logger, &were_object::destroyed, logger, []()
+        {
+            global_clear<were_log>();
+        });
 
         were_object_pointer<sparkle_settings> settings(new sparkle_settings("./sparkle.config"));
         settings->link(this_wop);

@@ -1,6 +1,5 @@
 #include "sparkle_service.h"
 #include "sparkle_view.h"
-#include "sparkle_android_logger.h"
 #include "were_thread.h"
 #include "sparkle.h"
 #include "sparkle_audio.h"
