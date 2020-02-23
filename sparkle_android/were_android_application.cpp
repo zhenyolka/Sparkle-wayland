@@ -33,10 +33,6 @@ were_android_application::were_android_application(JNIEnv *env, jobject instance
     logger->capture_stdout();
     logger->enable_file(files_dir_ + "/log.txt");
     global_set<were_log>(logger);
-    were_object::connect(logger, &were_object::destroyed, logger, []()
-    {
-        global_clear<were_log>();
-    });
 
 
     setup();
@@ -46,11 +42,6 @@ were_android_application::were_android_application(JNIEnv *env, jobject instance
     settings->link(this_wop);
     settings->load();
     global_set<sparkle_settings>(settings);
-    were_object::connect(settings, &were_object::destroyed, settings, []()
-    {
-        global_clear<sparkle_settings>();
-    });
-    //XXX1 Move to ptr
 }
 
 void were_android_application::enable_native_loop(int fd)
@@ -128,7 +119,8 @@ Java_com_sion_sparkle_WereApplication_native_1create(JNIEnv *env, jobject instan
     were_registry<were_debug *>::set(debug);
     debug->start();
 
-    t_l_global_set<were_thread>(were_object_pointer<were_thread>(new were_thread()));
+    were_t_l_registry<were_object_pointer<were_thread>>::set(
+        were_object_pointer<were_thread>(new were_thread()));
 
     were_object_pointer<were_android_application> native__(new were_android_application(env, instance));
     native__.increment_reference_count();

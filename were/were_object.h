@@ -7,6 +7,26 @@
 #include <atomic>
 
 
+
+template <typename T>
+were_object_pointer<T> &global();
+
+template <typename T>
+void global_set(const were_object_pointer<T> &v);
+
+template <typename T>
+void global_clear();
+
+template <typename T>
+were_object_pointer<T> &t_l_global();
+
+template <typename T>
+void t_l_global_set(const were_object_pointer<T> &v);
+
+template <typename T>
+void t_l_global_clear();
+
+
 class were_object : public were_object_base
 {
 public:
@@ -178,5 +198,52 @@ private:
     were_object_pointer<were_thread> thread_;
     static std::atomic<uint64_t> next_id_;
 };
+
+
+template <typename T>
+were_object_pointer<T> &global()
+{
+    return were_registry<were_object_pointer<T>>::get();
+}
+
+template <typename T>
+void global_set(const were_object_pointer<T> &v)
+{
+    were_registry<were_object_pointer<T>>::set(v);
+
+    were_object::connect(v, &were_object::destroyed, v, []()
+    {
+        global_clear<T>();
+    });
+}
+
+template <typename T>
+void global_clear()
+{
+    return were_registry<were_object_pointer<T>>::clear();
+}
+
+template <typename T>
+were_object_pointer<T> &t_l_global()
+{
+    return were_t_l_registry<were_object_pointer<T>>::get();
+}
+
+template <typename T>
+void t_l_global_set(const were_object_pointer<T> &v)
+{
+    were_t_l_registry<were_object_pointer<T>>::set(v);
+
+    were_object::connect(v, &were_object::destroyed, v, []()
+    {
+        t_l_global_clear<T>();
+    });
+}
+
+template <typename T>
+void t_l_global_clear()
+{
+    return were_t_l_registry<were_object_pointer<T>>::clear();
+}
 
 #endif // WERE_OBJECT_H
