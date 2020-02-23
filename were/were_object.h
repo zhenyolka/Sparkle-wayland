@@ -55,10 +55,7 @@ public:
     {
         if (reference_count_ == 1 && collapsed_)
         {
-            if (t_l_global<were_thread>() == thread())
-                delete this;
-            else
-                post([this](){ delete this; });
+            post([this](){ delete this; });
         }
         else
             reference_count_--;
