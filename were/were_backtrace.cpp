@@ -1,4 +1,5 @@
 #include "were_backtrace.h"
+#include "were_log.h"
 #include <cstdlib>
 #include <cstdio>
 #include <csignal>
@@ -33,7 +34,7 @@ void were_backtrace::enable()
         }
         catch (const std::exception &e)
         {
-            fprintf(stderr, "%s\n", e.what());
+            log("%s\n", e.what());
         }
         catch (...)
         {
@@ -58,7 +59,7 @@ void were_backtrace::handler(int n)
     }
 
     if (name)
-        fprintf(stderr, "Caught signal %d (%s)\n", n, name);
+        log("Caught signal %d (%s)\n", n, name);
 
     print_backtrace();
 
@@ -113,7 +114,7 @@ void were1_backtrace_print()
         int status = 0;
         char *demangled = __cxxabiv1::__cxa_demangle(symbol, 0, 0, &status);
 
-        fprintf(stdout, "%03d: 0x%p %s\n", i, addr,
+        log("%03d: 0x%p %s\n", i, addr,
             (demangled != NULL && status == 0) ? demangled : symbol);
 
         if (demangled != NULL)
