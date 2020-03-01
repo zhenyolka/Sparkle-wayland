@@ -26,6 +26,11 @@ sparkle_surface::sparkle_surface(struct wl_client *client, int version, uint32_t
         were_object::emit(this_wop, &were_surface::damage, x, y, width, height);
     });
 
+    were_object::connect(this_wop, &sparkle_wl_surface::damage_buffer, this_wop, [this_wop](int32_t x, int32_t y, int32_t width, int32_t height)
+    {
+        were_object::emit(this_wop, &were_surface::damage, x, y, width, height);
+    });
+
     were_object::connect(this_wop, &sparkle_wl_surface::commit, this_wop, [this_wop]()
     {
         were_object::emit(this_wop, &were_surface::commit);
