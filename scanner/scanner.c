@@ -90,7 +90,8 @@ void scanner_write_header(struct interface *i)
     fprintf(output, "public:\n");
 
     fprintf(output, "    ~sparkle_%s();\n", i->name);
-    fprintf(output, "    sparkle_%s(struct wl_client *client, int version, uint32_t id);\n\n", i->name);
+    fprintf(output, "    sparkle_%s(struct wl_client *client, int version, uint32_t id);\n", i->name);
+    fprintf(output, "    sparkle_%s(struct wl_resource *resource);\n\n", i->name);
 
     wl_list_for_each(message, &i->event_list, link)
         scanner_write_method(output, message);
@@ -152,7 +153,8 @@ void scanner_write_method_implementation(FILE *output, struct interface *i, stru
     //    fprintf(output, ",\n        ");
     scanner_write_args(output, &message->arg_list, 1);
     fprintf(output, ")\n{\n");
-    fprintf(output, "    %s_send_%s(", i->name, message->name);
+    fprintf(output, "    if (valid())\n");
+    fprintf(output, "        %s_send_%s(", i->name, message->name);
     fprintf(output, "resource()");
     if (message->arg_count > 0)
         fprintf(output, ", ");
@@ -187,6 +189,11 @@ void scanner_write_source(struct interface *i)
         fprintf(output, "    sparkle_resource(client, &%s_interface, version, id, nullptr)\n{\n", i->name);
     else
         fprintf(output, "    sparkle_resource(client, &%s_interface, version, id, &interface)\n{\n", i->name);
+
+    fprintf(output, "}\n");
+
+    fprintf(output, "sparkle_%s::sparkle_%s(struct wl_resource *resource) :\n", i->name, i->name);
+    fprintf(output, "    sparkle_resource(resource)\n{\n");
 
     fprintf(output, "}\n");
 

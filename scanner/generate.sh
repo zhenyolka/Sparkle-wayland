@@ -1,10 +1,11 @@
 #!/bin/sh
 
-rm ../generated/* > /dev/null 2>&1
+rm ../sparkle_common/generated/* > /dev/null 2>&1
 
-./scanner /usr/share/wayland/wayland.xml ../generated/ \
+./scanner /usr/share/wayland/wayland.xml ../sparkle_common/generated/ \
 wl_compositor \
 wl_surface \
+wl_buffer \
 wl_callback \
 wl_region \
 wl_output \

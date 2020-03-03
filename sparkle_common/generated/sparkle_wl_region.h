@@ -8,6 +8,7 @@ class sparkle_wl_region : public sparkle_resource
 public:
     ~sparkle_wl_region();
     sparkle_wl_region(struct wl_client *client, int version, uint32_t id);
+    sparkle_wl_region(struct wl_resource *resource);
 
 
 signals:

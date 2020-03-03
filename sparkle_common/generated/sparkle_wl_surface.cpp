@@ -22,13 +22,19 @@ sparkle_wl_surface::sparkle_wl_surface(struct wl_client *client, int version, ui
     sparkle_resource(client, &wl_surface_interface, version, id, &interface)
 {
 }
+sparkle_wl_surface::sparkle_wl_surface(struct wl_resource *resource) :
+    sparkle_resource(resource)
+{
+}
 
 void sparkle_wl_surface::send_enter(struct wl_resource *output)
 {
-    wl_surface_send_enter(resource(), output);
+    if (valid())
+        wl_surface_send_enter(resource(), output);
 }
 
 void sparkle_wl_surface::send_leave(struct wl_resource *output)
 {
-    wl_surface_send_leave(resource(), output);
+    if (valid())
+        wl_surface_send_leave(resource(), output);
 }

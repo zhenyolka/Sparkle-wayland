@@ -8,6 +8,7 @@ class sparkle_wl_keyboard : public sparkle_resource
 public:
     ~sparkle_wl_keyboard();
     sparkle_wl_keyboard(struct wl_client *client, int version, uint32_t id);
+    sparkle_wl_keyboard(struct wl_resource *resource);
 
     void send_keymap(uint32_t format, int32_t fd, uint32_t size);
     void send_enter(uint32_t serial, struct wl_resource *surface, struct wl_array *keys);

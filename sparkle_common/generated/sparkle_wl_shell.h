@@ -8,6 +8,7 @@ class sparkle_wl_shell : public sparkle_resource
 public:
     ~sparkle_wl_shell();
     sparkle_wl_shell(struct wl_client *client, int version, uint32_t id);
+    sparkle_wl_shell(struct wl_resource *resource);
 
 
 signals:

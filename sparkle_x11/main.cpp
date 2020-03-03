@@ -27,12 +27,12 @@ public:
     {
         auto this_wop = make_wop(this);
 
-        were_object_pointer<were_log> logger(new were_log());
-        logger->link(this_wop);
-        logger->capture_stdout();
-        logger->enable_stdout();
-        logger->enable_file("/tmp/sparkle.log");
-        global_set<were_log>(logger);
+        //were_object_pointer<were_log> logger(new were_log());
+        //logger->link(this_wop);
+        //logger->capture_stdout();
+        //logger->enable_stdout();
+        //logger->enable_file("/tmp/sparkle.log");
+        //global_set<were_log>(logger);
 
 
         were_object_pointer<sparkle_settings> settings(new sparkle_settings("./sparkle.config"));

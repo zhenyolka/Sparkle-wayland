@@ -22,18 +22,25 @@ sparkle_wl_shell_surface::sparkle_wl_shell_surface(struct wl_client *client, int
     sparkle_resource(client, &wl_shell_surface_interface, version, id, &interface)
 {
 }
+sparkle_wl_shell_surface::sparkle_wl_shell_surface(struct wl_resource *resource) :
+    sparkle_resource(resource)
+{
+}
 
 void sparkle_wl_shell_surface::send_ping(uint32_t serial)
 {
-    wl_shell_surface_send_ping(resource(), serial);
+    if (valid())
+        wl_shell_surface_send_ping(resource(), serial);
 }
 
 void sparkle_wl_shell_surface::send_configure(uint32_t edges, int32_t width, int32_t height)
 {
-    wl_shell_surface_send_configure(resource(), edges, width, height);
+    if (valid())
+        wl_shell_surface_send_configure(resource(), edges, width, height);
 }
 
 void sparkle_wl_shell_surface::send_popup_done()
 {
-    wl_shell_surface_send_popup_done(resource());
+    if (valid())
+        wl_shell_surface_send_popup_done(resource());
 }

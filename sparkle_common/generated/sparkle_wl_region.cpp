@@ -15,3 +15,7 @@ sparkle_wl_region::sparkle_wl_region(struct wl_client *client, int version, uint
     sparkle_resource(client, &wl_region_interface, version, id, &interface)
 {
 }
+sparkle_wl_region::sparkle_wl_region(struct wl_resource *resource) :
+    sparkle_resource(resource)
+{
+}

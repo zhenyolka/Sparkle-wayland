@@ -8,6 +8,7 @@ class sparkle_wl_compositor : public sparkle_resource
 public:
     ~sparkle_wl_compositor();
     sparkle_wl_compositor(struct wl_client *client, int version, uint32_t id);
+    sparkle_wl_compositor(struct wl_resource *resource);
 
 
 signals:

@@ -14,3 +14,7 @@ sparkle_wl_compositor::sparkle_wl_compositor(struct wl_client *client, int versi
     sparkle_resource(client, &wl_compositor_interface, version, id, &interface)
 {
 }
+sparkle_wl_compositor::sparkle_wl_compositor(struct wl_resource *resource) :
+    sparkle_resource(resource)
+{
+}

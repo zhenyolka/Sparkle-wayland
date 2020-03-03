@@ -3,22 +3,40 @@
 #include "sparkle_keyboard.h"
 #include "sparkle_pointer.h"
 #include "sparkle_touch.h"
+#include "generated/sparkle_wl_buffer.h"
+#include "generated/sparkle_wl_callback.h"
+#include <cstdio>
 
+sparkle_surface::~sparkle_surface()
+{
+    if (buffer_.has_value())
+    {
+        buffer_.value().collapse();
+        buffer_.reset();
+    }
+
+    if (callback_.has_value())
+    {
+        callback_.value().collapse();
+        callback_.reset();
+    }
+}
 
 sparkle_surface::sparkle_surface(struct wl_client *client, int version, uint32_t id) :
-    sparkle_wl_surface(client, version, id), buffer_(nullptr), callback_(nullptr)
+    sparkle_wl_surface(client, version, id)
 {
     auto this_wop = make_wop(this);
 
-    listener_.notify = sparkle_surface::destroy_;
-
     were_object::connect(this_wop, &sparkle_wl_surface::attach, this_wop, [this_wop](struct wl_resource *buffer, int32_t x, int32_t y)
     {
-        if (this_wop->buffer_ != nullptr)
-            wl_buffer_send_release(this_wop->buffer_);
+        if (this_wop->buffer_.has_value())
+        {
+            this_wop->buffer_.value()->send_release();
+            this_wop->buffer_.value().collapse();
+            this_wop->buffer_.reset();
+        }
 
-        this_wop->buffer_ = buffer;
-        wl_resource_add_destroy_listener(this_wop->buffer_, &this_wop->listener_);
+        this_wop->buffer_ = were_object_pointer<sparkle_wl_buffer>(new sparkle_wl_buffer(buffer));
     });
 
     were_object::connect(this_wop, &sparkle_wl_surface::damage, this_wop, [this_wop](int32_t x, int32_t y, int32_t width, int32_t height)
@@ -35,33 +53,35 @@ sparkle_surface::sparkle_surface(struct wl_client *client, int version, uint32_t
     {
         were_object::emit(this_wop, &were_surface::commit);
 
-        if (this_wop->callback_ != nullptr)
+        if (this_wop->callback_.has_value())
         {
-            wl_callback_send_done(this_wop->callback_, sparkle::current_msecs());
-            wl_resource_destroy(this_wop->callback_);
-            this_wop->callback_ = nullptr;
+            this_wop->callback_.value()->send_done(sparkle::current_msecs());
+            wl_resource_destroy(this_wop->callback_.value()->resource()); //XXX1
+            this_wop->callback_.value().collapse();
+            this_wop->callback_.reset();
         }
     });
 
     were_object::connect(this_wop, &sparkle_wl_surface::frame, this_wop, [this_wop](uint32_t callback)
     {
-        if (this_wop->callback_ != nullptr)
+        if (this_wop->callback_.has_value())
         {
-            wl_callback_send_done(this_wop->callback_, sparkle::current_msecs());
-            wl_resource_destroy(this_wop->callback_);
-            this_wop->callback_ = nullptr;
+            this_wop->callback_.value()->send_done(sparkle::current_msecs());
+            wl_resource_destroy(this_wop->callback_.value()->resource()); //XXX1
+            this_wop->callback_.value().collapse();
+            this_wop->callback_.reset();
         }
 
-        this_wop->callback_ = wl_resource_create(this_wop->client(), &wl_callback_interface, 1, callback);
+        this_wop->callback_ = were_object_pointer<sparkle_wl_callback>(new sparkle_wl_callback(this_wop->client(), 1, callback));
     });
 }
 
 void *sparkle_surface::data()
 {
-    if (buffer_ == nullptr)
+    if (!buffer_.has_value())
         return nullptr;
 
-    struct wl_shm_buffer *shm_buffer = wl_shm_buffer_get(buffer_);
+    struct wl_shm_buffer *shm_buffer = wl_shm_buffer_get(buffer_.value()->resource());
 
     if (shm_buffer == nullptr)
         return nullptr;
@@ -78,7 +98,7 @@ void *sparkle_surface::data()
 
 int sparkle_surface::width()
 {
-    struct wl_shm_buffer *shm_buffer = wl_shm_buffer_get(buffer_);
+    struct wl_shm_buffer *shm_buffer = wl_shm_buffer_get(buffer_.value()->resource());
     uint32_t width = wl_shm_buffer_get_width(shm_buffer);
 
     return width;
@@ -86,7 +106,7 @@ int sparkle_surface::width()
 
 int sparkle_surface::height()
 {
-    struct wl_shm_buffer *shm_buffer = wl_shm_buffer_get(buffer_);
+    struct wl_shm_buffer *shm_buffer = wl_shm_buffer_get(buffer_.value()->resource());
     uint32_t height = wl_shm_buffer_get_height(shm_buffer);
 
     return height;
@@ -94,7 +114,7 @@ int sparkle_surface::height()
 
 int sparkle_surface::stride()
 {
-    struct wl_shm_buffer *shm_buffer = wl_shm_buffer_get(buffer_);
+    struct wl_shm_buffer *shm_buffer = wl_shm_buffer_get(buffer_.value()->resource());
     uint32_t stride = wl_shm_buffer_get_stride(shm_buffer);
 
     return stride;
@@ -103,17 +123,6 @@ int sparkle_surface::stride()
 were_surface::buffer_format sparkle_surface::format()
 {
     return were_surface::buffer_format::ARGB8888;
-}
-
-void sparkle_surface::destroy_(struct wl_listener *listener, void *data)
-{
-    sparkle_surface *instance;
-    instance = wl_container_of(listener, instance, listener_); // XXX2
-
-    //wl_list_remove(&instance->listener_.link); // XXX3
-
-    instance->buffer_ = nullptr;
-    //instance->unreference();
 }
 
 void sparkle_surface::register_keyboard(were_object_pointer<sparkle_keyboard> keyboard)
