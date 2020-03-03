@@ -1,7 +1,7 @@
 #ifndef WERE_LOG_H
 #define WERE_LOG_H
 
-#include "were_object.h"
+#include "were.h"
 
 
 class were_log : public were_object, public were_thread_fd_listener

@@ -23,17 +23,17 @@ were_x11_surface::were_x11_surface(were_object_pointer<were_x11_compositor> comp
 
     window_ = were1_xcb_window_create(display_->get(), 1280, 720);
 
-    were_object::connect(compositor, &were_x11_compositor::event1, this_wop, [this_wop](xcb_generic_event_t *event)
+    were::connect(compositor, &were_x11_compositor::event1, this_wop, [this_wop](xcb_generic_event_t *event)
     {
         this_wop->process(event);
     });
 
-    were_object::connect(surface, &were_surface::damage, this_wop, [this_wop](int x, int y, int width, int height)
+    were::connect(surface, &were_surface::damage, this_wop, [this_wop](int x, int y, int width, int height)
     {
         this_wop->damage_.expand(x, y, x + width, y + height);
     });
 
-    were_object::connect(surface, &were_surface::commit, this_wop, [this_wop]()
+    were::connect(surface, &were_surface::commit, this_wop, [this_wop]()
     {
         this_wop->update(false);
     });
@@ -64,10 +64,10 @@ void were_x11_surface::process(xcb_generic_event_t *event)
             if (ev->event == window_->window)
             {
 #if TOUCH_MODE
-                were_object::emit(surface_, &were_surface::touch_down, TOUCH_ID, ev->event_x, ev->event_y);
+                were::emit(surface_, &were_surface::touch_down, TOUCH_ID, ev->event_x, ev->event_y);
                 touch_down_ = true;
 #else
-                were_object::emit(surface_, &were_surface::pointer_button_down, button_map[ev->detail]);
+                were::emit(surface_, &were_surface::pointer_button_down, button_map[ev->detail]);
 #endif
             }
             break;
@@ -78,10 +78,10 @@ void were_x11_surface::process(xcb_generic_event_t *event)
             if (ev->event == window_->window)
             {
 #if TOUCH_MODE
-                were_object::emit(surface_, &were_surface::touch_up, TOUCH_ID, ev->event_x, ev->event_y);
+                were::emit(surface_, &were_surface::touch_up, TOUCH_ID, ev->event_x, ev->event_y);
                 touch_down_ = false;
 #else
-                were_object::emit(surface_, &were_surface::pointer_button_up, button_map[ev->detail]);
+                were::emit(surface_, &were_surface::pointer_button_up, button_map[ev->detail]);
 #endif
             }
             break;
@@ -93,9 +93,9 @@ void were_x11_surface::process(xcb_generic_event_t *event)
             {
 #if TOUCH_MODE
             if (touch_down_)
-                were_object::emit(surface_, &were_surface::touch_motion, TOUCH_ID, ev->event_x, ev->event_y);
+                were::emit(surface_, &were_surface::touch_motion, TOUCH_ID, ev->event_x, ev->event_y);
 #else
-            were_object::emit(surface_, &were_surface::pointer_motion, ev->event_x, ev->event_y);
+            were::emit(surface_, &were_surface::pointer_motion, ev->event_x, ev->event_y);
 #endif
             }
             break;
@@ -108,7 +108,7 @@ void were_x11_surface::process(xcb_generic_event_t *event)
 #if TOUCH_MODE
 #else
                 // ev->event_x, ev->event_y
-                were_object::emit(surface_, &were_surface::pointer_enter);
+                were::emit(surface_, &were_surface::pointer_enter);
 #endif
             }
             break;
@@ -120,7 +120,7 @@ void were_x11_surface::process(xcb_generic_event_t *event)
             {
 #if TOUCH_MODE
 #else
-                were_object::emit(surface_, &were_surface::pointer_leave);
+                were::emit(surface_, &were_surface::pointer_leave);
 #endif
             }
             break;
@@ -130,7 +130,7 @@ void were_x11_surface::process(xcb_generic_event_t *event)
             xcb_key_press_event_t *ev = (xcb_key_press_event_t *)event;
             if (ev->event == window_->window)
             {
-                were_object::emit(surface_, &were_surface::key_down, ev->detail);
+                were::emit(surface_, &were_surface::key_down, ev->detail);
             }
             break;
         }
@@ -139,7 +139,7 @@ void were_x11_surface::process(xcb_generic_event_t *event)
             xcb_key_release_event_t *ev = (xcb_key_release_event_t *)event;
             if (ev->event == window_->window)
             {
-                were_object::emit(surface_, &were_surface::key_up, ev->detail);
+                were::emit(surface_, &were_surface::key_up, ev->detail);
             }
             break;
         }

@@ -72,7 +72,7 @@ sparkle_player::sparkle_player() :
 
     auto this_wop = make_wop(this);
 
-    were_object::connect(check_timer_, &were_timer::timeout, this_wop, [this_wop]()
+    were::connect(check_timer_, &were_timer::timeout, this_wop, [this_wop]()
     {
         this_wop->check();
     }); // XXX3 Find better solution
@@ -155,10 +155,10 @@ void sparkle_player::callback()
 #if UNSAFE
     post([this_wop]()
     {
-        were_object::emit(this_wop, &sparkle_player::played);
+        were::emit(this_wop, &sparkle_player::played);
     });
 #else
-    were_object::emit(this_wop, &sparkle_player::played);
+    were::emit(this_wop, &sparkle_player::played);
 #endif
 }
 

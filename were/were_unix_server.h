@@ -1,8 +1,7 @@
 #ifndef WERE_UNIX_SERVER_H
 #define WERE_UNIX_SERVER_H
 
-#include "were_object.h"
-#include "were_thread.h" // XXX3
+#include "were.h"
 #include <string>
 
 

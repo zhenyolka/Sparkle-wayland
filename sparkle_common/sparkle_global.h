@@ -2,7 +2,6 @@
 #define SPARKLE_GLOBAL_H
 
 #include "sparkle.h"
-#include "were_object.h"
 #include "wayland-server.h"
 #include "were_object_wrapper.h"
 
@@ -36,7 +35,7 @@ private:
 
         were_object_pointer<T> object__(new T(client, version, id, instance__->display_));
 
-        were_object::emit(instance__, &sparkle_global::instance, object__);
+        were::emit(instance__, &sparkle_global::instance, object__);
     }
 
 private:

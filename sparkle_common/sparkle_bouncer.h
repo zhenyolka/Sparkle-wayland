@@ -1,7 +1,7 @@
 #ifndef SPARKLE_BOUNCER_H
 #define SPARKLE_BOUNCER_H
 
-#include "were_object.h"
+#include "were.h"
 #include <wayland-server.h>
 
 #include <cstdio>
@@ -34,7 +34,7 @@ public:
     {
         T *object__ = reinterpret_cast<T *>(wl_resource_get_user_data(resource));
         were_object_pointer<T> object___(object__);
-        were_object::emit(object___, method__, args...);
+        were::emit(object___, method__, args...);
     }
 
     template<class T, class Method, Method method__, class ...Args>
@@ -42,7 +42,7 @@ public:
     {
         T *object__ = reinterpret_cast<T *>(wl_resource_get_user_data(resource));
         were_object_pointer<T> object___(object__);
-        were_object::emit(object___, method__, args...);
+        were::emit(object___, method__, args...);
 
         wl_resource_destroy(resource); // XXX2
     }

@@ -37,18 +37,18 @@ sparkle_view::sparkle_view(JNIEnv *env, were_object_pointer<sparkle_service> ser
 
     no_damage_ = global<sparkle_settings>()->get<bool>("no_damage", false);
 
-    were_object::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
+    were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
     {
         this_wop->call_void_method("collapse", "()V");
         this_wop->unreference();
     });
 
-    were_object::connect(surface, &were_surface::damage, this_wop, [this_wop](int x, int y, int width, int height)
+    were::connect(surface, &were_surface::damage, this_wop, [this_wop](int x, int y, int width, int height)
     {
         this_wop->damage_.expand(x, y, x + width, y + height);
     });
 
-    were_object::connect(surface, &were_surface::commit, this_wop, [this_wop]()
+    were::connect(surface, &were_surface::commit, this_wop, [this_wop]()
     {
         this_wop->update(false);
     });
@@ -188,7 +188,7 @@ Java_com_sion_sparkle_SparkleView_key_1down(JNIEnv *env, jobject instance, jlong
     were_object_pointer<sparkle_view> view(reinterpret_cast<sparkle_view *>(user));
     int x = sparkle_keymap[code];
     if (x != 0)
-        were_object::emit(view->surface(), &were_surface::key_down, x);
+        were::emit(view->surface(), &were_surface::key_down, x);
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -197,7 +197,7 @@ Java_com_sion_sparkle_SparkleView_key_1up(JNIEnv *env, jobject instance, jlong u
     were_object_pointer<sparkle_view> view(reinterpret_cast<sparkle_view *>(user));
     int x = sparkle_keymap[code];
     if (x != 0)
-        were_object::emit(view->surface(), &were_surface::key_up, x);
+        were::emit(view->surface(), &were_surface::key_up, x);
 }
 
 /* Pointer */
@@ -206,35 +206,35 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleView_pointer_1button_1down(JNIEnv *env, jobject instance, jlong user, jint button)
 {
     were_object_pointer<sparkle_view> view(reinterpret_cast<sparkle_view *>(user));
-    were_object::emit(view->surface(), &were_surface::pointer_button_down, button_map[button]);
+    were::emit(view->surface(), &were_surface::pointer_button_down, button_map[button]);
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleView_pointer_1button_1up(JNIEnv *env, jobject instance, jlong user, jint button)
 {
     were_object_pointer<sparkle_view> view(reinterpret_cast<sparkle_view *>(user));
-    were_object::emit(view->surface(), &were_surface::pointer_button_up, button_map[button]);
+    were::emit(view->surface(), &were_surface::pointer_button_up, button_map[button]);
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleView_pointer_1motion(JNIEnv *env, jobject instance, jlong user, jfloat x, jfloat y)
 {
     were_object_pointer<sparkle_view> view(reinterpret_cast<sparkle_view *>(user));
-    were_object::emit(view->surface(), &were_surface::pointer_motion, x, y);
+    were::emit(view->surface(), &were_surface::pointer_motion, x, y);
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleView_pointer_1enter(JNIEnv *env, jobject instance, jlong user)
 {
     were_object_pointer<sparkle_view> view(reinterpret_cast<sparkle_view *>(user));
-    were_object::emit(view->surface(), &were_surface::pointer_enter);
+    were::emit(view->surface(), &were_surface::pointer_enter);
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleView_pointer_1leave(JNIEnv *env, jobject instance, jlong user)
 {
     were_object_pointer<sparkle_view> view(reinterpret_cast<sparkle_view *>(user));
-    were_object::emit(view->surface(), &were_surface::pointer_leave);
+    were::emit(view->surface(), &were_surface::pointer_leave);
 }
 
 /* Touch */
@@ -243,19 +243,19 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleView_touch_1down(JNIEnv *env, jobject instance, jlong user, jint id, jfloat x, jfloat y)
 {
     were_object_pointer<sparkle_view> view(reinterpret_cast<sparkle_view *>(user));
-    were_object::emit(view->surface(), &were_surface::touch_down, id, x, y);
+    were::emit(view->surface(), &were_surface::touch_down, id, x, y);
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleView_touch_1up(JNIEnv *env, jobject instance, jlong user, jint id, jfloat x, jfloat y)
 {
     were_object_pointer<sparkle_view> view(reinterpret_cast<sparkle_view *>(user));
-    were_object::emit(view->surface(), &were_surface::touch_up, id, x, y);
+    were::emit(view->surface(), &were_surface::touch_up, id, x, y);
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleView_touch_1motion(JNIEnv *env, jobject instance, jlong user, jint id, jfloat x, jfloat y)
 {
     were_object_pointer<sparkle_view> view(reinterpret_cast<sparkle_view *>(user));
-    were_object::emit(view->surface(), &were_surface::touch_motion, id, x, y);
+    were::emit(view->surface(), &were_surface::touch_motion, id, x, y);
 }

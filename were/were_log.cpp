@@ -52,7 +52,7 @@ void were_log::capture_stdout()
 
 
     thread()->add_fd_listener(fd_, EPOLLIN /* | EPOLLET */, this_wop);
-    were_object::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
+    were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
     {
         this_wop->thread()->remove_fd_listener(this_wop->fd_, this_wop);
     });
@@ -62,7 +62,7 @@ void were_log::enable_stdout()
 {
     auto this_wop = make_wop(this);
 
-    were_object::connect(this_wop, &were_log::text, this_wop, [this_wop](std::vector<char> text)
+    were::connect(this_wop, &were_log::text, this_wop, [this_wop](std::vector<char> text)
     {
         write(this_wop->stdout1_, text.data(), text.size());
     });
@@ -81,7 +81,7 @@ void were_log::enable_file(const std::string &path)
 
     fchmod(fd, 0644);
 
-    were_object::connect(this_wop, &were_log::text, this_wop, [this_wop, fd](std::vector<char> text)
+    were::connect(this_wop, &were_log::text, this_wop, [this_wop, fd](std::vector<char> text)
     {
         write(fd, text.data(), text.size());
     });
@@ -99,7 +99,7 @@ void were_log::event(uint32_t events)
         if (n > 0)
         {
             buffer.resize(n);
-            were_object::emit(this_wop, &were_log::text, buffer);
+            were::emit(this_wop, &were_log::text, buffer);
         }
     }
     else
@@ -120,7 +120,7 @@ void were_log::message(const char *format, va_list ap)
 
     buffer.resize(n);
 
-    were_object::emit(this_wop, &were_log::text, buffer);
+    were::emit(this_wop, &were_log::text, buffer);
 }
 
 void were_log::message(const char *format, ...)

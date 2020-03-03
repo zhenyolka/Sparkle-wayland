@@ -1,8 +1,8 @@
 #ifndef WERE_TIMER_H
 #define WERE_TIMER_H
 
-#include "were_object.h"
-#include "were_thread.h" // XXX3
+#include "were.h"
+
 
 class were_timer : public were_object, public were_thread_fd_listener
 {

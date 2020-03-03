@@ -24,7 +24,7 @@ sparkle_audio::sparkle_audio(const std::string &path) :
 
     chmod(path.c_str(), 0666);
 
-    were_object::connect(server_, &were_unix_server::new_connection, this_wop, [this_wop]()
+    were::connect(server_, &were_unix_server::new_connection, this_wop, [this_wop]()
     {
         this_wop->connect_client();
     });
@@ -44,17 +44,17 @@ void sparkle_audio::connect_client()
 
     were_object_pointer<were_unix_socket> client = server_->accept();
 
-    were_object::connect(client, &were_unix_socket::ready_read, this_wop, [this_wop, client]()
+    were::connect(client, &were_unix_socket::ready_read, this_wop, [this_wop, client]()
     {
         this_wop->read(client);
     });
 
-    were_object::connect(client, &were_unix_socket::disconnected, this_wop, [this_wop, client]()
+    were::connect(client, &were_unix_socket::disconnected, this_wop, [this_wop, client]()
     {
         this_wop->disconnect_client(client);
     });
 
-    were_object::connect(player_, &sparkle_player::played, client, [client]()
+    were::connect(player_, &sparkle_player::played, client, [client]()
     {
         uint64_t data = 0;
         client->send_all((char *)&data, sizeof(uint64_t));

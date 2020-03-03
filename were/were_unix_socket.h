@@ -1,8 +1,7 @@
 #ifndef WERE_UNIX_SOCKET_H
 #define WERE_UNIX_SOCKET_H
 
-#include "were_object.h"
-#include "were_thread.h"
+#include "were.h"
 #include <string>
 
 

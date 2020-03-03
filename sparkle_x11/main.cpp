@@ -47,14 +47,14 @@ public:
         were_object_pointer<were_x11_compositor> compositor__(new were_x11_compositor());
         compositor__->link(this_wop);
 
-        were_object::connect(sparkle__->shell(), &sparkle_global<sparkle_shell>::instance, compositor__, [compositor__, this_wop](were_object_pointer<sparkle_shell> shell)
+        were::connect(sparkle__->shell(), &sparkle_global<sparkle_shell>::instance, compositor__, [compositor__, this_wop](were_object_pointer<sparkle_shell> shell)
         {
             compositor__->register_producer(shell);
         });
 
         were_object_pointer<were_signal_handler> sh(new were_signal_handler());
         sh->link(this_wop);
-        were_object::connect(sh, &were_signal_handler::signal, this_wop, [this_wop](uint32_t number) mutable
+        were::connect(sh, &were_signal_handler::signal, this_wop, [this_wop](uint32_t number) mutable
         {
             if (number == SIGINT)
             {

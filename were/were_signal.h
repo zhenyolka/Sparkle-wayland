@@ -1,78 +1,81 @@
 #ifndef WERE_SIGNAL_H
 #define WERE_SIGNAL_H
 
-#include "were_exception.h"
-#include "were_debug.h"
 #include <functional>
-#include <cstdint>
 #include <list>
+#include <memory>
+#include <mutex>
+#include <cstdint>
 
 
 template <typename Signature> class were_signal_connection;
 template <typename ...Args>
-class were_signal_connection<void (Args...)>
+class were_signal_connection<void (Args... args)>
 {
 public:
-    std::function<void (Args...)> call_;
+    were_signal_connection(const std::function<void (Args... args)> &call, uint64_t id) :
+        call_(call), id_(id) {}
+    const std::function<void (Args... args)> &call() const { return call_; }
+    uint64_t id() const { return id_; }
+private:
+    std::function<void (Args... args)> call_;
     uint64_t id_;
 };
 
-
 template <typename Signature> class were_signal;
 template <typename ...Args>
-class were_signal<void (Args...)>
+class were_signal<void (Args... args)>
 {
-    typedef were_signal_connection<void (Args...)> connection_type;
-public:
-    were_signal() : emitting_(false) {}
 
-    void add_connection(const std::function<void (Args...)> &call, uint64_t id);
-    void remove_connection(uint64_t id);
-    void emit(Args... args);
-    bool emitting() const {return emitting_;}
+    using function_type = std::function<void (Args... args)>;
+    using connection_type = were_signal_connection<void (Args... args)>;
+    using connection_list_type = std::list<connection_type>;
+
+public:
+
+    were_signal()
+    {
+        connections_ = std::shared_ptr<connection_list_type>(new connection_list_type());
+    }
+
+    void add_connection(const function_type &call, uint64_t id)
+    {
+        mutex_.lock();
+        std::shared_ptr<const connection_list_type> connections = atomic_load(&connections_);
+        std::shared_ptr<connection_list_type> new_connections(new connection_list_type(*connections));
+        new_connections->push_back(were_signal_connection<void (Args... args)>(call, id));
+        std::shared_ptr<const connection_list_type> new_connections_const = new_connections;
+        atomic_store(&connections_, new_connections_const);
+        mutex_.unlock();
+    }
+
+    void remove_connection(uint64_t id)
+    {
+        mutex_.lock();
+        std::shared_ptr<const connection_list_type> connections = atomic_load(&connections_);
+        std::shared_ptr<connection_list_type> new_connections(new connection_list_type(*connections));
+        new_connections->remove_if([id](connection_type &connection)
+        {
+            return connection.id() == id;
+        });
+        std::shared_ptr<const connection_list_type> new_connections_const = new_connections;
+        atomic_store(&connections_, new_connections_const);
+        mutex_.unlock();
+    }
+
+    void emit(Args... args)
+    {
+        std::shared_ptr<const connection_list_type> connections = atomic_load(&connections_);
+        for (auto &connection : *connections)
+        {
+            connection.call()(args...);
+        }
+    }
 
 private:
-    std::list<connection_type> connections_;
-    bool emitting_;
+    std::shared_ptr<const connection_list_type> connections_;
+    std::mutex mutex_;
 };
-
-
-template <typename Signature> class were_signal;
-template <typename ...Args>
-void were_signal<void (Args...)>::add_connection(const std::function<void (Args...)> &call, uint64_t id)
-{
-    if (emitting_)
-        throw were_exception(WE_SIMPLE);
-
-    connection_type connection;
-    connection.call_ = call;
-    connection.id_ = id;
-
-    connections_.push_back(connection);
-}
-
-template <typename Signature> class were_signal;
-template <typename ...Args>
-void were_signal<void (Args...)>::remove_connection(uint64_t id)
-{
-    if (emitting_)
-        throw were_exception(WE_SIMPLE);
-
-    connections_.remove_if([id](connection_type &connection)
-    {
-        return connection.id_ == id;
-    });
-}
-
-template <typename Signature> class were_signal;
-template <typename ...Args>
-void were_signal<void (Args...)>::emit(Args... args)
-{
-    emitting_ = true;
-    for (auto &connection : connections_)
-        connection.call_(args...);
-    emitting_ = false;
-}
 
 #define signals public
 

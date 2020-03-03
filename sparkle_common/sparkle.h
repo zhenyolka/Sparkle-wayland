@@ -1,8 +1,7 @@
 #ifndef SPARKLE_H
 #define SPARKLE_H
 
-#include "were_object.h"
-#include "were_thread.h" // XXX3
+#include "were.h"
 #include "were_object_wrapper.h" // XXX3
 #include <wayland-server.h>
 #include <ctime>

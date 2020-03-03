@@ -1,8 +1,8 @@
 #ifndef WERE_SIGNAL_HANDLER_H
 #define WERE_SIGNAL_HANDLER_H
 
-#include "were_object.h"
-#include "were_thread.h" // XXX3
+#include "were.h"
+
 
 class were_signal_handler : public were_object, public were_thread_fd_listener
 {

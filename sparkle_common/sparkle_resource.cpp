@@ -1,7 +1,6 @@
 #include "sparkle_resource.h"
-#include "were_exception.h"
-
 #include <cstdio>
+
 
 template <typename T, typename M>
 static inline constexpr ptrdiff_t offset_of(const M T::*member)
@@ -33,7 +32,7 @@ sparkle_resource::sparkle_resource(struct wl_client *client, const struct wl_int
     listener_.notify = sparkle_resource::destroy_;
     wl_resource_add_destroy_listener(resource_, &listener_);
 
-    were_object::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
+    were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
     {
         if (this_wop->resource_ != nullptr)
         {
@@ -53,7 +52,7 @@ sparkle_resource::sparkle_resource(struct wl_resource *resource)
     listener_.notify = sparkle_resource::destroy_;
     wl_resource_add_destroy_listener(resource_, &listener_);
 
-    were_object::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
+    were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
     {
         if (this_wop->resource_ != nullptr)
         {

@@ -1,7 +1,7 @@
 #ifndef WERE_X11_SURFACE_H
 #define WERE_X11_SURFACE_H
 
-#include "were_object.h"
+#include "were.h"
 #include "were_object_wrapper.h"
 #include "were1_xcb.h"
 #include "were_rect.h"
