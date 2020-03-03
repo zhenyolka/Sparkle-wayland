@@ -59,6 +59,7 @@ public:
             if (number == SIGINT)
             {
                 this_wop.collapse();
+                t_l_global<were_thread>()->exit();
             }
         });
 
@@ -83,6 +84,8 @@ int main(int argc, char *argv[])
     debug->start();
 
     t_l_global<were_thread>()->run();
+
+    t_l_global<were_thread>()->run_for(1000);
 
     debug->stop();
 

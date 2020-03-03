@@ -9,6 +9,15 @@
 const int MAX_EVENTS = 16;
 
 
+static uint64_t current_msecs()
+{
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    uint64_t msecs = 1000ULL * ts.tv_sec + ts.tv_nsec / 1000000ULL;
+    return msecs;
+}
+
+
 were_thread::~were_thread()
 {
     remove_fd_listener_(event_fd_);
@@ -18,7 +27,7 @@ were_thread::~were_thread()
 }
 
 were_thread::were_thread() :
-    reference_count_(0), collapsed_(false)
+    reference_count_(0), collapsed_(false), exit_(false)
 {
     auto this_wop = make_wop(this);
 
@@ -134,14 +143,11 @@ void were_thread::run()
 {
     process_queue();
 
-    for (;;)
+    while (!exit_)
     {
-        process_events(1000); // XXX2
+        process_events(-1);
         process_queue();
         process_idle();
-
-        if (reference_count() == 1)
-            break;
     }
 }
 
@@ -154,24 +160,17 @@ void were_thread::run_once()
 
 void were_thread::run_for(int ms)
 {
-    struct timespec ts1, ts2;
-    clock_gettime(CLOCK_MONOTONIC, &ts1);
+    uint64_t start = current_msecs();
 
     for (;;)
     {
-        process_events(10);
+        int wait = ms - (current_msecs() - start);
+        if (wait <= 0)
+            break;
+
+        process_events(wait);
         process_queue();
         process_idle();
-
-        if (reference_count() == 1)
-            break;
-
-        clock_gettime(CLOCK_MONOTONIC, &ts2);
-        uint64_t elapsed = 0;
-        elapsed += 1000ULL * (ts2.tv_sec - ts1.tv_sec);
-        elapsed += (ts2.tv_nsec - ts1.tv_nsec) / 1000000ULL;
-        if (elapsed > static_cast<uint64_t>(ms))
-            break;
     }
 }
 
@@ -185,20 +184,13 @@ were_object_pointer<were_thread> were_thread::thread() const
 
 void were_thread::post(const std::function<void ()> &call)
 {
-    auto this_wop = make_wop(this);
-
     call_queue_mutex_.lock();
     call_queue_.push(call);
     call_queue_mutex_.unlock();
 
-#if 0 // XXX1 Causes thread init
-    if (were_thread::current_thread() != this_wop)
-#endif
-    {
-        uint64_t add = 1;
-        if (write(event_fd_, &add, sizeof(uint64_t)) != sizeof(uint64_t))
-            throw were_exception(WE_SIMPLE);
-    }
+    uint64_t add = 1;
+    if (write(event_fd_, &add, sizeof(uint64_t)) != sizeof(uint64_t))
+        throw were_exception(WE_SIMPLE);
 }
 
 void were_thread::event(uint32_t events)

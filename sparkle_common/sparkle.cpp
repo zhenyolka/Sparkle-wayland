@@ -7,6 +7,7 @@
 #include "sparkle_shell.h"
 #include "were_registry.h"
 #include "sparkle_settings.h"
+#include "were_timer.h"
 
 #include <wayland-server.h>
 #include <sys/stat.h>
@@ -153,6 +154,36 @@ sparkle::sparkle(const std::string &home_dir) :
             were::emit(this_wop, &sparkle::touch_created, touch);
         });
     });
+
+#if 1
+    were_object_pointer<were_timer> timer(new were_timer(1000, false));
+    timer->link(this_wop);
+    timer->start();
+    were::connect(timer, &were_timer::timeout, this_wop, [this_wop]()
+    {
+        int clients = 0;
+        int resources = 0;
+
+        struct wl_list *list = wl_display_get_client_list(this_wop->display_->get());
+        struct wl_client *client = nullptr;
+        wl_client_for_each(client, list)
+        {
+            clients += 1;
+
+            wl_client_for_each_resource(client,
+                            [](struct wl_resource *resource, void *user_data) -> wl_iterator_result
+                            {
+                                int *resources = (int *)user_data;
+                                *resources += 1;
+                                return WL_ITERATOR_CONTINUE;
+                            },
+                            &resources);
+
+        }
+
+        fprintf(stdout, "clients %d, resources %d.\n", clients, resources);
+    });
+#endif
 }
 
 void sparkle::event(uint32_t events)

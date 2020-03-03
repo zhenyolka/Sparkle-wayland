@@ -61,6 +61,7 @@ public:
     int reference_count() const override { return reference_count_.load(); }
     were_object_pointer<were_thread> thread() const override;
     void post(const std::function<void ()> &call) override;
+    void exit() { exit_ = true; }
 
 private:
     void add_fd_listener_(int fd, uint32_t events, were_thread_fd_listener *listener);
@@ -76,6 +77,7 @@ private:
     int event_fd_;
     std::queue< std::function<void ()> > call_queue_;
     std::mutex call_queue_mutex_;
+    bool exit_;
 };
 
 #endif // WERE_THREAD_H
