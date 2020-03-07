@@ -1,13 +1,12 @@
 #include "sparkle_service.h"
 #include "sparkle_view.h"
-#include "were_thread.h"
 #include "sparkle.h"
 #include "sparkle_audio.h"
 #include "sparkle_global.h"
 #include "sparkle_shell.h"
 #include "sparkle_settings.h"
-#include "were_registry.h"
 #include "were_android_application.h"
+
 
 
 sparkle_service::~sparkle_service()

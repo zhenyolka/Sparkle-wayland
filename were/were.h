@@ -6,5 +6,6 @@
 #include "were_connect.h"
 #include "were_thread.h"
 #include "were_global.h"
+#include "were_log.h"
 
 #endif // WERE_H

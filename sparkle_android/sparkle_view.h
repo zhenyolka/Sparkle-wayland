@@ -1,7 +1,7 @@
 #ifndef SPARKLE_VIEW_H
 #define SPARKLE_VIEW_H
 
-#include "were_object.h"
+#include "were.h"
 #include "sparkle_java_object.h"
 #include "sparkle_service.h"
 #include "were_rect.h"

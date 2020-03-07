@@ -1,7 +1,7 @@
 #ifndef SPARKLE_SERVICE_H
 #define SPARKLE_SERVICE_H
 
-#include "were_object.h"
+#include "were.h"
 #include "sparkle_java_object.h"
 
 class were_surface_producer;

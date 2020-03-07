@@ -2,8 +2,6 @@
 #include "were_exception.h"
 #include "were_backtrace.h"
 #include "were_debug.h"
-#include "were_registry.h"
-#include "were_log.h"
 #include "sparkle_settings.h"
 #include <unistd.h> // dup()
 #include <android/asset_manager.h>

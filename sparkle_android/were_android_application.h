@@ -1,7 +1,7 @@
 #ifndef WERE_ANDROID_APPLICATION_H
 #define WERE_ANDROID_APPLICATION_H
 
-#include "were_object.h"
+#include "were.h"
 #include "sparkle_java_object.h"
 
 class AAssetManager;

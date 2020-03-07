@@ -155,7 +155,7 @@ sparkle::sparkle(const std::string &home_dir) :
         });
     });
 
-#if 1
+#if 0
     were_object_pointer<were_timer> timer(new were_timer(1000, false));
     timer->link(this_wop);
     timer->start();

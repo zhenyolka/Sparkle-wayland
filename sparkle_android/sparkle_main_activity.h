@@ -1,7 +1,7 @@
 #ifndef SPARKLE_MAIN_ACTIVITY_H
 #define SPARKLE_MAIN_ACTIVITY_H
 
-#include "were_object.h"
+#include "were.h"
 #include "sparkle_java_object.h"
 #include <thread>
 

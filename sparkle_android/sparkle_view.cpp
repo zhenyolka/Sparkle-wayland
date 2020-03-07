@@ -1,9 +1,7 @@
 #include "sparkle_view.h"
 #include "sparkle_keymap.h"
 #include "were_surface.h"
-#include "were_debug.h"
 #include "were_upload.h"
-#include "were_registry.h"
 #include "sparkle_settings.h"
 #include <android/native_window_jni.h>
 #include <linux/input-event-codes.h>

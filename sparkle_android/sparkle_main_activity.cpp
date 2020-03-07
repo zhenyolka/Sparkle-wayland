@@ -1,16 +1,12 @@
 #include "sparkle_main_activity.h"
+#include "were_android_application.h"
+#include "sparkle_settings.h"
 #include <jni.h>
 #include <thread>
-
-#include "were_thread.h"
-#include "were_registry.h"
-#include "sparkle_settings.h"
-
 //#include <sys/stat.h> // chmod()
 #include <unistd.h> // chdir()
 #include <cstdlib> // system()
 
-#include "were_android_application.h"
 
 
 sparkle_main_activity::~sparkle_main_activity()

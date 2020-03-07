@@ -1,7 +1,7 @@
 #ifndef SPARKLE_AUDIO_H
 #define SPARKLE_AUDIO_H
 
-#include "were_object.h"
+#include "were.h"
 #include "sparkle_player.h"
 #include <string>
 

@@ -14,8 +14,6 @@ file(GLOB EVERYTHING
     "were_*.h"
 )
 
-#HACK
-#set(CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS "-pie -rdynamic")
 
 add_library(sparkle SHARED
     ${EVERYTHING}
@@ -46,9 +44,3 @@ target_link_libraries(sparkle LINK_PUBLIC
     OpenSLES
 )
 
-#set(EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/src/main/assets/${ANDROID_ABI}")
-#set(EXECUTABLE_OUTPUT_PATH "${SPARKLE_ROOT}/apk/app/src/main/assets/${ANDROID_ABI}")
-
-#add_executable(xtest
-#    main.cpp
-#)

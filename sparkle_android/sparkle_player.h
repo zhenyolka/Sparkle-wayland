@@ -1,9 +1,8 @@
 #ifndef SPARKLE_PLAYER_H
 #define SPARKLE_PLAYER_H
 
-#include "were_object.h"
+#include "were.h"
 #include "were1_ring_buffer.h"
-#include "were_exception.h"
 
 
 #include <SLES/OpenSLES.h>
