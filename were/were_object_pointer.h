@@ -26,7 +26,6 @@ public:
     were_object_pointer(T *object__)
     {
         object_ = object__;
-        pointer_ = object__;
 
         if (object_ == nullptr)
             throw were_exception(WE_SIMPLE);
@@ -37,7 +36,6 @@ public:
     were_object_pointer(const were_object_pointer &other)
     {
         object_ = other.object_;
-        pointer_ = other.pointer_;
 
         object_->reference();
     }
@@ -46,7 +44,6 @@ public:
     were_object_pointer(const were_object_pointer<T2> &other)
     {
         object_ = other.object_;
-        pointer_ = other.pointer_;
 
         object_->reference();
     }
@@ -56,7 +53,6 @@ public:
         reset();
 
         object_ = other.object_;
-        pointer_ = other.pointer_;
 
         object_->reference();
 
@@ -77,17 +73,17 @@ public:
     {
         object_->access();
 
-        return pointer_;
+        return object_;
     }
 
     T *access_UNSAFE() const
     {
-        return pointer_;
+        return object_;
     }
 
     T *operator->() const { return access(); }
-    bool operator==(const were_object_pointer &other) const { return pointer_ == other.pointer_; }
-    bool operator!=(const were_object_pointer &other) const { return pointer_ != other.pointer_; }
+    bool operator==(const were_object_pointer &other) const { return object_ == other.object_; }
+    bool operator!=(const were_object_pointer &other) const { return object_ != other.object_; }
     void increment_reference_count() { object_->reference(); }
     void decrement_reference_count() { object_->unreference(); }
     //int reference_count() const { return object_->reference_count(); }
@@ -95,11 +91,10 @@ public:
     //operator were_object_pointer<were_object>();
     were_object_pointer<were_thread> thread() const { return object_->thread(); }
     void post(const std::function<void ()> &call) const { object_->post(call); }
-    bool operator<(const were_object_pointer &other) const { return pointer_ < other.pointer_; }
+    bool operator<(const were_object_pointer &other) const { return object_ < other.object_; }
 
 private:
-    were_object_base *object_;
-    T *pointer_;
+    T *object_;
 };
 
 #endif // WERE_OBJECT_POINTER_H

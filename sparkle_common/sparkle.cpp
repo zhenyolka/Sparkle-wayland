@@ -186,6 +186,26 @@ sparkle::sparkle(const std::string &home_dir) :
 #endif
 }
 
+were_object_pointer<sparkle_global<sparkle_output>> sparkle::output() const
+{
+    return output_;
+}
+
+were_object_pointer<sparkle_global<sparkle_compositor>> sparkle::compositor() const
+{
+    return compositor_;
+}
+
+were_object_pointer<sparkle_global<sparkle_seat>> sparkle::seat() const
+{
+    return seat_;
+}
+
+were_object_pointer<sparkle_global<sparkle_shell>> sparkle::shell() const
+{
+    return shell_;
+}
+
 void sparkle::event(uint32_t events)
 {
     struct wl_event_loop *loop = wl_display_get_event_loop(display_->get());

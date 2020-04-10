@@ -10,7 +10,7 @@
 
 
 
-class were_object : public were_object_base
+class were_object : virtual public were_object_base
 {
 public:
 

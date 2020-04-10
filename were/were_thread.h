@@ -12,21 +12,21 @@
 #include <atomic>
 
 
-class were_thread_fd_listener
+class were_thread_fd_listener : virtual public were_object_base
 {
     friend class were_thread;
 private:
     virtual void event(uint32_t events) = 0;
 };
 
-class were_thread_idle_handler
+class were_thread_idle_handler : virtual public were_object_base
 {
     friend class were_thread;
 private:
     virtual void idle() = 0;
 };
 
-class were_thread : public were_object_base, public were_thread_fd_listener
+class were_thread : virtual public were_object_base, public were_thread_fd_listener
 {
 public:
     ~were_thread();
