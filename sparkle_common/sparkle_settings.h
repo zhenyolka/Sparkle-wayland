@@ -15,13 +15,11 @@ struct sparkle_settings_handler
     std::function<void (const std::smatch &match)> f;
 };
 
-class sparkle_settings : public were_object
+class sparkle_settings : virtual public were_object
 {
 public:
     ~sparkle_settings();
     sparkle_settings(const std::string &path);
-
-    void access() const override {}
 
     void load();
 

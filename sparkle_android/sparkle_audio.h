@@ -10,7 +10,7 @@ class sparkle_player;
 class were_unix_server;
 class were_unix_socket;
 
-class sparkle_audio : public were_object
+class sparkle_audio : virtual public were_object
 {
 public:
     ~sparkle_audio();

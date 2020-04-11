@@ -6,7 +6,7 @@
 
 class AAssetManager;
 
-class were_android_application : public were_object, public sparkle_java_object
+class were_android_application : virtual public were_object, public sparkle_java_object
 {
 public:
     ~were_android_application();

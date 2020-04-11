@@ -1,6 +1,7 @@
 #ifndef WERE_CONNECT_H
 #define WERE_CONNECT_H
 
+#include "were_capability_thread.h"
 #include "were_object_pointer.h"
 #include "were_object.h"
 #include "were_signal.h"
@@ -68,7 +69,9 @@ namespace were
 
         std::function<void (Args...)> call__;
 
-        if (context.thread() == source.thread())
+        were_object_pointer<were_object> source1 = source;
+
+        if (context.capability<were_capability_thread>()->thread() == source1.capability<were_capability_thread>()->thread())
             call__ = std::function<void (Args...)>(call);
         else
             call__ = make_queued_call(std::function<void (Args...)>(call), context);

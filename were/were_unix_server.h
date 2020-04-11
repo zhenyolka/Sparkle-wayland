@@ -8,7 +8,7 @@
 class were_unix_socket;
 
 
-class were_unix_server : public were_object, public were_thread_fd_listener
+class were_unix_server : virtual public were_object, public were_thread_fd_listener
 {
 public:
     ~were_unix_server();

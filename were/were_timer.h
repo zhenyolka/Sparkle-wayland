@@ -4,7 +4,7 @@
 #include "were.h"
 
 
-class were_timer : public were_object, public were_thread_fd_listener
+class were_timer : virtual public were_object, public were_thread_fd_listener
 {
 public:
     ~were_timer();

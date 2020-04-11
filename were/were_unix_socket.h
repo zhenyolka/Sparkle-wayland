@@ -5,7 +5,7 @@
 #include <string>
 
 
-class were_unix_socket : public were_object, public were_thread_fd_listener
+class were_unix_socket : virtual public were_object, public were_thread_fd_listener
 {
 public:
     ~were_unix_socket();

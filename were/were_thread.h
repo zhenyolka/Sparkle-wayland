@@ -2,6 +2,7 @@
 #define WERE_THREAD_H
 
 #include "were_object_pointer.h"
+#include "were_capability_thread.h"
 #include "were_registry.h"
 #include <cstdint>
 #include <sys/epoll.h> // XXX3
@@ -12,24 +13,24 @@
 #include <atomic>
 
 
-class were_thread_fd_listener : virtual public were_object_base
+class were_thread_fd_listener : virtual public were_capability_rc, virtual public were_capability_thread
 {
     friend class were_thread;
 private:
     virtual void event(uint32_t events) = 0;
 };
 
-class were_thread_idle_handler : virtual public were_object_base
+class were_thread_idle_handler : virtual public were_capability_rc, virtual public were_capability_thread
 {
     friend class were_thread;
 private:
     virtual void idle() = 0;
 };
 
-class were_thread : virtual public were_object_base, public were_thread_fd_listener
+class were_thread : virtual public were_capability_rc, virtual public were_capability_thread, public were_thread_fd_listener
 {
 public:
-    ~were_thread();
+    virtual ~were_thread();
     were_thread();
 
     int fd() const { return epoll_fd_; }
@@ -47,9 +48,9 @@ public:
     void run_once();
     void run_for(int ms);
 
-    bool collapsed() const override { return collapsed_; }
-    void collapse() override { collapsed_ = true; }
-    void access() const override {}
+    bool collapsed() const { return collapsed_; }
+    void collapse() { collapsed_ = true; }
+    void access() const {}
     void reference() override { reference_count_++; }
     void unreference() override
     {

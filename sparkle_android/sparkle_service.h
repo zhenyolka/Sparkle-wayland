@@ -7,7 +7,7 @@
 class were_surface_producer;
 class sparkle;
 
-class sparkle_service : public were_object, public sparkle_java_object
+class sparkle_service : virtual public were_object, public sparkle_java_object
 {
 public:
     ~sparkle_service();

@@ -4,7 +4,7 @@
 #include "were.h"
 
 
-class were_signal_handler : public were_object, public were_thread_fd_listener
+class were_signal_handler : virtual public were_object, public were_thread_fd_listener
 {
 public:
     ~were_signal_handler();

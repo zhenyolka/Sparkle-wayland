@@ -38,7 +38,7 @@ private:
 };
 
 template <typename T>
-class were_object_wrapper : public were_object, public T
+class were_object_wrapper : virtual public were_object, public T
 {
     using T::T;
 };

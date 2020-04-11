@@ -14,7 +14,7 @@
 
 
 
-class test : public were_object
+class test : virtual public were_object
 {
 public:
 

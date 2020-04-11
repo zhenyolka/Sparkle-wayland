@@ -7,7 +7,7 @@
 
 
 template <typename T>
-class sparkle_global : public were_object
+class sparkle_global : virtual public were_object
 {
 public:
 

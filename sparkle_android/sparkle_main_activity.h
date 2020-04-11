@@ -5,7 +5,7 @@
 #include "sparkle_java_object.h"
 #include <thread>
 
-class sparkle_main_activity : public were_object, public sparkle_java_object
+class sparkle_main_activity : virtual public were_object, public sparkle_java_object
 {
 public:
     ~sparkle_main_activity();

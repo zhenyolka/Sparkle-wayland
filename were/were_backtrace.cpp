@@ -1,5 +1,5 @@
 #include "were_backtrace.h"
-#include "were_log.h"
+//#include "were_log.h"
 #include <cstdlib>
 #include <cstdio>
 #include <csignal>

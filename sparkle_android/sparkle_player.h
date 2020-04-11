@@ -40,7 +40,7 @@ struct sparkle_audio_buffer
 
 class were_timer;
 
-class sparkle_player : public were_object
+class sparkle_player : virtual public were_object
 {
 public:
     ~sparkle_player();

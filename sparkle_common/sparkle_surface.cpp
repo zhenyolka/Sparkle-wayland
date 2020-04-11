@@ -135,13 +135,13 @@ void sparkle_surface::register_keyboard(were_object_pointer<sparkle_keyboard> ke
     were::connect(this_wop, &were_surface::key_down, keyboard, [keyboard, this_wop](int code)
     {
         keyboard->key_press(code);
-        keyboard.thread()->process_idle();
+        keyboard->thread()->process_idle();
     });
 
     were::connect(this_wop, &were_surface::key_up, keyboard, [keyboard, this_wop](int code)
     {
         keyboard->key_release(code);
-        keyboard.thread()->process_idle();
+        keyboard->thread()->process_idle();
     });
 
     keyboard->enter(this_wop); // XXX2

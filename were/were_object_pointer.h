@@ -1,16 +1,12 @@
 #ifndef WERE_OBJECT_POINTER_H
 #define WERE_OBJECT_POINTER_H
 
-#include "were_object_base.h"
+#include "were_capability_rc.h"
 #include "were_exception.h"
 #include "were_registry.h"
+#include <functional>
 
 
-template <typename T>
-were_object_pointer<T> make_wop(T *object__)
-{
-    return were_object_pointer<T>(object__);
-}
 
 
 template <typename T>
@@ -30,14 +26,14 @@ public:
         if (object_ == nullptr)
             throw were_exception(WE_SIMPLE);
 
-        object_->reference();
+        capability<were_capability_rc>()->reference();
     }
 
     were_object_pointer(const were_object_pointer &other)
     {
         object_ = other.object_;
 
-        object_->reference();
+        capability<were_capability_rc>()->reference();
     }
 
     template <typename T2>
@@ -45,7 +41,7 @@ public:
     {
         object_ = other.object_;
 
-        object_->reference();
+        capability<were_capability_rc>()->reference();
     }
 
     were_object_pointer &operator=(const were_object_pointer &other)
@@ -54,14 +50,20 @@ public:
 
         object_ = other.object_;
 
-        object_->reference();
+        capability<were_capability_rc>()->reference();
 
         return *this;
     }
 
+    template <typename Capability>
+    Capability *capability() const
+    {
+        return object_;
+    }
+
     void reset()
     {
-        object_->unreference();
+        capability<were_capability_rc>()->unreference();
     }
 
     void collapse()
@@ -71,8 +73,6 @@ public:
 
     T *access() const
     {
-        object_->access();
-
         return object_;
     }
 
@@ -86,15 +86,18 @@ public:
     bool operator!=(const were_object_pointer &other) const { return object_ != other.object_; }
     void increment_reference_count() { object_->reference(); }
     void decrement_reference_count() { object_->unreference(); }
-    //int reference_count() const { return object_->reference_count(); }
-    //were_object_pointer<were_object> were() const;
-    //operator were_object_pointer<were_object>();
-    were_object_pointer<were_thread> thread() const { return object_->thread(); }
     void post(const std::function<void ()> &call) const { object_->post(call); }
     bool operator<(const were_object_pointer &other) const { return object_ < other.object_; }
 
 private:
     T *object_;
 };
+
+
+template <typename T>
+were_object_pointer<T> make_wop(T *object__)
+{
+    return were_object_pointer<T>(object__);
+}
 
 #endif // WERE_OBJECT_POINTER_H

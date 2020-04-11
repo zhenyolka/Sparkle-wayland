@@ -13,7 +13,7 @@ Java_com_sion_sparkle_SparkleView_surface_1changed(JNIEnv *env, jobject instance
 class ANativeWindow;
 class were_surface;
 
-class sparkle_view : public were_object, public sparkle_java_object
+class sparkle_view : virtual public were_object, public sparkle_java_object
 {
     friend
     JNIEXPORT void JNICALL

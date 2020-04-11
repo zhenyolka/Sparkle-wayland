@@ -9,7 +9,7 @@ class were_surface_producer;
 
 typedef were_object_wrapper<were_object_wrapper_primitive<struct were1_xcb_display *>> x11_display;
 
-class were_x11_compositor : public were_object, public were_thread_fd_listener
+class were_x11_compositor : virtual public were_object, public were_thread_fd_listener
 {
 public:
     ~were_x11_compositor();

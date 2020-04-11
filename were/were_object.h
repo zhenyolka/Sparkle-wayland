@@ -1,7 +1,8 @@
 #ifndef WERE_OBJECT_H
 #define WERE_OBJECT_H
 
-#include "were_object_pointer.h"
+#include "were_capability_rc.h"
+#include "were_capability_thread.h"
 #include "were_signal.h"
 #include "were_thread.h"
 #include "were_registry.h"
@@ -10,18 +11,18 @@
 
 
 
-class were_object : virtual public were_object_base
+class were_object : virtual public were_capability_rc, virtual public were_capability_thread
 {
 public:
 
-    ~were_object();
+    virtual ~were_object();
     were_object();
 
-    bool collapsed() const override { return collapsed_; }
+    bool collapsed() const { return collapsed_; }
 
-    void collapse() override;
+    void collapse();
 
-    void access() const override
+    void access() const
     {
         if (were_t_l_registry<were_object_pointer<were_thread>>::get() != thread())
             throw were_exception(WE_SIMPLE);
