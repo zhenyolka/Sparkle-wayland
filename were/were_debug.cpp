@@ -178,7 +178,7 @@ void were_debug::loop()
     print_now();
 }
 
-void were_debug::add_object(were_object_base *object__)
+void were_debug::add_object(were_object *object__)
 {
 #ifdef X_DEBUG
     object_set_mutex_.lock();
@@ -188,7 +188,7 @@ void were_debug::add_object(were_object_base *object__)
     object_count_ += 1;
 }
 
-void were_debug::remove_object(were_object_base *object__)
+void were_debug::remove_object(were_object *object__)
 {
 #ifdef X_DEBUG
     object_set_mutex_.lock();
@@ -208,7 +208,7 @@ void were_debug::remove_object(were_object_base *object__)
             state = state_normal;
 #endif
 
-        //fprintf(stdout, "%-20p%-45.44s%-5d%-10s\n", object__, typeid(*object__).name(), 0, state);
+        fprintf(stdout, "%-20p%-45.44s%-5d%-10s\n", object__, typeid(*object__).name(), 0, state);
 
         throw were_exception(WE_SIMPLE);
     }
@@ -246,19 +246,14 @@ void were_debug::print_objects()
     {
         const char *state;
 
-#if 0
         if (object__->collapsed())
             state = state_collapsed;
         else if (object__->reference_count() == 0)
             state = state_lost;
         else
             state = state_normal;
-#else
-        state = state_normal;
-#endif
 
-
-        //fprintf(stdout, "%-20p%-45.44s%-5d%-10s\n", object__, typeid(*object__).name(), object__->reference_count(), state);
+        fprintf(stdout, "%-20p%-45.44s%-5d%-10s\n", object__, typeid(*object__).name(), object__->reference_count(), state);
     }
 
     object_set_mutex_.unlock();
