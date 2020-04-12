@@ -5,6 +5,12 @@
 
 class were_thread;
 
+namespace std
+{
+template <typename T>
+class function;
+}
+
 class were_capability_thread
 {
 public:

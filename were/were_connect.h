@@ -48,7 +48,7 @@ namespace were
     {
         std::function<void (Args...)> queued_call = [context, call](Args... args)
         {
-            context.post([call, args...]()
+            context.capability<were_capability_thread>()->post([call, args...]()
             {
                 call(args...);
             });

@@ -3,9 +3,6 @@
 
 #include "were_capability_rc.h"
 #include "were_exception.h"
-#include "were_registry.h"
-#include <functional>
-
 
 
 
@@ -82,11 +79,11 @@ public:
     }
 
     T *operator->() const { return access(); }
+    T &operator*() const { return *object_; }
     bool operator==(const were_object_pointer &other) const { return object_ == other.object_; }
     bool operator!=(const were_object_pointer &other) const { return object_ != other.object_; }
     void increment_reference_count() { object_->reference(); }
     void decrement_reference_count() { object_->unreference(); }
-    void post(const std::function<void ()> &call) const { object_->post(call); }
     bool operator<(const were_object_pointer &other) const { return object_ < other.object_; }
 
 private:
