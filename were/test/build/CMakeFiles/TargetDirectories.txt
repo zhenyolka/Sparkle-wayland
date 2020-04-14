@@ -1,6 +1,0 @@
-/home/sion/projects/sparkle-w/were/test/build/CMakeFiles/rebuild_cache.dir
-/home/sion/projects/sparkle-w/were/test/build/CMakeFiles/test.dir
-/home/sion/projects/sparkle-w/were/test/build/CMakeFiles/edit_cache.dir
-/home/sion/projects/sparkle-w/were/test/build/were/CMakeFiles/rebuild_cache.dir
-/home/sion/projects/sparkle-w/were/test/build/were/CMakeFiles/were.dir
-/home/sion/projects/sparkle-w/were/test/build/were/CMakeFiles/edit_cache.dir
