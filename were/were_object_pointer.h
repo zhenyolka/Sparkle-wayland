@@ -16,7 +16,7 @@ public:
 
     ~were_object_pointer() { reset(); }
 
-    were_object_pointer(T *object__)
+    explicit were_object_pointer(T *object__)
     {
         object_ = object__;
 

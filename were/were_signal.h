@@ -1,11 +1,13 @@
 #ifndef WERE_SIGNAL_H
 #define WERE_SIGNAL_H
 
+#include "were_object_pointer.h"
+#include "were_class_wrapper.h"
 #include <functional>
 #include <list>
-#include <memory>
 #include <mutex>
 #include <cstdint>
+
 
 
 template <typename Signature> class were_signal_connection;
@@ -30,42 +32,41 @@ class were_signal<void (Args... args)>
     using function_type = std::function<void (Args... args)>;
     using connection_type = were_signal_connection<void (Args... args)>;
     using connection_list_type = std::list<connection_type>;
+    using wrapped_connection_list_type = were_class_wrapper<connection_list_type>;
 
 public:
 
-    were_signal()
+    were_signal() :
+        connections_(new wrapped_connection_list_type())
     {
-        connections_ = std::shared_ptr<connection_list_type>(new connection_list_type());
     }
 
     void add_connection(const function_type &call, uint64_t id)
     {
         mutex_.lock();
-        std::shared_ptr<const connection_list_type> connections = atomic_load(&connections_);
-        std::shared_ptr<connection_list_type> new_connections(new connection_list_type(*connections));
+        were_object_pointer<wrapped_connection_list_type> connections = connections_;
+        were_object_pointer<wrapped_connection_list_type> new_connections(new wrapped_connection_list_type(*connections));
         new_connections->push_back(were_signal_connection<void (Args... args)>(call, id));
-        std::shared_ptr<const connection_list_type> new_connections_const = new_connections;
-        atomic_store(&connections_, new_connections_const);
+        connections_ = new_connections;
         mutex_.unlock();
     }
 
     void remove_connection(uint64_t id)
     {
         mutex_.lock();
-        std::shared_ptr<const connection_list_type> connections = atomic_load(&connections_);
-        std::shared_ptr<connection_list_type> new_connections(new connection_list_type(*connections));
+        were_object_pointer<wrapped_connection_list_type> connections = connections_;
+        were_object_pointer<wrapped_connection_list_type> new_connections(new wrapped_connection_list_type(*connections));
         new_connections->remove_if([id](connection_type &connection)
         {
             return connection.id() == id;
         });
-        std::shared_ptr<const connection_list_type> new_connections_const = new_connections;
-        atomic_store(&connections_, new_connections_const);
+        connections_ = new_connections;
         mutex_.unlock();
     }
 
     void emit(Args... args)
     {
-        std::shared_ptr<const connection_list_type> connections = atomic_load(&connections_);
+        were_object_pointer<wrapped_connection_list_type> connections = connections_;
         for (auto &connection : *connections)
         {
             connection.call()(args...);
@@ -73,7 +74,7 @@ public:
     }
 
 private:
-    std::shared_ptr<const connection_list_type> connections_;
+    were_object_pointer<wrapped_connection_list_type> connections_;
     std::mutex mutex_;
 };
 

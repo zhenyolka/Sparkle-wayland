@@ -24,7 +24,7 @@ public:
             were_object_pointer<sparkle_shell_surface> shell_surface(new sparkle_shell_surface(this_wop->client(), this_wop->version(), id));
 
             were::emit(this_wop, &sparkle_shell::shell_surface_created, shell_surface, surface___);
-            were::emit(this_wop, &were_surface_producer::surface_created, surface__);
+            were::emit(this_wop, &were_surface_producer::surface_created, surface___);
         });
     }
 
