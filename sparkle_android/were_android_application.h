@@ -12,8 +12,6 @@ public:
     ~were_android_application();
     were_android_application(JNIEnv *env, jobject instance);
 
-    void access() const override {}
-
     std::string files_dir() const { return files_dir_; }
     std::string home_dir() const { return home_dir_; }
 

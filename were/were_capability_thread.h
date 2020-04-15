@@ -2,14 +2,9 @@
 #define WERE_CAPABILITY_THREAD_H
 
 #include "were_pointer.h"
+#include <functional>
 
 class were_thread;
-
-namespace std
-{
-template <typename T>
-class function;
-}
 
 class were_capability_thread
 {
