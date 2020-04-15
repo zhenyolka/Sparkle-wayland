@@ -6,7 +6,7 @@
 
 sparkle_player::~sparkle_player()
 {
-    check_timer_.collapse();
+    check_timer_->collapse();
     (*player_)->Destroy(player_);
     (*output_mix_)->Destroy(output_mix_);
     (*engine_)->Destroy(engine_);
@@ -70,7 +70,7 @@ sparkle_player::sparkle_player() :
     check_result(result);
 
 
-    auto this_wop = make_wop(this);
+    auto this_wop = were_pointer(this);
 
     were::connect(check_timer_, &were_timer::timeout, this_wop, [this_wop]()
     {
@@ -127,7 +127,7 @@ void sparkle_player::callback(BufferQueueItf playerBufferqueue, void *data)
 {
     sparkle_player *instance = reinterpret_cast<sparkle_player *>(data);
 
-    were_object_pointer<sparkle_player> instance__(instance);
+    were_pointer<sparkle_player> instance__(instance);
 
 #if UNSAFE
     instance__.access_UNSAFE()->callback(); /* Unsafe */
@@ -141,7 +141,7 @@ void sparkle_player::callback(BufferQueueItf playerBufferqueue, void *data)
 
 void sparkle_player::callback()
 {
-    auto this_wop = make_wop(this);
+    auto this_wop = were_pointer(this);
 
     if (state_ != SL_PLAYSTATE_PLAYING)
         return;

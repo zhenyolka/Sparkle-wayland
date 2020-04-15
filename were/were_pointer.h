@@ -1,5 +1,5 @@
-#ifndef WERE_OBJECT_POINTER_H
-#define WERE_OBJECT_POINTER_H
+#ifndef WERE_POINTER_H
+#define WERE_POINTER_H
 
 #include "were_capability_rc.h"
 #include "were_exception.h"
@@ -7,16 +7,16 @@
 
 
 template <typename T>
-class were_object_pointer
+class were_pointer
 {
     template <typename T2>
-    friend class were_object_pointer;
+    friend class were_pointer;
 
 public:
 
-    ~were_object_pointer() { reset(); }
+    ~were_pointer() { reset(); }
 
-    explicit were_object_pointer(T *object__)
+    explicit were_pointer(T *object__)
     {
         object_ = object__;
 
@@ -26,7 +26,7 @@ public:
         capability<were_capability_rc>()->reference();
     }
 
-    were_object_pointer(const were_object_pointer &other)
+    were_pointer(const were_pointer &other)
     {
         object_ = other.object_;
 
@@ -34,14 +34,14 @@ public:
     }
 
     template <typename T2>
-    were_object_pointer(const were_object_pointer<T2> &other)
+    were_pointer(const were_pointer<T2> &other)
     {
         object_ = other.object_;
 
         capability<were_capability_rc>()->reference();
     }
 
-    were_object_pointer &operator=(const were_object_pointer &other)
+    were_pointer &operator=(const were_pointer &other)
     {
         reset();
 
@@ -58,16 +58,6 @@ public:
         return object_;
     }
 
-    void reset()
-    {
-        capability<were_capability_rc>()->unreference();
-    }
-
-    void collapse()
-    {
-        object_->collapse();
-    }
-
     T *access() const
     {
         return object_;
@@ -79,22 +69,24 @@ public:
     }
 
     T *operator->() const { return access(); }
-    T &operator*() const { return *object_; }
-    bool operator==(const were_object_pointer &other) const { return object_ == other.object_; }
-    bool operator!=(const were_object_pointer &other) const { return object_ != other.object_; }
+    T &operator*() const { return *access(); }
+    bool operator==(const were_pointer &other) const { return object_ == other.object_; }
+    bool operator!=(const were_pointer &other) const { return object_ != other.object_; }
     void increment_reference_count() { object_->reference(); }
     void decrement_reference_count() { object_->unreference(); }
-    bool operator<(const were_object_pointer &other) const { return object_ < other.object_; }
+    bool operator<(const were_pointer &other) const { return object_ < other.object_; }
+
+private:
+
+    void reset()
+    {
+        capability<were_capability_rc>()->unreference();
+    }
+
 
 private:
     T *object_;
 };
 
 
-template <typename T>
-were_object_pointer<T> make_wop(T *object__)
-{
-    return were_object_pointer<T>(object__);
-}
-
-#endif // WERE_OBJECT_POINTER_H
+#endif // WERE_POINTER_H

@@ -19,14 +19,14 @@ were_android_application::~were_android_application()
 were_android_application::were_android_application(JNIEnv *env, jobject instance) :
     sparkle_java_object(env, instance)
 {
-    auto this_wop = make_wop(this);
+    auto this_wop = were_pointer(this);
 
     fprintf(stdout, "were_android_application\n");
 
     files_dir_ = call_string_method("files_dir", "()Ljava/lang/String;");
     home_dir_ = call_string_method("home_dir", "()Ljava/lang/String;");
 
-    were_object_pointer<were_log> logger(new were_log());
+    were_pointer<were_log> logger(new were_log());
     logger->link(this_wop);
     logger->capture_stdout();
     logger->enable_file(files_dir_ + "/log.txt");
@@ -36,7 +36,7 @@ were_android_application::were_android_application(JNIEnv *env, jobject instance
     setup();
 
 
-    were_object_pointer<sparkle_settings> settings(new sparkle_settings(files_dir_ + "/sparkle.config"));
+    were_pointer<sparkle_settings> settings(new sparkle_settings(files_dir_ + "/sparkle.config"));
     settings->link(this_wop);
     settings->load();
     global_set<sparkle_settings>(settings);
@@ -117,10 +117,10 @@ Java_com_sion_sparkle_WereApplication_native_1create(JNIEnv *env, jobject instan
     were_registry<were_debug *>::set(debug);
     debug->start();
 
-    were_t_l_registry<were_object_pointer<were_thread>>::set(
-        were_object_pointer<were_thread>(new were_thread()));
+    were_t_l_registry<were_pointer<were_thread>>::set(
+        were_pointer<were_thread>(new were_thread()));
 
-    were_object_pointer<were_android_application> native__(new were_android_application(env, instance));
+    were_pointer<were_android_application> native__(new were_android_application(env, instance));
     native__.increment_reference_count();
 
     native__->enable_native_loop(dup(t_l_global<were_thread>()->fd()));
@@ -134,13 +134,13 @@ Java_com_sion_sparkle_WereApplication_native_1create(JNIEnv *env, jobject instan
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_WereApplication_native_1destroy(JNIEnv *env, jobject instance, jlong native)
 {
-    were_object_pointer<were_android_application> native__(reinterpret_cast<were_android_application *>(native));
+    were_pointer<were_android_application> native__(reinterpret_cast<were_android_application *>(native));
     native__.decrement_reference_count();
 
     native__->disable_native_loop();
     //t_l_global<were_thread>()->run_for(1000);
 
-    native__.collapse();
+    native__->collapse();
 
     //fprintf(stdout, "SIGINT\n");
     //raise(SIGINT); /* That is how we deal with program termination and proper resource deallocation! Yeah! */

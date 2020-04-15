@@ -1,7 +1,7 @@
 #ifndef WERE_SIGNAL_H
 #define WERE_SIGNAL_H
 
-#include "were_object_pointer.h"
+#include "were_pointer.h"
 #include "were_class_wrapper.h"
 #include <functional>
 #include <list>
@@ -44,8 +44,8 @@ public:
     void add_connection(const function_type &call, uint64_t id)
     {
         mutex_.lock();
-        were_object_pointer<wrapped_connection_list_type> connections = connections_;
-        were_object_pointer<wrapped_connection_list_type> new_connections(new wrapped_connection_list_type(*connections));
+        were_pointer<wrapped_connection_list_type> connections = connections_;
+        were_pointer<wrapped_connection_list_type> new_connections(new wrapped_connection_list_type(*connections));
         new_connections->push_back(were_signal_connection<void (Args... args)>(call, id));
         connections_ = new_connections;
         mutex_.unlock();
@@ -54,8 +54,8 @@ public:
     void remove_connection(uint64_t id)
     {
         mutex_.lock();
-        were_object_pointer<wrapped_connection_list_type> connections = connections_;
-        were_object_pointer<wrapped_connection_list_type> new_connections(new wrapped_connection_list_type(*connections));
+        were_pointer<wrapped_connection_list_type> connections = connections_;
+        were_pointer<wrapped_connection_list_type> new_connections(new wrapped_connection_list_type(*connections));
         new_connections->remove_if([id](connection_type &connection)
         {
             return connection.id() == id;
@@ -66,7 +66,7 @@ public:
 
     void emit(Args... args)
     {
-        were_object_pointer<wrapped_connection_list_type> connections = connections_;
+        were_pointer<wrapped_connection_list_type> connections = connections_;
         for (auto &connection : *connections)
         {
             connection.call()(args...);
@@ -74,7 +74,7 @@ public:
     }
 
 private:
-    were_object_pointer<wrapped_connection_list_type> connections_;
+    were_pointer<wrapped_connection_list_type> connections_;
     std::mutex mutex_;
 };
 

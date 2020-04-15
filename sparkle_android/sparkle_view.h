@@ -21,9 +21,9 @@ class sparkle_view : virtual public were_object, public sparkle_java_object
 
 public:
     ~sparkle_view();
-    sparkle_view(JNIEnv *env, were_object_pointer<sparkle_service> service, were_object_pointer<were_surface> surface);
+    sparkle_view(JNIEnv *env, were_pointer<sparkle_service> service, were_pointer<were_surface> surface);
 
-    were_object_pointer<were_surface> surface() const { return surface_; }
+    were_pointer<were_surface> surface() const { return surface_; }
 
     int width() const { return width_; }
     int height() const { return height_; }
@@ -36,7 +36,7 @@ private:
     void update(bool full = false);
 
 private:
-    were_object_pointer<were_surface> surface_;
+    were_pointer<were_surface> surface_;
     int width_;
     int height_;
     int format_;

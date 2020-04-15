@@ -9,7 +9,7 @@ were_unix_socket::~were_unix_socket()
 
 were_unix_socket::were_unix_socket(int fd)
 {
-    auto this_wop = make_wop(this);
+    auto this_wop = were_pointer(this);
 
     fd_ = fd;
     thread()->add_fd_listener(fd_, EPOLLIN | EPOLLET, this_wop);
@@ -25,7 +25,7 @@ void were_unix_socket::disconnect()
     if (fd_ == -1)
         return;
 
-    auto this_wop = make_wop(this);
+    auto this_wop = were_pointer(this);
 
     thread()->remove_fd_listener(fd_, this_wop);
     were1_unix_socket_destroy(fd_);
@@ -34,7 +34,7 @@ void were_unix_socket::disconnect()
 
 void were_unix_socket::event(uint32_t events)
 {
-    auto this_wop = make_wop(this);
+    auto this_wop = were_pointer(this);
 
     if (events == EPOLLIN)
         were::emit(this_wop, &were_unix_socket::ready_read);

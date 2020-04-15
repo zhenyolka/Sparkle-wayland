@@ -20,7 +20,7 @@ sparkle_resource::~sparkle_resource()
 
 sparkle_resource::sparkle_resource(struct wl_client *client, const struct wl_interface *interface, int version, uint32_t id, const void *implementation)
 {
-    auto this_wop = make_wop(this);
+    auto this_wop = were_pointer(this);
 
     resource_ = wl_resource_create(client, interface, version, id);
     if (resource_ == nullptr)
@@ -44,7 +44,7 @@ sparkle_resource::sparkle_resource(struct wl_client *client, const struct wl_int
 
 sparkle_resource::sparkle_resource(struct wl_resource *resource)
 {
-    auto this_wop = make_wop(this);
+    auto this_wop = were_pointer(this);
 
     resource_ = resource;
 
@@ -68,8 +68,8 @@ void sparkle_resource::destroy_(struct wl_listener *listener, void *data)
 
     instance->resource_ = nullptr;
 
-    were_object_pointer<sparkle_resource> instance__(instance);
-    instance__.collapse();
+    were_pointer<sparkle_resource> instance__(instance);
+    instance__->collapse();
 
     instance->unreference();
 }

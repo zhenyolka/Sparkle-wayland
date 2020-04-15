@@ -1,7 +1,7 @@
 #ifndef WERE_THREAD_H
 #define WERE_THREAD_H
 
-#include "were_object_pointer.h"
+#include "were_pointer.h"
 #include "were_capability_thread.h"
 #include "were_registry.h"
 #include <cstdint>
@@ -35,10 +35,10 @@ public:
 
     int fd() const { return epoll_fd_; }
 
-    void add_fd_listener(int fd, uint32_t events, were_object_pointer<were_thread_fd_listener> listener);
-    void remove_fd_listener(int fd, were_object_pointer<were_thread_fd_listener> listener);
-    void add_idle_handler(were_object_pointer<were_thread_idle_handler> handler);
-    void remove_idle_handler(were_object_pointer<were_thread_idle_handler> handler);
+    void add_fd_listener(int fd, uint32_t events, were_pointer<were_thread_fd_listener> listener);
+    void remove_fd_listener(int fd, were_pointer<were_thread_fd_listener> listener);
+    void add_idle_handler(were_pointer<were_thread_idle_handler> handler);
+    void remove_idle_handler(were_pointer<were_thread_idle_handler> handler);
 
     void process_events(int timeout = -1);
     void process_idle();
@@ -60,7 +60,7 @@ public:
             reference_count_--;
     }
     int reference_count() const override { return reference_count_.load(); }
-    were_object_pointer<were_thread> thread() const override;
+    were_pointer<were_thread> thread() const override;
     void post(const std::function<void ()> &call) override;
     void exit() { exit_ = true; }
 
@@ -73,7 +73,7 @@ private:
     std::atomic<int> reference_count_;
     bool collapsed_;
     int epoll_fd_;
-    std::set< were_object_pointer<were_thread_idle_handler> > idle_handlers_;
+    std::set< were_pointer<were_thread_idle_handler> > idle_handlers_;
     //std::mutex idle_handlers_mutex_;
     int event_fd_;
     std::queue< std::function<void ()> > call_queue_;

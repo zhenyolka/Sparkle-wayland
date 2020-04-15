@@ -13,7 +13,7 @@ were_unix_server::~were_unix_server()
 were_unix_server::were_unix_server(const std::string &path) :
     path_(path)
 {
-    auto this_wop = make_wop(this);
+    auto this_wop = were_pointer(this);
 
     fd_ = were1_unix_server_create(path_.c_str());
     if (fd_ == -1)
@@ -28,7 +28,7 @@ were_unix_server::were_unix_server(const std::string &path) :
 
 void were_unix_server::event(uint32_t events)
 {
-    auto this_wop = make_wop(this);
+    auto this_wop = were_pointer(this);
 
     if (events == EPOLLIN)
         were::emit(this_wop, &were_unix_server::new_connection);
@@ -36,13 +36,13 @@ void were_unix_server::event(uint32_t events)
         throw were_exception(WE_SIMPLE);
 }
 
-were_object_pointer<were_unix_socket> were_unix_server::accept()
+were_pointer<were_unix_socket> were_unix_server::accept()
 {
     int fd = were1_unix_server_accept(fd_);
     if (fd == -1)
         throw were_exception(WE_SIMPLE);
 
-    were_object_pointer<were_unix_socket> socket(new were_unix_socket(fd));
+    were_pointer<were_unix_socket> socket(new were_unix_socket(fd));
 
     return socket;
 }

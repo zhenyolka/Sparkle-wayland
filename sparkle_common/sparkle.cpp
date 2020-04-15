@@ -19,11 +19,11 @@
 
 sparkle::~sparkle()
 {
-    shell_.collapse();
-    seat_.collapse();
-    compositor_.collapse();
-    output_.collapse();
-    display_.collapse();
+    shell_->collapse();
+    seat_->collapse();
+    compositor_->collapse();
+    output_->collapse();
+    display_->collapse();
 }
 
 sparkle::sparkle(const std::string &home_dir) :
@@ -35,7 +35,7 @@ sparkle::sparkle(const std::string &home_dir) :
     width_(1280), height_(720)
 
 {
-    auto this_wop = make_wop(this);
+    auto this_wop = were_pointer(this);
 
     display_->set_destructor([](struct wl_display *&display)
     {
@@ -78,7 +78,7 @@ sparkle::sparkle(const std::string &home_dir) :
         wl_display_destroy_clients(this_wop->display_->get()); // XXX2
     });
 
-    were::connect(output_, &sparkle_global<sparkle_output>::instance, this_wop, [this_wop](were_object_pointer<sparkle_output> output)
+    were::connect(output_, &sparkle_global<sparkle_output>::instance, this_wop, [this_wop](were_pointer<sparkle_output> output)
     {
         int width = this_wop->width_;
         int height = this_wop->height_;
@@ -99,21 +99,21 @@ sparkle::sparkle(const std::string &home_dir) :
             output->send_done();
     });
 
-    were::connect(shell_, &sparkle_global<sparkle_shell>::instance, this_wop, [this_wop](were_object_pointer<sparkle_shell> shell)
+    were::connect(shell_, &sparkle_global<sparkle_shell>::instance, this_wop, [this_wop](were_pointer<sparkle_shell> shell)
     {
-        were::connect(shell, &sparkle_shell::shell_surface_created, this_wop, [this_wop](were_object_pointer<sparkle_shell_surface> shell_surface, were_object_pointer<sparkle_surface> surface)
+        were::connect(shell, &sparkle_shell::shell_surface_created, this_wop, [this_wop](were_pointer<sparkle_shell_surface> shell_surface, were_pointer<sparkle_surface> surface)
         {
-            were::connect(this_wop, &sparkle::keyboard_created, surface, [surface](were_object_pointer<sparkle_keyboard> keyboard)
+            were::connect(this_wop, &sparkle::keyboard_created, surface, [surface](were_pointer<sparkle_keyboard> keyboard)
             {
                 surface->register_keyboard(keyboard);
             });
 
-            were::connect(this_wop, &sparkle::pointer_created, surface, [surface](were_object_pointer<sparkle_pointer> pointer)
+            were::connect(this_wop, &sparkle::pointer_created, surface, [surface](were_pointer<sparkle_pointer> pointer)
             {
                 surface->register_pointer(pointer);
             });
 
-            were::connect(this_wop, &sparkle::touch_created, surface, [surface](were_object_pointer<sparkle_touch> touch)
+            were::connect(this_wop, &sparkle::touch_created, surface, [surface](were_pointer<sparkle_touch> touch)
             {
                 surface->register_touch(touch);
             });
@@ -122,11 +122,11 @@ sparkle::sparkle(const std::string &home_dir) :
         });
     });
 
-    were::connect(seat_, &sparkle_global<sparkle_seat>::instance, this_wop, [this_wop](were_object_pointer<sparkle_seat> seat)
+    were::connect(seat_, &sparkle_global<sparkle_seat>::instance, this_wop, [this_wop](were_pointer<sparkle_seat> seat)
     {
-        were::connect(seat, &sparkle_seat::keyboard_created, this_wop, [this_wop](were_object_pointer<sparkle_keyboard> keyboard)
+        were::connect(seat, &sparkle_seat::keyboard_created, this_wop, [this_wop](were_pointer<sparkle_keyboard> keyboard)
         {
-            were::connect(this_wop, &sparkle::surface_created, keyboard, [keyboard](were_object_pointer<sparkle_surface> surface)
+            were::connect(this_wop, &sparkle::surface_created, keyboard, [keyboard](were_pointer<sparkle_surface> surface)
             {
                 surface->register_keyboard(keyboard);
             });
@@ -134,9 +134,9 @@ sparkle::sparkle(const std::string &home_dir) :
             were::emit(this_wop, &sparkle::keyboard_created, keyboard);
         });
 
-        were::connect(seat, &sparkle_seat::pointer_created, this_wop, [this_wop](were_object_pointer<sparkle_pointer> pointer)
+        were::connect(seat, &sparkle_seat::pointer_created, this_wop, [this_wop](were_pointer<sparkle_pointer> pointer)
         {
-            were::connect(this_wop, &sparkle::surface_created, pointer, [pointer](were_object_pointer<sparkle_surface> surface)
+            were::connect(this_wop, &sparkle::surface_created, pointer, [pointer](were_pointer<sparkle_surface> surface)
             {
                 surface->register_pointer(pointer);
             });
@@ -144,9 +144,9 @@ sparkle::sparkle(const std::string &home_dir) :
             were::emit(this_wop, &sparkle::pointer_created, pointer);
         });
 
-        were::connect(seat, &sparkle_seat::touch_created, this_wop, [this_wop](were_object_pointer<sparkle_touch> touch)
+        were::connect(seat, &sparkle_seat::touch_created, this_wop, [this_wop](were_pointer<sparkle_touch> touch)
         {
-            were::connect(this_wop, &sparkle::surface_created, touch, [touch](were_object_pointer<sparkle_surface> surface)
+            were::connect(this_wop, &sparkle::surface_created, touch, [touch](were_pointer<sparkle_surface> surface)
             {
                 surface->register_touch(touch);
             });
@@ -156,7 +156,7 @@ sparkle::sparkle(const std::string &home_dir) :
     });
 
 #if 0
-    were_object_pointer<were_timer> timer(new were_timer(1000, false));
+    were_pointer<were_timer> timer(new were_timer(1000, false));
     timer->link(this_wop);
     timer->start();
     were::connect(timer, &were_timer::timeout, this_wop, [this_wop]()
@@ -186,22 +186,22 @@ sparkle::sparkle(const std::string &home_dir) :
 #endif
 }
 
-were_object_pointer<sparkle_global<sparkle_output>> sparkle::output() const
+were_pointer<sparkle_global<sparkle_output>> sparkle::output() const
 {
     return output_;
 }
 
-were_object_pointer<sparkle_global<sparkle_compositor>> sparkle::compositor() const
+were_pointer<sparkle_global<sparkle_compositor>> sparkle::compositor() const
 {
     return compositor_;
 }
 
-were_object_pointer<sparkle_global<sparkle_seat>> sparkle::seat() const
+were_pointer<sparkle_global<sparkle_seat>> sparkle::seat() const
 {
     return seat_;
 }
 
-were_object_pointer<sparkle_global<sparkle_shell>> sparkle::shell() const
+were_pointer<sparkle_global<sparkle_shell>> sparkle::shell() const
 {
     return shell_;
 }

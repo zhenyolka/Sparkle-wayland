@@ -6,21 +6,21 @@
 
 
 template <typename T>
-were_object_pointer<T> &global()
+were_pointer<T> &global()
 {
-    return were_registry<were_object_pointer<T>>::get();
+    return were_registry<were_pointer<T>>::get();
 }
 
 template <typename T>
 void global_clear()
 {
-    return were_registry<were_object_pointer<T>>::clear();
+    return were_registry<were_pointer<T>>::clear();
 }
 
 template <typename T>
-void global_set(const were_object_pointer<T> &v)
+void global_set(const were_pointer<T> &v)
 {
-    were_registry<were_object_pointer<T>>::set(v);
+    were_registry<were_pointer<T>>::set(v);
 
     were::connect(v, &were_object::destroyed, v, []()
     {
@@ -29,21 +29,21 @@ void global_set(const were_object_pointer<T> &v)
 }
 
 template <typename T>
-were_object_pointer<T> &t_l_global()
+were_pointer<T> &t_l_global()
 {
-    return were_t_l_registry<were_object_pointer<T>>::get();
+    return were_t_l_registry<were_pointer<T>>::get();
 }
 
 template <typename T>
 void t_l_global_clear()
 {
-    return were_t_l_registry<were_object_pointer<T>>::clear();
+    return were_t_l_registry<were_pointer<T>>::clear();
 }
 
 template <typename T>
-void t_l_global_set(const were_object_pointer<T> &v)
+void t_l_global_set(const were_pointer<T> &v)
 {
-    were_t_l_registry<were_object_pointer<T>>::set(v);
+    were_t_l_registry<were_pointer<T>>::set(v);
 
     were::connect(v, &were_object::destroyed, v, []()
     {

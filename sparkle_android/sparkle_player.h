@@ -77,7 +77,7 @@ private:
 
     struct sparkle_audio_buffer *buffer_;
 
-    were_object_pointer<were_timer> check_timer_;
+    were_pointer<were_timer> check_timer_;
 };
 
 #endif // SPARKLE_PLAYER_H

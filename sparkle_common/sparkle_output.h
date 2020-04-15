@@ -7,7 +7,7 @@
 class sparkle_output : public sparkle_wl_output
 {
 public:
-    sparkle_output(struct wl_client *client, int version, uint32_t id, were_object_pointer<sparkle_display> display) :
+    sparkle_output(struct wl_client *client, int version, uint32_t id, were_pointer<sparkle_display> display) :
         sparkle_wl_output(client, version, id)
     {
     }

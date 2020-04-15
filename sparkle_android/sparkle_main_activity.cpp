@@ -56,7 +56,7 @@ void sparkle_main_activity::stop()
 extern "C" JNIEXPORT jlong JNICALL
 Java_com_sion_sparkle_MainActivity_native_1create(JNIEnv *env, jobject instance)
 {
-    were_object_pointer<sparkle_main_activity> native__(new sparkle_main_activity(env, instance));
+    were_pointer<sparkle_main_activity> native__(new sparkle_main_activity(env, instance));
     native__.increment_reference_count();
     return jlong(native__.access());
 }
@@ -64,21 +64,21 @@ Java_com_sion_sparkle_MainActivity_native_1create(JNIEnv *env, jobject instance)
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_MainActivity_native_1destroy(JNIEnv *env, jobject instance, jlong native)
 {
-    were_object_pointer<sparkle_main_activity> native__(reinterpret_cast<sparkle_main_activity *>(native));
+    were_pointer<sparkle_main_activity> native__(reinterpret_cast<sparkle_main_activity *>(native));
     native__.decrement_reference_count();
-    native__.collapse();
+    native__->collapse();
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_MainActivity_native_1start(JNIEnv *env, jobject instance, jlong native)
 {
-    were_object_pointer<sparkle_main_activity> native__(reinterpret_cast<sparkle_main_activity *>(native));
+    were_pointer<sparkle_main_activity> native__(reinterpret_cast<sparkle_main_activity *>(native));
     native__->start();
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_MainActivity_native_1stop(JNIEnv *env, jobject instance, jlong native)
 {
-    were_object_pointer<sparkle_main_activity> native__(reinterpret_cast<sparkle_main_activity *>(native));
+    were_pointer<sparkle_main_activity> native__(reinterpret_cast<sparkle_main_activity *>(native));
     native__->stop();
 }

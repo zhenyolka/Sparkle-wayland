@@ -30,7 +30,7 @@ were_log::were_log() :
 
 void were_log::capture_stdout()
 {
-    auto this_wop = make_wop(this);
+    auto this_wop = were_pointer(this);
 
     int pipe_fd[2];
 
@@ -60,7 +60,7 @@ void were_log::capture_stdout()
 
 void were_log::enable_stdout()
 {
-    auto this_wop = make_wop(this);
+    auto this_wop = were_pointer(this);
 
     were::connect(this_wop, &were_log::text, this_wop, [this_wop](std::vector<char> text)
     {
@@ -70,7 +70,7 @@ void were_log::enable_stdout()
 
 void were_log::enable_file(const std::string &path)
 {
-    auto this_wop = make_wop(this);
+    auto this_wop = were_pointer(this);
 
     rename(path.c_str(), std::string(path + ".old").c_str());
 
@@ -89,7 +89,7 @@ void were_log::enable_file(const std::string &path)
 
 void were_log::event(uint32_t events)
 {
-    auto this_wop = make_wop(this);
+    auto this_wop = were_pointer(this);
 
     if (events == EPOLLIN)
     {
@@ -108,7 +108,7 @@ void were_log::event(uint32_t events)
 
 void were_log::message(const char *format, va_list ap)
 {
-    auto this_wop = make_wop(this);
+    auto this_wop = were_pointer(this);
 
     std::vector<char> buffer;
     buffer.resize(1024);

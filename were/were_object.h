@@ -3,6 +3,7 @@
 
 #include "were_capability_rc.h"
 #include "were_capability_thread.h"
+#include "were_capability_debug.h"
 #include "were_signal.h"
 #include "were_thread.h"
 #include "were_registry.h"
@@ -11,7 +12,7 @@
 
 
 
-class were_object : virtual public were_capability_rc, virtual public were_capability_thread
+class were_object : virtual public were_capability_rc, virtual public were_capability_thread, virtual public were_capability_debug
 {
 public:
 
@@ -24,7 +25,7 @@ public:
 
     void access() const
     {
-        if (were_t_l_registry<were_object_pointer<were_thread>>::get() != thread())
+        if (were_t_l_registry<were_pointer<were_thread>>::get() != thread())
             throw were_exception(WE_SIMPLE);
     }
 
@@ -39,10 +40,12 @@ public:
             reference_count_--;
     }
     int reference_count() const override { return reference_count_.load(); }
-    were_object_pointer<were_thread> thread() const override { return thread_; }
+    were_pointer<were_thread> thread() const override { return thread_; }
     void post(const std::function<void ()> &call) override { thread()->post(call); }
 
-    void link(were_object_pointer<were_object> other);
+    void link(were_pointer<were_object> other);
+
+    std::string dump() const override;
 
 signals:
     were_signal<void ()> destroyed;
@@ -50,7 +53,7 @@ signals:
 private:
     std::atomic<int> reference_count_;
     std::atomic<bool> collapsed_;
-    were_object_pointer<were_thread> thread_;
+    were_pointer<were_thread> thread_;
 
 };
 

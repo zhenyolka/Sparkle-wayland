@@ -15,8 +15,8 @@ public:
     ~were_x11_compositor();
     were_x11_compositor();
 
-    void register_producer(were_object_pointer<were_surface_producer> producer);
-    were_object_pointer<x11_display> display() const { return display_; }
+    void register_producer(were_pointer<were_surface_producer> producer);
+    were_pointer<x11_display> display() const { return display_; }
 
 signals:
     were_signal<void (xcb_generic_event_t *event)> event1;
@@ -26,7 +26,7 @@ private:
     void event(uint32_t events);
 
 private:
-    were_object_pointer<x11_display> display_;
+    were_pointer<x11_display> display_;
 };
 
 #endif // WERE_X11_COMPOSITOR_H

@@ -29,7 +29,7 @@ were_thread::~were_thread()
 were_thread::were_thread() :
     reference_count_(0), collapsed_(false), exit_(false)
 {
-    auto this_wop = make_wop(this);
+    auto this_wop = were_pointer(this);
 
     epoll_fd_ = epoll_create1(0);
     if (epoll_fd_ == -1)
@@ -42,9 +42,9 @@ were_thread::were_thread() :
     add_fd_listener_(event_fd_, EPOLLIN | EPOLLET, this);
 }
 
-void were_thread::add_fd_listener(int fd, uint32_t events, were_object_pointer<were_thread_fd_listener> listener)
+void were_thread::add_fd_listener(int fd, uint32_t events, were_pointer<were_thread_fd_listener> listener)
 {
-    auto this_wop = make_wop(this);
+    auto this_wop = were_pointer(this);
 
     listener.increment_reference_count();
 
@@ -56,7 +56,7 @@ void were_thread::add_fd_listener(int fd, uint32_t events, were_object_pointer<w
         throw were_exception(WE_SIMPLE);
 }
 
-void were_thread::remove_fd_listener(int fd, were_object_pointer<were_thread_fd_listener> listener)
+void were_thread::remove_fd_listener(int fd, were_pointer<were_thread_fd_listener> listener)
 {
     if (epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, fd, NULL) == -1)
         throw were_exception(WE_SIMPLE);
@@ -80,9 +80,9 @@ void were_thread::remove_fd_listener_(int fd)
         throw were_exception(WE_SIMPLE);
 }
 
-void were_thread::add_idle_handler(were_object_pointer<were_thread_idle_handler> handler)
+void were_thread::add_idle_handler(were_pointer<were_thread_idle_handler> handler)
 {
-    auto this_wop = make_wop(this);
+    auto this_wop = were_pointer(this);
 
     handler.increment_reference_count();
 
@@ -91,7 +91,7 @@ void were_thread::add_idle_handler(were_object_pointer<were_thread_idle_handler>
     //idle_handlers_mutex_.unlock();
 }
 
-void were_thread::remove_idle_handler(were_object_pointer<were_thread_idle_handler> handler)
+void were_thread::remove_idle_handler(were_pointer<were_thread_idle_handler> handler)
 {
     //idle_handlers_mutex_.lock();
     idle_handlers_.erase(handler);
@@ -174,9 +174,9 @@ void were_thread::run_for(int ms)
     }
 }
 
-were_object_pointer<were_thread> were_thread::thread() const
+were_pointer<were_thread> were_thread::thread() const
 {
-    were_object_pointer<were_thread> this_wop(const_cast<were_thread *>(this));
+    were_pointer<were_thread> this_wop(const_cast<were_thread *>(this));
 
     return this_wop;
 }

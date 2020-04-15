@@ -29,12 +29,12 @@ public:
     ~sparkle();
     sparkle(const std::string &home_dir = std::string());
 
-    were_object_pointer<sparkle_global<sparkle_output>> output() const;
-    were_object_pointer<sparkle_global<sparkle_compositor>> compositor() const;
-    were_object_pointer<sparkle_global<sparkle_seat>> seat() const;
-    were_object_pointer<sparkle_global<sparkle_shell>> shell() const;
+    were_pointer<sparkle_global<sparkle_output>> output() const;
+    were_pointer<sparkle_global<sparkle_compositor>> compositor() const;
+    were_pointer<sparkle_global<sparkle_seat>> seat() const;
+    were_pointer<sparkle_global<sparkle_shell>> shell() const;
 
-    static uint32_t next_serial(were_object_pointer<sparkle_display> display)
+    static uint32_t next_serial(were_pointer<sparkle_display> display)
     {
         return wl_display_next_serial(display->get());
     }
@@ -54,21 +54,21 @@ public:
     }
 
 signals:
-    were_signal<void (were_object_pointer<sparkle_surface> surface)> surface_created;
-    were_signal<void (were_object_pointer<sparkle_keyboard> keyboard)> keyboard_created;
-    were_signal<void (were_object_pointer<sparkle_pointer> pointer)> pointer_created;
-    were_signal<void (were_object_pointer<sparkle_touch> touch)> touch_created;
+    were_signal<void (were_pointer<sparkle_surface> surface)> surface_created;
+    were_signal<void (were_pointer<sparkle_keyboard> keyboard)> keyboard_created;
+    were_signal<void (were_pointer<sparkle_pointer> pointer)> pointer_created;
+    were_signal<void (were_pointer<sparkle_touch> touch)> touch_created;
 
 private:
     void event(uint32_t events);
     void idle();
 
 private:
-    were_object_pointer<sparkle_display> display_;
-    were_object_pointer<sparkle_global<sparkle_output>> output_;
-    were_object_pointer<sparkle_global<sparkle_compositor>> compositor_;
-    were_object_pointer<sparkle_global<sparkle_seat>> seat_;
-    were_object_pointer<sparkle_global<sparkle_shell>> shell_;
+    were_pointer<sparkle_display> display_;
+    were_pointer<sparkle_global<sparkle_output>> output_;
+    were_pointer<sparkle_global<sparkle_compositor>> compositor_;
+    were_pointer<sparkle_global<sparkle_seat>> seat_;
+    were_pointer<sparkle_global<sparkle_shell>> shell_;
     int width_;
     int height_;
 };

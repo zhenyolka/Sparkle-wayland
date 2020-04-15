@@ -33,7 +33,7 @@ public:
     static void bouncer_2(struct wl_client *client, struct wl_resource *resource, Args... args)
     {
         T *object__ = reinterpret_cast<T *>(wl_resource_get_user_data(resource));
-        were_object_pointer<T> object___(object__);
+        were_pointer<T> object___(object__);
         were::emit(object___, method__, args...);
     }
 
@@ -41,7 +41,7 @@ public:
     static void bouncer_2_d(struct wl_client *client, struct wl_resource *resource, Args... args)
     {
         T *object__ = reinterpret_cast<T *>(wl_resource_get_user_data(resource));
-        were_object_pointer<T> object___(object__);
+        were_pointer<T> object___(object__);
         were::emit(object___, method__, args...);
 
         wl_resource_destroy(resource); // XXX2

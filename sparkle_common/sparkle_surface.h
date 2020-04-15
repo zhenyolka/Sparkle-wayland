@@ -23,14 +23,14 @@ public:
     int stride();
     were_surface::buffer_format format();
 
-    void register_keyboard(were_object_pointer<sparkle_keyboard> keyboard);
-    void register_pointer(were_object_pointer<sparkle_pointer> pointer);
-    void register_touch(were_object_pointer<sparkle_touch> touch);
+    void register_keyboard(were_pointer<sparkle_keyboard> keyboard);
+    void register_pointer(were_pointer<sparkle_pointer> pointer);
+    void register_touch(were_pointer<sparkle_touch> touch);
 
 private:
 
-    std::optional<were_object_pointer<sparkle_wl_buffer>> buffer_;
-    std::optional<were_object_pointer<sparkle_wl_callback>> callback_;
+    std::optional<were_pointer<sparkle_wl_buffer>> buffer_;
+    std::optional<were_pointer<sparkle_wl_callback>> callback_;
 };
 
 #endif // SPARKLE_SURFACE_H

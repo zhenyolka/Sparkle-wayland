@@ -10,7 +10,7 @@
 class sparkle_pointer : public sparkle_wl_pointer
 {
 public:
-    sparkle_pointer(struct wl_client *client, int version, uint32_t id, were_object_pointer<sparkle_display> display) :
+    sparkle_pointer(struct wl_client *client, int version, uint32_t id, were_pointer<sparkle_display> display) :
         sparkle_wl_pointer(client, version, id), display_(display)
     {
     }
@@ -40,14 +40,14 @@ public:
             send_frame();
     }
 
-    void enter(were_object_pointer<sparkle_surface> surface)
+    void enter(were_pointer<sparkle_surface> surface)
     {
         send_enter(sparkle::next_serial(display_), surface->resource(), wl_fixed_from_int(0), wl_fixed_from_int(0));
         if (version() >= WL_POINTER_FRAME_SINCE_VERSION)
             send_frame();
     }
 
-    void leave(were_object_pointer<sparkle_surface> surface)
+    void leave(were_pointer<sparkle_surface> surface)
     {
         send_leave(sparkle::next_serial(display_), surface->resource());
         if (version() >= WL_POINTER_FRAME_SINCE_VERSION)
@@ -65,7 +65,7 @@ public:
     }
 
 private:
-    were_object_pointer<sparkle_display> display_;
+    were_pointer<sparkle_display> display_;
 };
 
 #endif // SPARKLE_POINTER_H

@@ -17,10 +17,10 @@ public:
     int display_height() const;
 
 private:
-    void register_producer(were_object_pointer<were_surface_producer> producer);
+    void register_producer(were_pointer<were_surface_producer> producer);
 
 private:
-    were_object_pointer<sparkle> sparkle_;
+    were_pointer<sparkle> sparkle_;
 };
 
 #endif // SPARKLE_SERVICE_H

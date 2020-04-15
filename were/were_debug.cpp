@@ -1,17 +1,14 @@
 #include "were_debug.h"
-#include "were_object.h"
+#include "were_exception.h"
+#include "were_capability_debug.h"
 #include <ctime>
 #include <cstdio>
 #include <chrono>
 #include <unistd.h>
 #include <fcntl.h>
+#include <cstring>
 
 
-#if X_DEBUG
-const char *state_normal = "NORMAL";
-const char *state_collapsed = "COLLAPSED";
-const char *state_lost = "LOST";
-#endif
 
 const char *power_source = "/sys/class/power_supply/battery/current_now";
 
@@ -178,7 +175,7 @@ void were_debug::loop()
     print_now();
 }
 
-void were_debug::add_object(were_object *object__)
+void were_debug::add_object(were_capability_debug *object__)
 {
 #ifdef X_DEBUG
     object_set_mutex_.lock();
@@ -188,30 +185,14 @@ void were_debug::add_object(were_object *object__)
     object_count_ += 1;
 }
 
-void were_debug::remove_object(were_object *object__)
+void were_debug::remove_object(were_capability_debug *object__)
 {
 #ifdef X_DEBUG
     object_set_mutex_.lock();
 
     auto search = object_set_.find(object__);
     if (search == object_set_.end())
-    {
-
-        const char *state = "Unknown"; // XXX2 It is already half-deleted
-
-#if 0
-        if (object__->collapsed())
-            state = state_collapsed;
-        else if (object__->reference_count() == 0)
-            state = state_lost;
-        else
-            state = state_normal;
-#endif
-
-        fprintf(stdout, "%-20p%-45.44s%-5d%-10s\n", object__, typeid(*object__).name(), 0, state);
-
         throw were_exception(WE_SIMPLE);
-    }
 
     object_set_.erase(search);
 
@@ -240,20 +221,10 @@ void were_debug::print_objects()
 #ifdef X_DEBUG
     object_set_mutex_.lock();
 
-    fprintf(stdout, "%-20s%-45s%-5s%-10s\n", "Pointer", "Type", "RC", "State");
-
     for (auto &object__ : object_set_)
     {
-        const char *state;
-
-        if (object__->collapsed())
-            state = state_collapsed;
-        else if (object__->reference_count() == 0)
-            state = state_lost;
-        else
-            state = state_normal;
-
-        fprintf(stdout, "%-20p%-45.44s%-5d%-10s\n", object__, typeid(*object__).name(), object__->reference_count(), state);
+        std::string text = object__->dump();
+        fprintf(stdout, "%s\n", text.c_str());
     }
 
     object_set_mutex_.unlock();

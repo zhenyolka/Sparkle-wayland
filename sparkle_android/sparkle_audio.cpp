@@ -11,8 +11,8 @@
 
 sparkle_audio::~sparkle_audio()
 {
-    server_.collapse();
-    player_.collapse();
+    server_->collapse();
+    player_->collapse();
 }
 
 sparkle_audio::sparkle_audio(const std::string &path) :
@@ -20,7 +20,7 @@ sparkle_audio::sparkle_audio(const std::string &path) :
     server_(new were_unix_server(path)),
     buffer_fd_(-1), buffer_(nullptr), connected_(false)
 {
-    auto this_wop = make_wop(this);
+    auto this_wop = were_pointer(this);
 
     chmod(path.c_str(), 0666);
 
@@ -32,7 +32,7 @@ sparkle_audio::sparkle_audio(const std::string &path) :
 
 void sparkle_audio::connect_client()
 {
-    auto this_wop = make_wop(this);
+    auto this_wop = were_pointer(this);
 
     if (connected_)
     {
@@ -42,7 +42,7 @@ void sparkle_audio::connect_client()
 
     player_->stop();
 
-    were_object_pointer<were_unix_socket> client = server_->accept();
+    were_pointer<were_unix_socket> client = server_->accept();
 
     were::connect(client, &were_unix_socket::ready_read, this_wop, [this_wop, client]()
     {
@@ -63,7 +63,7 @@ void sparkle_audio::connect_client()
     connected_ = true;
 }
 
-void sparkle_audio::disconnect_client(were_object_pointer<were_unix_socket> client)
+void sparkle_audio::disconnect_client(were_pointer<were_unix_socket> client)
 {
     if (!connected_)
         return;
@@ -86,12 +86,12 @@ void sparkle_audio::disconnect_client(were_object_pointer<were_unix_socket> clie
         buffer_fd_ = -1;
     }
 
-    client.collapse();
+    client->collapse();
 
     connected_ = false;
 }
 
-void sparkle_audio::read(were_object_pointer<were_unix_socket> client)
+void sparkle_audio::read(were_pointer<were_unix_socket> client)
 {
     bool r;
 

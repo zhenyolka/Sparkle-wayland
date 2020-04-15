@@ -2,7 +2,7 @@
 #define WERE_CONNECT_H
 
 #include "were_capability_thread.h"
-#include "were_object_pointer.h"
+#include "were_pointer.h"
 #include "were_object.h"
 #include "were_signal.h"
 #include <cstdint>
@@ -14,9 +14,9 @@ namespace were
     uint64_t next_id();
 
     template <typename SourceType, typename SignalType>
-    void disconnect(were_object_pointer<SourceType> source,
+    void disconnect(were_pointer<SourceType> source,
                     SignalType signal,
-                    were_object_pointer<were_object> context,
+                    were_pointer<were_object> context,
                     uint64_t pc_id, uint64_t sb_id, uint64_t cb_id)
     {
         auto signal1__ = &((source.access_UNSAFE())->*signal);
@@ -29,9 +29,9 @@ namespace were
     }
 
     template <typename SourceType, typename SignalType, typename ...Args>
-    static std::function<void ()> make_breaker( were_object_pointer<SourceType> source,
+    static std::function<void ()> make_breaker( were_pointer<SourceType> source,
                                                 were_signal<void (Args...)> SignalType::*signal,
-                                                were_object_pointer<were_object> context,
+                                                were_pointer<were_object> context,
                                                 uint64_t pc_id, uint64_t sb_id, uint64_t cb_id)
     {
         std::function<void ()> breaker = [source, signal, context, pc_id, sb_id, cb_id]()
@@ -44,7 +44,7 @@ namespace were
 
     template <typename ...Args>
     static std::function<void (Args...)> make_queued_call(  const std::function<void (Args...)> &call,
-                                                            were_object_pointer<were_object> context)
+                                                            were_pointer<were_object> context)
     {
         std::function<void (Args...)> queued_call = [context, call](Args... args)
         {
@@ -58,9 +58,9 @@ namespace were
     }
 
     template <typename SourceType, typename SignalType, typename Functor, typename ...Args>
-    void connect(   were_object_pointer<SourceType> source,
+    void connect(   were_pointer<SourceType> source,
                     were_signal<void (Args...)> SignalType::*signal,
-                    were_object_pointer<were_object> context,
+                    were_pointer<were_object> context,
                     Functor call)
     {
         uint64_t pc_id = next_id();
@@ -69,7 +69,7 @@ namespace were
 
         std::function<void (Args...)> call__;
 
-        were_object_pointer<were_object> source1 = source;
+        were_pointer<were_object> source1 = source;
 
         if (context.capability<were_capability_thread>()->thread() == source1.capability<were_capability_thread>()->thread())
             call__ = std::function<void (Args...)>(call);
@@ -88,7 +88,7 @@ namespace were
     };
 
     template <typename SourceType, typename SignalType, typename ...Args>
-    static void emit(   were_object_pointer<SourceType> source,
+    static void emit(   were_pointer<SourceType> source,
                         SignalType signal,
                         Args... args)
     {

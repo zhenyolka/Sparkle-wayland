@@ -6,13 +6,13 @@
 
 were_x11_compositor::~were_x11_compositor()
 {
-    display_.collapse();
+    display_->collapse();
 }
 
 were_x11_compositor::were_x11_compositor() :
     display_(new x11_display(were1_xcb_display_open()))
 {
-    auto this_wop = make_wop(this);
+    auto this_wop = were_pointer(this);
 
     display_->set_destructor([](struct were1_xcb_display *&display)
     {
@@ -28,13 +28,13 @@ were_x11_compositor::were_x11_compositor() :
     });
 }
 
-void were_x11_compositor::register_producer(were_object_pointer<were_surface_producer> producer)
+void were_x11_compositor::register_producer(were_pointer<were_surface_producer> producer)
 {
-    auto this_wop = make_wop(this);
+    auto this_wop = were_pointer(this);
 
-    were::connect(producer, &were_surface_producer::surface_created, this_wop, [this_wop](were_object_pointer<were_surface> surface)
+    were::connect(producer, &were_surface_producer::surface_created, this_wop, [this_wop](were_pointer<were_surface> surface)
     {
-        were_object_pointer<were_x11_surface> x11_surface(new were_x11_surface(this_wop, surface));
+        were_pointer<were_x11_surface> x11_surface(new were_x11_surface(this_wop, surface));
         x11_surface->link(surface);
     });
 }
@@ -42,7 +42,7 @@ void were_x11_compositor::register_producer(were_object_pointer<were_surface_pro
 void were_x11_compositor::handler(xcb_generic_event_t *event, void *user)
 {
     were_x11_compositor *instance = reinterpret_cast<were_x11_compositor *>(user);
-    were_object_pointer<were_x11_compositor> instance__(instance);
+    were_pointer<were_x11_compositor> instance__(instance);
 
     were::emit(instance__, &were_x11_compositor::event1, event);
 }

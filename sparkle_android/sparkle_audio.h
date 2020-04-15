@@ -18,12 +18,12 @@ public:
 
 private:
     void connect_client();
-    void disconnect_client(were_object_pointer<were_unix_socket> client);
-    void read(were_object_pointer<were_unix_socket> client);
+    void disconnect_client(were_pointer<were_unix_socket> client);
+    void read(were_pointer<were_unix_socket> client);
 
 private:
-    were_object_pointer<sparkle_player> player_;
-    were_object_pointer<were_unix_server> server_;
+    were_pointer<sparkle_player> player_;
+    were_pointer<were_unix_server> server_;
     int buffer_fd_;
     struct sparkle_audio_buffer *buffer_;
     bool connected_;

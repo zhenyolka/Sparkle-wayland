@@ -17,7 +17,7 @@ struct cpu_state
     uint64_t idle;
 };
 
-class were_object;
+class were_capability_debug;
 
 class were_debug
 {
@@ -29,8 +29,8 @@ public:
     void start();
     void stop();
 
-    void add_object(were_object *object__);
-    void remove_object(were_object *object__);
+    void add_object(were_capability_debug *object__);
+    void remove_object(were_capability_debug *object__);
     void add_connection();
     void remove_connection();
     void frame();
@@ -51,7 +51,7 @@ private:
     int connection_count_;
     int frames_;
 #ifdef X_DEBUG
-    std::set<were_object *> object_set_;
+    std::set<were_capability_debug *> object_set_;
     std::mutex object_set_mutex_;
 #endif
 };
