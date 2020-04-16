@@ -1,7 +1,6 @@
 #include "were_debug.h"
 #include "were_exception.h"
 #include "were_capability_debug.h"
-#include <ctime>
 #include <cstdio>
 #include <chrono>
 #include <unistd.h>
@@ -10,9 +9,9 @@
 
 
 
-const char *power_source = "/sys/class/power_supply/battery/current_now";
+static const char *power_source = "/sys/class/power_supply/battery/current_now";
 
-int cpu_state_read(struct cpu_state *state)
+static int cpu_state_read(struct cpu_state *state)
 {
     FILE *file = NULL;
     char cpu[16];
@@ -41,7 +40,7 @@ error:
     return -1;
 }
 
-int get_power()
+static int get_power()
 {
     int fd;
     char buffer[32];
@@ -79,7 +78,7 @@ were_debug::~were_debug()
 }
 
 were_debug::were_debug() :
-    run_(false), object_count_(0), connection_count_(0), frames_(0)
+    cpu_(CLOCK_PROCESS_CPUTIME_ID), run_(false), object_count_(0), frames_(0)
 {
 }
 
@@ -87,8 +86,8 @@ void were_debug::start()
 {
     if (!run_)
     {
-        clock_gettime(CLOCK_MONOTONIC, &real1_);
-        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &cpu1_);
+        real_.start();
+        cpu_.start();
         cpu_state_read(&state1_);
 
         run_ = true;
@@ -108,17 +107,9 @@ void were_debug::stop()
 
 void were_debug::print_now()
 {
-    clock_gettime(CLOCK_MONOTONIC, &real2_);
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &cpu2_);
+    uint64_t elapsed_real = real_.elapsed_ns(true);
+    uint64_t elapsed_cpu = cpu_.elapsed_ns(true);
     cpu_state_read(&state2_);
-
-    uint64_t elapsed_real = 0;
-    elapsed_real += 1000000000LL * (real2_.tv_sec - real1_.tv_sec);
-    elapsed_real += real2_.tv_nsec - real1_.tv_nsec;
-
-    uint64_t elapsed_cpu = 0;
-    elapsed_cpu += 1000000000LL * (cpu2_.tv_sec - cpu1_.tv_sec);
-    elapsed_cpu += cpu2_.tv_nsec - cpu1_.tv_nsec;
 
     float cpu_load = 100.0 * (elapsed_cpu / 1000) / (elapsed_real / 1000);
 
@@ -130,8 +121,6 @@ void were_debug::print_now()
 
     float load1 = 100.0 * (elapsed_cpu1 / 1000) / (elapsed_real / 1000);
 
-    real1_ = real2_;
-    cpu1_ = cpu2_;
     state1_ = state2_;
 
 #ifdef X_DEBUG
@@ -150,7 +139,7 @@ void were_debug::print_now()
 #else
     if (object_count_ > 0)
 #endif
-        fprintf(stdout, "| CPU: %5.1f%% %5.1f%% | OC: %3d | CC: %3d | PWR: %4d | FPS: %2.1f |\n", cpu_load, load1, object_count_, connection_count_, get_power(), fps);
+        fprintf(stdout, "| CPU: %5.1f%% %5.1f%% | OC: %3d | PWR: %4d | FPS: %2.1f |\n", cpu_load, load1, object_count_, get_power(), fps);
 
 #ifdef X_DEBUG
     print_objects();
@@ -199,16 +188,6 @@ void were_debug::remove_object(were_capability_debug *object__)
     object_set_mutex_.unlock();
 #endif
     object_count_ -= 1;
-}
-
-void were_debug::add_connection()
-{
-    connection_count_ += 1;
-}
-
-void were_debug::remove_connection()
-{
-    connection_count_ -= 1;
 }
 
 void were_debug::frame()

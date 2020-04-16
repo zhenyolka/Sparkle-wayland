@@ -1,7 +1,7 @@
 #ifndef WERE_DEBUG_H
 #define WERE_DEBUG_H
 
-#include <ctime>
+#include "were_elapsed_timer.h"
 #include <thread>
 
 #ifdef X_DEBUG
@@ -31,8 +31,6 @@ public:
 
     void add_object(were_capability_debug *object__);
     void remove_object(were_capability_debug *object__);
-    void add_connection();
-    void remove_connection();
     void frame();
 
     void print_now();
@@ -42,13 +40,12 @@ private:
     void loop();
 
 private:
-    struct timespec real1_, real2_;
-    struct timespec cpu1_, cpu2_;
+    were_elapsed_timer real_;
+    were_elapsed_timer cpu_;
     struct cpu_state state1_, state2_;
     std::thread thread_;
     bool run_;
     int object_count_;
-    int connection_count_;
     int frames_;
 #ifdef X_DEBUG
     std::set<were_capability_debug *> object_set_;

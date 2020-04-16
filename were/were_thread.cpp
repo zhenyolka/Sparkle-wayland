@@ -1,21 +1,11 @@
 #include "were_thread.h"
 #include "were_exception.h"
+#include "were_deadline_timer.h"
 #include <unistd.h>
 #include <sys/eventfd.h>
-#include <ctime>
-#include <cstdio>
 
 
-const int MAX_EVENTS = 16;
-
-
-static uint64_t current_msecs()
-{
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    uint64_t msecs = 1000ULL * ts.tv_sec + ts.tv_nsec / 1000000ULL;
-    return msecs;
-}
+static const int MAX_EVENTS = 16;
 
 
 were_thread::~were_thread()
@@ -160,15 +150,15 @@ void were_thread::run_once()
 
 void were_thread::run_for(int ms)
 {
-    uint64_t start = current_msecs();
+    were_deadline_timer deadline(ms);
 
     for (;;)
     {
-        int wait = ms - (current_msecs() - start);
-        if (wait <= 0)
+        int remaining = deadline.remaining_time();
+        if (remaining == 0)
             break;
 
-        process_events(wait);
+        process_events(remaining);
         process_queue();
         process_idle();
     }

@@ -23,12 +23,6 @@ public:
 
     void collapse();
 
-    void access() const
-    {
-        if (were_t_l_registry<were_pointer<were_thread>>::get() != thread())
-            throw were_exception(WE_SIMPLE);
-    }
-
     void reference() override { reference_count_++; }
     void unreference() override
     {

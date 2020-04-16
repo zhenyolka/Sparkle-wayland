@@ -50,7 +50,6 @@ public:
 
     bool collapsed() const { return collapsed_; }
     void collapse() { collapsed_ = true; }
-    void access() const {}
     void reference() override { reference_count_++; }
     void unreference() override
     {
