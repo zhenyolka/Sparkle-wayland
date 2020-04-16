@@ -38,7 +38,7 @@ public:
 
     int reference_count() const override { return reference_count_.load(); }
 
-    were_pointer<were_thread> thread() const;
+    were_pointer<were_thread> thread() const override;
 
     void post(const std::function<void ()> &call) override;
 
