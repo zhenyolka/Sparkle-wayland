@@ -2,6 +2,7 @@
 #define WERE_X11_COMPOSITOR_H
 
 #include "were_object.h"
+#include "were_thread.h"
 #include "were_object_wrapper.h"
 #include "were1_xcb.h"
 

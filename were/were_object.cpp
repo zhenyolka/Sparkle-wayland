@@ -1,5 +1,6 @@
 #include "were_object.h"
 #include "were_connect.h"
+#include "were_thread.h"
 #include "were_debug.h"
 
 
@@ -19,6 +20,16 @@ void were_object::collapse()
 
     were::emit(this_wop, &were_object::destroyed);
     collapsed_ = true;
+}
+
+were_pointer<were_thread> were_object::thread() const
+{
+    return thread_;
+}
+
+void were_object::post(const std::function<void ()> &call)
+{
+    thread()->post(call);
 }
 
 void were_object::link(were_pointer<were_object> other)

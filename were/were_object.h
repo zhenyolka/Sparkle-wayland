@@ -2,28 +2,30 @@
 #define WERE_OBJECT_H
 
 #include "were_capability_rc.h"
+#include "were_capability_collapse.h"
 #include "were_capability_thread.h"
 #include "were_capability_debug.h"
-#include "were_signal.h"
-#include "were_thread.h"
-#include "were_registry.h"
 #include <atomic>
 
 
 
-
-class were_object : virtual public were_capability_rc, virtual public were_capability_thread, virtual public were_capability_debug
+class were_object :
+    virtual public were_capability_rc,
+    virtual public were_capability_collapse,
+    virtual public were_capability_thread,
+    virtual public were_capability_debug
 {
 public:
 
     virtual ~were_object();
     were_object();
 
-    bool collapsed() const { return collapsed_; }
+    bool collapsed() const override { return collapsed_; }
 
-    void collapse();
+    void collapse() override ;
 
     void reference() override { reference_count_++; }
+
     void unreference() override
     {
         if (reference_count_ == 1 && collapsed_)
@@ -33,16 +35,16 @@ public:
         else
             reference_count_--;
     }
+
     int reference_count() const override { return reference_count_.load(); }
-    were_pointer<were_thread> thread() const override { return thread_; }
-    void post(const std::function<void ()> &call) override { thread()->post(call); }
+
+    were_pointer<were_thread> thread() const;
+
+    void post(const std::function<void ()> &call) override;
 
     void link(were_pointer<were_object> other);
 
     std::string dump() const override;
-
-signals:
-    were_signal<void ()> destroyed;
 
 private:
     std::atomic<int> reference_count_;
