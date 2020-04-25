@@ -2,6 +2,7 @@
 #define WERE_POINTER_H
 
 #include "were_capability_rc.h"
+#include "were_capability_sentinel.h"
 #include "were_exception.h"
 
 
@@ -55,11 +56,19 @@ public:
     template <typename Capability>
     Capability *capability() const
     {
+        // TODO: Sentinel
+
         return object_;
     }
 
     T *access() const
     {
+        if constexpr (std::is_base_of<were_capability_sentinel, T>::value)
+        {
+            if (!capability<were_capability_sentinel>()->sentinel())
+                throw were_exception(WE_SIMPLE);
+        }
+
         return object_;
     }
 

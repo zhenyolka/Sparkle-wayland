@@ -27,6 +27,11 @@ were_pointer<were_thread> were_object::thread() const
     return thread_;
 }
 
+//bool were_object::sentinel() const
+//{
+//    return were_t_l_registry<were_pointer<were_thread>>::get() == thread_;
+//}
+
 void were_object::post(const std::function<void ()> &call)
 {
     thread()->post(call);
