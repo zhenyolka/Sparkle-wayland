@@ -74,7 +74,7 @@ void were_log::enable_file(const std::string &path)
 
     rename(path.c_str(), std::string(path + ".old").c_str());
 
-    int fd = open(path.c_str(), O_WRONLY | O_CREAT);
+    int fd = open(path.c_str(), O_WRONLY | O_CREAT, 0644);
 
     if (fd == -1)
         return;
