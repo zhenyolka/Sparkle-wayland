@@ -2,8 +2,8 @@
 #define WERE_CONNECT_H
 
 #include "were_capability_thread.h"
+#include "were_capability_collapse.h"
 #include "were_pointer.h"
-#include "were_object.h"
 #include "were_signal.h"
 #include <cstdint>
 #include <functional>
@@ -13,10 +13,10 @@ namespace were
 {
     uint64_t next_id();
 
-    template <typename SourceType, typename SignalType>
+    template <typename SourceType, typename SignalType, typename ContextType>
     void disconnect(were_pointer<SourceType> source,
                     SignalType signal,
-                    were_pointer<were_object> context,
+                    were_pointer<ContextType> context,
                     uint64_t pc_id, uint64_t sb_id, uint64_t cb_id)
     {
         auto signal1__ = &((source.access_UNSAFE())->*signal);
@@ -28,10 +28,10 @@ namespace were
         signal3__->remove_connection(cb_id);
     }
 
-    template <typename SourceType, typename SignalType, typename ...Args>
+    template <typename SourceType, typename SignalType, typename ContextType, typename ...Args>
     static std::function<void ()> make_breaker( were_pointer<SourceType> source,
                                                 were_signal<void (Args...)> SignalType::*signal,
-                                                were_pointer<were_object> context,
+                                                were_pointer<ContextType> context,
                                                 uint64_t pc_id, uint64_t sb_id, uint64_t cb_id)
     {
         std::function<void ()> breaker = [source, signal, context, pc_id, sb_id, cb_id]()
@@ -42,13 +42,13 @@ namespace were
         return breaker;
     }
 
-    template <typename ...Args>
+    template <typename ContextType, typename ...Args>
     static std::function<void (Args...)> make_queued_call(  const std::function<void (Args...)> &call,
-                                                            were_pointer<were_object> context)
+                                                            were_pointer<ContextType> context)
     {
         std::function<void (Args...)> queued_call = [context, call](Args... args)
         {
-            context.capability<were_capability_thread>()->post([call, args...]()
+            context.template capability<were_capability_thread>()->thread()->handler()->post([call, args...]()
             {
                 call(args...);
             });
@@ -57,10 +57,10 @@ namespace were
         return queued_call;
     }
 
-    template <typename SourceType, typename SignalType, typename Functor, typename ...Args>
+    template <typename SourceType, typename SignalType, typename ContextType, typename Functor, typename ...Args>
     void connect(   were_pointer<SourceType> source,
                     were_signal<void (Args...)> SignalType::*signal,
-                    were_pointer<were_object> context,
+                    were_pointer<ContextType> context,
                     Functor call)
     {
         uint64_t pc_id = next_id();
@@ -69,9 +69,7 @@ namespace were
 
         std::function<void (Args...)> call__;
 
-        were_pointer<were_object> source1 = source;
-
-        if (context.capability<were_capability_thread>()->thread() == source1.capability<were_capability_thread>()->thread())
+        if (context.template capability<were_capability_thread>()->thread() == source.template capability<were_capability_thread>()->thread())
             call__ = std::function<void (Args...)>(call);
         else
             call__ = make_queued_call(std::function<void (Args...)>(call), context);
@@ -88,14 +86,24 @@ namespace were
     };
 
     template <typename SourceType, typename SignalType, typename ...Args>
-    static void emit(   were_pointer<SourceType> source,
-                        SignalType signal,
-                        Args... args)
+    void emit(  were_pointer<SourceType> source,
+                SignalType signal,
+                Args... args)
     {
         auto signal__ = &((source.access())->*signal);
         signal__->emit(args...);
     }
 
-}
+    template <typename FirstType, typename SecondType>
+    void link(were_pointer<FirstType> first, were_pointer<SecondType> second)
+    {
+        were::connect(second, &were_capability_collapse::destroyed, first, [first]()
+        {
+            first->collapse();
+        });
+    }
+
+
+} // namespace were
 
 #endif // WERE_CONNECT_H

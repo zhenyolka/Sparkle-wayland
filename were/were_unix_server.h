@@ -5,10 +5,10 @@
 #include <string>
 
 
+class were_fd;
 class were_unix_socket;
 
-
-class were_unix_server : virtual public were_object, public were_thread_fd_listener
+class were_unix_server : virtual public were_object
 {
 public:
     ~were_unix_server();
@@ -24,8 +24,8 @@ private:
     void event(uint32_t events);
 
 private:
-    int fd_;
     std::string path_;
+    were_pointer<were_fd> fd_;
 };
 
 #endif // WERE_UNIX_SERVER_H

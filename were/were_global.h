@@ -3,6 +3,7 @@
 
 #include "were_registry.h"
 #include "were_connect.h"
+#include "were_capability_collapse.h"
 
 
 template <typename T>
@@ -22,7 +23,7 @@ void global_set(const were_pointer<T> &v)
 {
     were_registry<were_pointer<T>>::set(v);
 
-    were::connect(v, &were_object::destroyed, v, []()
+    were::connect(v, &were_capability_collapse::destroyed, v, []()
     {
         global_clear<T>();
     });
@@ -45,7 +46,7 @@ void t_l_global_set(const were_pointer<T> &v)
 {
     were_t_l_registry<were_pointer<T>>::set(v);
 
-    were::connect(v, &were_object::destroyed, v, []()
+    were::connect(v, &were_capability_collapse::destroyed, v, []()
     {
         t_l_global_clear<T>();
     });

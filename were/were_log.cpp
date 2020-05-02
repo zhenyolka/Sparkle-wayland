@@ -1,4 +1,5 @@
 #include "were_log.h"
+#include "were_fd.h"
 #include <unistd.h>
 #include <cstdio>
 #include <cstdarg>
@@ -9,8 +10,6 @@
 
 were_log::~were_log()
 {
-    if (fd_ != -1)
-        close(fd_);
     if (stdout1_ != -1)
     {
         dup2(stdout1_, fileno(stdout));
@@ -24,7 +23,7 @@ were_log::~were_log()
 }
 
 were_log::were_log() :
-    fd_(-1), stdout1_(-1), stderr1_(-1)
+    stdout1_(-1), stderr1_(-1)
 {
 }
 
@@ -45,17 +44,13 @@ void were_log::capture_stdout()
 
     close(pipe_fd[1]);
 
-    fd_ = pipe_fd[0];
+    int fd__ = pipe_fd[0];
 
     setvbuf(stdout, NULL, _IOLBF, 0);
     setvbuf(stderr, NULL, _IOLBF, 0);
 
-
-    thread()->add_fd_listener(fd_, EPOLLIN /* | EPOLLET */, this_wop);
-    were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
-    {
-        this_wop->thread()->remove_fd_listener(this_wop->fd_, this_wop);
-    });
+    were_pointer<were_fd> fd(new were_fd(fd__, EPOLLIN));
+    were::connect(fd, &were_fd::event, this_wop, [this_wop, fd](uint32_t events){ this_wop->event(fd, events); });
 }
 
 void were_log::enable_stdout()
@@ -87,7 +82,7 @@ void were_log::enable_file(const std::string &path)
     });
 }
 
-void were_log::event(uint32_t events)
+void were_log::event(were_pointer<were_fd> fd, uint32_t events)
 {
     auto this_wop = were_pointer(this);
 
@@ -95,7 +90,7 @@ void were_log::event(uint32_t events)
     {
         std::vector<char> buffer;
         buffer.resize(512);
-        int n = read(fd_, buffer.data(), buffer.size());
+        int n = fd->read(buffer.data(), buffer.size());
         if (n > 0)
         {
             buffer.resize(n);

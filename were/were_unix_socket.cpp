@@ -1,35 +1,28 @@
 #include "were_unix_socket.h"
 #include "were_exception.h"
+#include "were_fd.h"
 #include "were1_unix_socket.h"
 
 
 were_unix_socket::~were_unix_socket()
 {
+    fd_->collapse();
 }
 
-were_unix_socket::were_unix_socket(int fd)
+were_unix_socket::were_unix_socket(int fd) :
+    fd_(new were_fd(fd, EPOLLIN | EPOLLET))
 {
     auto this_wop = were_pointer(this);
 
-    fd_ = fd;
-    thread()->add_fd_listener(fd_, EPOLLIN | EPOLLET, this_wop);
-
-    were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
-    {
-        this_wop->disconnect();
-    });
+    were::connect(fd_, &were_fd::event, this_wop, [this_wop](uint32_t events){ this_wop->event(events); });
 }
 
 void were_unix_socket::disconnect()
 {
-    if (fd_ == -1)
-        return;
-
     auto this_wop = were_pointer(this);
 
-    thread()->remove_fd_listener(fd_, this_wop);
-    were1_unix_socket_destroy(fd_);
-    fd_ = -1;
+    fd_->disable();
+    were1_unix_socket_destroy(fd_->fd());
 }
 
 void were_unix_socket::event(uint32_t events)
@@ -53,10 +46,10 @@ void were_unix_socket::event(uint32_t events)
 
 bool were_unix_socket::send_all(const char *data, int size)
 {
-    if (fd_ == -1)
+    if (fd_->fd() == -1)
         return false;
 
-    if (were1_unix_socket_send_all(fd_, data, size) == -1)
+    if (were1_unix_socket_send_all(fd_->fd(), data, size) == -1)
         return false;
 
     return true;
@@ -64,10 +57,10 @@ bool were_unix_socket::send_all(const char *data, int size)
 
 bool were_unix_socket::receive_all(char *data, int size)
 {
-    if (fd_ == -1)
+    if (fd_->fd() == -1)
         return false;
 
-    if (were1_unix_socket_receive_all(fd_, data, size) == -1)
+    if (were1_unix_socket_receive_all(fd_->fd(), data, size) == -1)
         return false;
 
     return true;
@@ -75,10 +68,10 @@ bool were_unix_socket::receive_all(char *data, int size)
 
 bool were_unix_socket::send_fds(const int *fds, int n)
 {
-    if (fd_ == -1)
+    if (fd_->fd() == -1)
         return false;
 
-    if (were1_unix_socket_send_fds(fd_, fds, n) == -1)
+    if (were1_unix_socket_send_fds(fd_->fd(), fds, n) == -1)
         return false;
 
     return true;
@@ -86,10 +79,10 @@ bool were_unix_socket::send_fds(const int *fds, int n)
 
 bool were_unix_socket::receive_fds(int *fds, int n)
 {
-    if (fd_ == -1)
+    if (fd_->fd() == -1)
         return false;
 
-    if (were1_unix_socket_receive_fds(fd_, fds, n) == -1)
+    if (were1_unix_socket_receive_fds(fd_->fd(), fds, n) == -1)
         return false;
 
     return true;
@@ -97,15 +90,15 @@ bool were_unix_socket::receive_fds(int *fds, int n)
 
 int were_unix_socket::bytes_available() const
 {
-    if (fd_ == -1)
+    if (fd_->fd() == -1)
         return 0;
 
-    int bytes = were1_unix_socket_bytes_available(fd_);
+    int bytes = were1_unix_socket_bytes_available(fd_->fd());
 
     return bytes;
 }
 
 bool were_unix_socket::connected() const
 {
-    return fd_ != -1;
+    return fd_->fd() != -1;
 }

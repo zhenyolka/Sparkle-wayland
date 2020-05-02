@@ -3,8 +3,9 @@
 
 #include "were.h"
 
+class were_fd;
 
-class were_timer : virtual public were_object, public were_thread_fd_listener
+class were_timer : virtual public were_object
 {
 public:
     ~were_timer();
@@ -22,7 +23,7 @@ private:
 private:
     int interval_;
     bool single_shot_;
-    int fd_;
+    were_pointer<were_fd> fd_;
 };
 
 #endif // WERE_TIMER_H

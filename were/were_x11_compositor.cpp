@@ -1,4 +1,5 @@
 #include "were_x11_compositor.h"
+#include "were_fd.h"
 #include "were_surface_producer.h"
 #include "were_x11_surface.h"
 #include "were_surface.h"
@@ -19,13 +20,12 @@ were_x11_compositor::were_x11_compositor() :
         were1_xcb_display_close(display);
     });
 
-    int fd = were1_xcb_display_fd(display_->get());
+    int fd__ = were1_xcb_display_fd(display_->get());
 
-    thread()->add_fd_listener(fd, EPOLLIN | EPOLLET, this_wop);
-    were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop, fd]()
-    {
-        this_wop->thread()->remove_fd_listener(fd, this_wop);
-    });
+    were_pointer<were_fd> fd(new were_fd(fd__, EPOLLIN | EPOLLET));
+    were::link(fd, this_wop);
+
+    were::connect(fd, &were_fd::event, this_wop, [this_wop](uint32_t events){ this_wop->event(events); });
 }
 
 void were_x11_compositor::register_producer(were_pointer<were_surface_producer> producer)
@@ -35,7 +35,7 @@ void were_x11_compositor::register_producer(were_pointer<were_surface_producer> 
     were::connect(producer, &were_surface_producer::surface_created, this_wop, [this_wop](were_pointer<were_surface> surface)
     {
         were_pointer<were_x11_surface> x11_surface(new were_x11_surface(this_wop, surface));
-        x11_surface->link(surface);
+        were::link(x11_surface, surface);
     });
 }
 

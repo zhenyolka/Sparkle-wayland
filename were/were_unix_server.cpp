@@ -1,5 +1,6 @@
 #include "were_unix_server.h"
 #include "were_exception.h"
+#include "were_fd.h"
 #include "were1_unix_socket.h"
 #include "were_unix_socket.h"
 
@@ -7,23 +8,17 @@
 
 were_unix_server::~were_unix_server()
 {
-    were1_unix_server_destroy(path_.c_str(), fd_);
+    were1_unix_server_destroy(path_.c_str(), fd_->fd());
+    fd_->collapse();
 }
 
 were_unix_server::were_unix_server(const std::string &path) :
-    path_(path)
+    path_(path),
+    fd_(new were_fd(were1_unix_server_create(path_.c_str()), EPOLLIN))
 {
     auto this_wop = were_pointer(this);
 
-    fd_ = were1_unix_server_create(path_.c_str());
-    if (fd_ == -1)
-        throw were_exception(WE_SIMPLE);
-
-    thread()->add_fd_listener(fd_, EPOLLIN /* | EPOLLET */, this_wop);
-    were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
-    {
-        this_wop->thread()->remove_fd_listener(this_wop->fd_, this_wop);
-    });
+    were::connect(fd_, &were_fd::event, this_wop, [this_wop](uint32_t events){ this_wop->event(events); });
 }
 
 void were_unix_server::event(uint32_t events)
@@ -38,7 +33,7 @@ void were_unix_server::event(uint32_t events)
 
 were_pointer<were_unix_socket> were_unix_server::accept()
 {
-    int fd = were1_unix_server_accept(fd_);
+    int fd = were1_unix_server_accept(fd_->fd());
     if (fd == -1)
         throw were_exception(WE_SIMPLE);
 
@@ -49,5 +44,5 @@ were_pointer<were_unix_socket> were_unix_server::accept()
 
 void were_unix_server::reject()
 {
-    were1_unix_server_reject(fd_);
+    were1_unix_server_reject(fd_->fd());
 }

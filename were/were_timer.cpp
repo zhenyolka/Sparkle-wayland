@@ -1,29 +1,22 @@
 #include "were_timer.h"
 #include "were_exception.h"
+#include "were_fd.h"
 #include <unistd.h>
 #include <sys/timerfd.h>
 
 
 were_timer::~were_timer()
 {
-    //thread()->remove_fd_listener(fd_);
-    close(fd_);
+    fd_->collapse();
 }
 
 were_timer::were_timer(int interval, bool single_shot) :
-    interval_(interval), single_shot_(single_shot)
+    interval_(interval), single_shot_(single_shot),
+    fd_(new were_fd(timerfd_create(CLOCK_MONOTONIC, 0), EPOLLIN | EPOLLET))
 {
     auto this_wop = were_pointer(this);
 
-    fd_ = timerfd_create(CLOCK_MONOTONIC, 0);
-    if (fd_ == -1)
-        throw were_exception(WE_SIMPLE);
-
-    thread()->add_fd_listener(fd_, EPOLLIN | EPOLLET, this_wop);
-    were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
-    {
-        this_wop->thread()->remove_fd_listener(this_wop->fd_, this_wop);
-    });
+    were::connect(fd_, &were_fd::event, this_wop, [this_wop](uint32_t events){ this_wop->event(events); });
 }
 
 void were_timer::start()
@@ -44,7 +37,7 @@ void were_timer::start()
         new_value.it_interval.tv_nsec = (interval_ % 1000) * 1000000;
     }
 
-    if (timerfd_settime(fd_, 0, &new_value, NULL) == -1)
+    if (timerfd_settime(fd_->fd(), 0, &new_value, NULL) == -1)
         throw were_exception(WE_SIMPLE);
 }
 
@@ -57,7 +50,7 @@ void were_timer::stop()
     new_value.it_interval.tv_sec = 0;
     new_value.it_interval.tv_nsec = 0;
 
-    if (timerfd_settime(fd_, 0, &new_value, NULL) == -1)
+    if (timerfd_settime(fd_->fd(), 0, &new_value, NULL) == -1)
         throw were_exception(WE_SIMPLE);
 }
 
@@ -69,7 +62,7 @@ void were_timer::event(uint32_t events)
     {
         uint64_t expirations;
 
-        if (read(fd_, &expirations, sizeof(uint64_t)) != sizeof(uint64_t))
+        if (fd_->read(&expirations, sizeof(uint64_t)) != sizeof(uint64_t))
             throw were_exception(WE_SIMPLE);
 
         were::emit(this_wop, &were_timer::timeout);

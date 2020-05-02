@@ -3,8 +3,9 @@
 
 #include "were.h"
 
+class were_fd;
 
-class were_signal_handler : virtual public were_object, public were_thread_fd_listener
+class were_signal_handler : virtual public were_object
 {
 public:
     ~were_signal_handler();
@@ -17,7 +18,7 @@ private:
     void event(uint32_t events);
 
 private:
-    int fd_;
+    were_pointer<were_fd> fd_;
 };
 
 #endif // WERE_SIGNAL_HANDLER_H

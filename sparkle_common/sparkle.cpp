@@ -1,5 +1,6 @@
 #include "sparkle.h"
 
+#include "were_fd.h"
 #include "sparkle_global.h"
 #include "sparkle_output.h"
 #include "sparkle_compositor.h"
@@ -64,17 +65,17 @@ sparkle::sparkle(const std::string &home_dir) :
 
 
     struct wl_event_loop *loop = wl_display_get_event_loop(display_->get());
-    int fd = wl_event_loop_get_fd(loop);
-    thread()->add_fd_listener(fd, EPOLLIN | EPOLLET, this_wop);
-    thread()->add_idle_handler(this_wop);
+    int fd__ = wl_event_loop_get_fd(loop);
+
+    were_pointer<were_fd> fd(new were_fd(fd__, EPOLLIN | EPOLLET));
+    were::link(fd, this_wop);
+
+    were::connect(fd, &were_fd::event, this_wop, [this_wop](uint32_t events){ this_wop->event(events); });
+    were::connect(thread(), &were_thread::idle, this_wop, [this_wop](){ this_wop->idle(); });
+
 
     were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
     {
-        struct wl_event_loop *loop = wl_display_get_event_loop(this_wop->display_->get());
-        int fd = wl_event_loop_get_fd(loop);
-        this_wop->thread()->remove_fd_listener(fd, this_wop);
-        this_wop->thread()->remove_idle_handler(this_wop);
-
         wl_display_destroy_clients(this_wop->display_->get()); // XXX2
     });
 

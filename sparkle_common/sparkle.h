@@ -23,7 +23,7 @@ class sparkle_pointer;
 class sparkle_touch;
 
 
-class sparkle : virtual public were_object, public were_thread_fd_listener, public were_thread_idle_handler
+class sparkle : virtual public were_object
 {
 public:
     ~sparkle();

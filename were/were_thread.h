@@ -4,30 +4,22 @@
 #include "were_pointer.h"
 #include "were_capability_thread.h"
 #include "were_registry.h"
+#include "were_handler.h"
+#include "were_connect.h"
 #include <cstdint>
 #include <sys/epoll.h> // XXX3
-#include <set>
 #include <functional>
-#include <queue>
-#include <mutex>
 #include <atomic>
 
 
-class were_thread_fd_listener : virtual public were_capability_rc, virtual public were_capability_thread
-{
-    friend class were_thread;
-private:
-    virtual void event(uint32_t events) = 0;
-};
 
-class were_thread_idle_handler : virtual public were_capability_rc, virtual public were_capability_thread
-{
-    friend class were_thread;
-private:
-    virtual void idle() = 0;
-};
+class were_fd;
+class were_handler;
 
-class were_thread : virtual public were_capability_rc, virtual public were_capability_thread, public were_thread_fd_listener
+class were_thread : virtual public were_capability_rc,
+                    virtual public were_capability_thread,
+                    virtual public were_capability_collapse,
+                    virtual public were_capability_debug
 {
 public:
     virtual ~were_thread();
@@ -35,21 +27,23 @@ public:
 
     int fd() const { return epoll_fd_; }
 
-    void add_fd_listener(int fd, uint32_t events, were_pointer<were_thread_fd_listener> listener);
-    void remove_fd_listener(int fd, were_pointer<were_thread_fd_listener> listener);
-    void add_idle_handler(were_pointer<were_thread_idle_handler> handler);
-    void remove_idle_handler(were_pointer<were_thread_idle_handler> handler);
+    void register_fd(were_pointer<were_fd> fd);
+    void unregister_fd(were_pointer<were_fd> fd);
 
     void process_events(int timeout = -1);
-    void process_idle();
-    void process_queue();
 
     void run();
     void run_once();
     void run_for(int ms);
 
     bool collapsed() const { return collapsed_; }
-    void collapse() { collapsed_ = true; }
+    void collapse()
+    {
+        auto this_wop = were_pointer(this);
+
+        were::emit(this_wop, &were_object::destroyed);
+        collapsed_ = true;
+    }
     void reference() override { reference_count_++; }
     void unreference() override
     {
@@ -60,24 +54,24 @@ public:
     }
     int reference_count() const override { return reference_count_.load(); }
     were_pointer<were_thread> thread() const override;
-    void post(const std::function<void ()> &call) override;
+
     void exit() { exit_ = true; }
 
-private:
-    void add_fd_listener_(int fd, uint32_t events, were_thread_fd_listener *listener);
-    void remove_fd_listener_(int fd);
-    void event(uint32_t events) override;
+    were_pointer<were_handler> handler() const { return handler_.value(); }
+    void set_handler(were_pointer<were_handler> handler) { handler_ = handler; }
+
+    std::string dump() const override;
+
+signals:
+    were_signal<void ()> idle;
+
 
 private:
     std::atomic<int> reference_count_;
     bool collapsed_;
     int epoll_fd_;
-    std::set< were_pointer<were_thread_idle_handler> > idle_handlers_;
-    //std::mutex idle_handlers_mutex_;
-    int event_fd_;
-    std::queue< std::function<void ()> > call_queue_;
-    std::mutex call_queue_mutex_;
     bool exit_;
+    std::optional<were_pointer<were_handler>> handler_;
 };
 
 #endif // WERE_THREAD_H

@@ -4,8 +4,9 @@
 #include "were.h"
 #include <string>
 
+class were_fd;
 
-class were_unix_socket : virtual public were_object, public were_thread_fd_listener
+class were_unix_socket : virtual public were_object
 {
 public:
     ~were_unix_socket();
@@ -29,7 +30,7 @@ private:
     void event(uint32_t events);
 
 private:
-    int fd_;
+    were_pointer<were_fd> fd_;
 };
 
 #endif // WERE_UNIX_SOCKET_H

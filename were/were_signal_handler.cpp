@@ -1,8 +1,25 @@
 #include "were_signal_handler.h"
 #include "were_exception.h"
+#include "were_fd.h"
 #include <unistd.h>
 #include <csignal>
 #include <sys/signalfd.h>
+
+static were_fd *create_fd()
+{
+    sigset_t mask;
+    sigemptyset(&mask);
+    //sigaddset(&mask, SIGTERM);
+    sigaddset(&mask, SIGINT);
+    sigprocmask(SIG_BLOCK, &mask, NULL);
+    fprintf(stdout, "SIGINT blocked\n");
+
+    int fd__ = signalfd(-1, &mask, 0);
+    if (fd__ == -1)
+        throw were_exception(WE_SIMPLE);
+
+    return new were_fd(fd__, EPOLLIN | EPOLLET);
+}
 
 were_signal_handler::~were_signal_handler()
 {
@@ -15,29 +32,15 @@ were_signal_handler::~were_signal_handler()
     sigprocmask(SIG_UNBLOCK, &mask, NULL);
     fprintf(stdout, "SIGINT unblocked\n");
 
-    close(fd_);
+    fd_->collapse();
 }
 
-were_signal_handler::were_signal_handler()
+were_signal_handler::were_signal_handler() :
+    fd_(create_fd())
 {
     auto this_wop = were_pointer(this);
 
-    sigset_t mask;
-    sigemptyset(&mask);
-    //sigaddset(&mask, SIGTERM);
-    sigaddset(&mask, SIGINT);
-    sigprocmask(SIG_BLOCK, &mask, NULL);
-    fprintf(stdout, "SIGINT blocked\n");
-
-    fd_ = signalfd(-1, &mask, 0);
-    if (fd_ == -1)
-        throw were_exception(WE_SIMPLE);
-
-    thread()->add_fd_listener(fd_, EPOLLIN | EPOLLET, this_wop);
-    were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
-    {
-        this_wop->thread()->remove_fd_listener(this_wop->fd_, this_wop);
-    });
+    were::connect(fd_, &were_fd::event, this_wop, [this_wop](uint32_t events){ this_wop->event(events); });
 }
 
 void were_signal_handler::event(uint32_t events)
@@ -48,7 +51,7 @@ void were_signal_handler::event(uint32_t events)
     {
         struct signalfd_siginfo si;
 
-        if (read(fd_, &si, sizeof(struct signalfd_siginfo)) != sizeof(struct signalfd_siginfo))
+        if (fd_->read(&si, sizeof(struct signalfd_siginfo)) != sizeof(struct signalfd_siginfo))
             throw were_exception(WE_SIMPLE);
 
         were::emit(this_wop, &were_signal_handler::signal, si.ssi_signo);

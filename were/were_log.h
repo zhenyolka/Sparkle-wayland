@@ -3,8 +3,9 @@
 
 #include "were.h"
 
+class were_fd;
 
-class were_log : virtual public were_object, public were_thread_fd_listener
+class were_log : virtual public were_object
 {
 public:
     ~were_log();
@@ -21,10 +22,9 @@ signals:
     were_signal<void (std::vector<char> text)> text;
 
 private:
-    void event(uint32_t events);
+    void event(were_pointer<were_fd> fd, uint32_t events);
 
 private:
-    int fd_;
     int stdout1_;
     int stderr1_;
 };

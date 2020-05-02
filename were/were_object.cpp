@@ -22,29 +22,24 @@ void were_object::collapse()
     collapsed_ = true;
 }
 
+void were_object::reference()
+{
+    reference_count_++;
+}
+
+void were_object::unreference()
+{
+    if (reference_count_ == 1 && collapsed_)
+    {
+        thread()->handler()->post([this](){ delete this; });
+    }
+    else
+        reference_count_--;
+}
+
 were_pointer<were_thread> were_object::thread() const
 {
     return thread_;
-}
-
-//bool were_object::sentinel() const
-//{
-//    return were_t_l_registry<were_pointer<were_thread>>::get() == thread_;
-//}
-
-void were_object::post(const std::function<void ()> &call)
-{
-    thread()->post(call);
-}
-
-void were_object::link(were_pointer<were_object> other)
-{
-    auto this_wop = were_pointer(this);
-
-    were::connect(other, &were_object::destroyed, this_wop, [this_wop]() mutable
-    {
-        this_wop->collapse();
-    });
 }
 
 std::string were_object::dump() const
