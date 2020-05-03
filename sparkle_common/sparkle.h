@@ -60,10 +60,6 @@ signals:
     were_signal<void (were_pointer<sparkle_touch> touch)> touch_created;
 
 private:
-    void event(uint32_t events);
-    void idle();
-
-private:
     were_pointer<sparkle_display> display_;
     were_pointer<sparkle_global<sparkle_output>> output_;
     were_pointer<sparkle_global<sparkle_compositor>> compositor_;

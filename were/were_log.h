@@ -25,8 +25,8 @@ private:
     void event(were_pointer<were_fd> fd, uint32_t events);
 
 private:
-    int stdout1_;
-    int stderr1_;
+    int original_stdout_;
+    int original_stderr_;
 };
 
 void log(const char *format, ...);

@@ -18,9 +18,6 @@ signals:
     were_signal<void ()> timeout;
 
 private:
-    void event(uint32_t events);
-
-private:
     int interval_;
     bool single_shot_;
     were_pointer<were_fd> fd_;

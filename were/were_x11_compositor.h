@@ -24,7 +24,6 @@ signals:
 
 private:
     static void handler(xcb_generic_event_t *event, void *user);
-    void event(uint32_t events);
 
 private:
     were_pointer<x11_display> display_;

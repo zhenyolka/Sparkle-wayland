@@ -36,10 +36,9 @@ error:
     return -1;
 }
 
-void were1_unix_server_destroy(const char *path, int fd)
+void were1_unix_server_shutdown(const char *path, int fd)
 {
     shutdown(fd, SHUT_RDWR);
-    close(fd);
     unlink(path);
 }
 
@@ -79,10 +78,9 @@ error:
     return -1;
 }
 
-void were1_unix_socket_destroy(int fd)
+void were1_unix_socket_shutdown(int fd)
 {
     shutdown(fd, SHUT_RDWR);
-    close(fd);
 }
 
 int were1_unix_socket_send_all(int fd, const void *buffer, size_t length)

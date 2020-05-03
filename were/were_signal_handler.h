@@ -15,9 +15,6 @@ signals:
     were_signal<void (uint32_t number)> signal;
 
 private:
-    void event(uint32_t events);
-
-private:
     were_pointer<were_fd> fd_;
 };
 

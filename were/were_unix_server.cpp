@@ -5,10 +5,10 @@
 #include "were_unix_socket.h"
 
 
-
 were_unix_server::~were_unix_server()
 {
-    were1_unix_server_destroy(path_.c_str(), fd_->fd());
+    were1_unix_server_shutdown(path_.c_str(), fd_->fd());
+
     fd_->collapse();
 }
 
@@ -18,17 +18,13 @@ were_unix_server::were_unix_server(const std::string &path) :
 {
     auto this_wop = were_pointer(this);
 
-    were::connect(fd_, &were_fd::event, this_wop, [this_wop](uint32_t events){ this_wop->event(events); });
-}
-
-void were_unix_server::event(uint32_t events)
-{
-    auto this_wop = were_pointer(this);
-
-    if (events == EPOLLIN)
-        were::emit(this_wop, &were_unix_server::new_connection);
-    else
-        throw were_exception(WE_SIMPLE);
+    were::connect(fd_, &were_fd::event, this_wop, [this_wop](uint32_t events)
+    {
+        if (events == EPOLLIN)
+            were::emit(this_wop, &were_unix_server::new_connection);
+        else
+            throw were_exception(WE_SIMPLE);
+    });
 }
 
 were_pointer<were_unix_socket> were_unix_server::accept()

@@ -25,7 +25,10 @@ were_x11_compositor::were_x11_compositor() :
     were_pointer<were_fd> fd(new were_fd(fd__, EPOLLIN | EPOLLET));
     were::link(fd, this_wop);
 
-    were::connect(fd, &were_fd::event, this_wop, [this_wop](uint32_t events){ this_wop->event(events); });
+    were::connect(fd, &were_fd::event, this_wop, [this_wop](uint32_t events)
+    {
+        were1_xcb_display_get_events(this_wop->display_->get(), &were_x11_compositor::handler, this_wop.access());
+    });
 }
 
 void were_x11_compositor::register_producer(were_pointer<were_surface_producer> producer)
@@ -45,9 +48,4 @@ void were_x11_compositor::handler(xcb_generic_event_t *event, void *user)
     were_pointer<were_x11_compositor> instance__(instance);
 
     were::emit(instance__, &were_x11_compositor::event1, event);
-}
-
-void were_x11_compositor::event(uint32_t events)
-{
-    were1_xcb_display_get_events(display_->get(), &were_x11_compositor::handler, this);
 }

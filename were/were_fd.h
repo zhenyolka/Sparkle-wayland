@@ -14,10 +14,9 @@ public:
 
     int fd() const { return fd_; }
     uint32_t events() const { return events_; }
+    bool is_open() const { return fd_ != -1; }
 
-    void enable();
-    void disable();
-
+    void close();
     ssize_t read(void *buffer, size_t count);
     ssize_t write(const void *buffer, size_t count);
 

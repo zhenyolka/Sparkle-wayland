@@ -27,7 +27,7 @@ were_android_application::were_android_application(JNIEnv *env, jobject instance
     home_dir_ = call_string_method("home_dir", "()Ljava/lang/String;");
 
     were_pointer<were_log> logger(new were_log());
-    logger->link(this_wop);
+    were::link(logger, this_wop);
     logger->capture_stdout();
     logger->enable_file(files_dir_ + "/log.txt");
     global_set<were_log>(logger);
@@ -37,7 +37,7 @@ were_android_application::were_android_application(JNIEnv *env, jobject instance
 
 
     were_pointer<sparkle_settings> settings(new sparkle_settings(files_dir_ + "/sparkle.config"));
-    settings->link(this_wop);
+    were::link(settings, this_wop);
     settings->load();
     global_set<sparkle_settings>(settings);
 }
@@ -117,14 +117,17 @@ Java_com_sion_sparkle_WereApplication_native_1create(JNIEnv *env, jobject instan
     were_registry<were_debug *>::set(debug);
     debug->start();
 
-    were_t_l_registry<were_pointer<were_thread>>::set(
-        were_pointer<were_thread>(new were_thread()));
+    were_pointer<were_thread> thread(new were_thread());
+    t_l_global_set<were_thread>(thread);
+
+    were_pointer<were_handler> handler(new were_handler());
+    thread->set_handler(handler);
 
     were_pointer<were_android_application> native__(new were_android_application(env, instance));
     native__.increment_reference_count();
 
-    native__->enable_native_loop(dup(t_l_global<were_thread>()->fd()));
-    t_l_global<were_thread>()->process_queue();
+    native__->enable_native_loop(dup(thread->fd()));
+    thread->handler()->process_queue();
 
     global_set<were_android_application>(native__);
 
@@ -155,5 +158,5 @@ Java_com_sion_sparkle_WereApplication_native_1loop_1fd_1event(JNIEnv *env, jobje
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_WereApplication_native_1loop_1idle_1event(JNIEnv *env, jobject instance, jlong user)
 {
-    t_l_global<were_thread>()->process_idle();
+    were::emit(t_l_global<were_thread>(), &were_thread::idle);
 }

@@ -153,7 +153,7 @@ void sparkle_player::callback()
     check();
 
 #if UNSAFE
-    post([this_wop]()
+    thread()->handler()->post([this_wop]()
     {
         were::emit(this_wop, &sparkle_player::played);
     });

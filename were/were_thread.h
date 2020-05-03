@@ -36,8 +36,8 @@ public:
     void run_once();
     void run_for(int ms);
 
-    bool collapsed() const { return collapsed_; }
-    void collapse()
+    bool collapsed() const override { return collapsed_; }
+    void collapse() override
     {
         auto this_wop = were_pointer(this);
 

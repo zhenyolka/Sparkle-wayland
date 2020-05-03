@@ -27,9 +27,6 @@ signals:
     were_signal<void ()> disconnected;
 
 private:
-    void event(uint32_t events);
-
-private:
     were_pointer<were_fd> fd_;
 };
 

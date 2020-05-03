@@ -70,9 +70,17 @@ sparkle::sparkle(const std::string &home_dir) :
     were_pointer<were_fd> fd(new were_fd(fd__, EPOLLIN | EPOLLET));
     were::link(fd, this_wop);
 
-    were::connect(fd, &were_fd::event, this_wop, [this_wop](uint32_t events){ this_wop->event(events); });
-    were::connect(thread(), &were_thread::idle, this_wop, [this_wop](){ this_wop->idle(); });
+    were::connect(fd, &were_fd::event, this_wop, [this_wop](uint32_t events)
+    {
+        struct wl_event_loop *loop = wl_display_get_event_loop(this_wop->display_->get());
+        wl_display_flush_clients(this_wop->display_->get());
+        wl_event_loop_dispatch(loop, 0);
+    });
 
+    were::connect(thread(), &were_thread::idle, this_wop, [this_wop]()
+    {
+        wl_display_flush_clients(this_wop->display_->get());
+    });
 
     were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
     {
@@ -205,16 +213,4 @@ were_pointer<sparkle_global<sparkle_seat>> sparkle::seat() const
 were_pointer<sparkle_global<sparkle_shell>> sparkle::shell() const
 {
     return shell_;
-}
-
-void sparkle::event(uint32_t events)
-{
-    struct wl_event_loop *loop = wl_display_get_event_loop(display_->get());
-    wl_display_flush_clients(display_->get());
-    wl_event_loop_dispatch(loop, 0);
-}
-
-void sparkle::idle()
-{
-    wl_display_flush_clients(display_->get());
 }

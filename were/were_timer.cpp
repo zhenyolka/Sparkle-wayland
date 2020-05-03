@@ -16,7 +16,20 @@ were_timer::were_timer(int interval, bool single_shot) :
 {
     auto this_wop = were_pointer(this);
 
-    were::connect(fd_, &were_fd::event, this_wop, [this_wop](uint32_t events){ this_wop->event(events); });
+    were::connect(fd_, &were_fd::event, this_wop, [this_wop](uint32_t events)
+    {
+        if (events == EPOLLIN)
+        {
+            uint64_t expirations;
+
+            if (this_wop->fd_->read(&expirations, sizeof(uint64_t)) != sizeof(uint64_t))
+                throw were_exception(WE_SIMPLE);
+
+            were::emit(this_wop, &were_timer::timeout);
+        }
+        else
+            throw were_exception(WE_SIMPLE);
+    });
 }
 
 void were_timer::start()
@@ -51,22 +64,5 @@ void were_timer::stop()
     new_value.it_interval.tv_nsec = 0;
 
     if (timerfd_settime(fd_->fd(), 0, &new_value, NULL) == -1)
-        throw were_exception(WE_SIMPLE);
-}
-
-void were_timer::event(uint32_t events)
-{
-    auto this_wop = were_pointer(this);
-
-    if (events == EPOLLIN)
-    {
-        uint64_t expirations;
-
-        if (fd_->read(&expirations, sizeof(uint64_t)) != sizeof(uint64_t))
-            throw were_exception(WE_SIMPLE);
-
-        were::emit(this_wop, &were_timer::timeout);
-    }
-    else
         throw were_exception(WE_SIMPLE);
 }

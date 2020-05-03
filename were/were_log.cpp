@@ -10,21 +10,14 @@
 
 were_log::~were_log()
 {
-    if (stdout1_ != -1)
-    {
-        dup2(stdout1_, fileno(stdout));
-        close(stdout1_);
-    }
-    if (stderr1_ != -1)
-    {
-        dup2(stderr1_, fileno(stderr));
-        close(stderr1_);
-    }
+    close(original_stdout_);
+    close(original_stderr_);
 }
 
-were_log::were_log() :
-    stdout1_(-1), stderr1_(-1)
+were_log::were_log()
 {
+    original_stdout_ = dup(fileno(stdout));
+    original_stderr_ = dup(fileno(stderr));
 }
 
 void were_log::capture_stdout()
@@ -35,9 +28,6 @@ void were_log::capture_stdout()
 
     if (pipe(pipe_fd) == -1)
         return;
-
-    stdout1_ = dup(fileno(stdout));
-    stderr1_ = dup(fileno(stderr));
 
     dup2(pipe_fd[1], fileno(stdout));
     dup2(pipe_fd[1], fileno(stderr));
@@ -51,6 +41,7 @@ void were_log::capture_stdout()
 
     were_pointer<were_fd> fd(new were_fd(fd__, EPOLLIN));
     were::connect(fd, &were_fd::event, this_wop, [this_wop, fd](uint32_t events){ this_wop->event(fd, events); });
+    were::link(fd, this_wop);
 }
 
 void were_log::enable_stdout()
@@ -59,7 +50,7 @@ void were_log::enable_stdout()
 
     were::connect(this_wop, &were_log::text, this_wop, [this_wop](std::vector<char> text)
     {
-        write(this_wop->stdout1_, text.data(), text.size());
+        write(this_wop->original_stdout_, text.data(), text.size());
     });
 }
 

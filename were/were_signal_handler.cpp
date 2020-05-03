@@ -23,8 +23,6 @@ static were_fd *create_fd()
 
 were_signal_handler::~were_signal_handler()
 {
-    //thread()->remove_fd_listener(fd_);
-
     sigset_t mask;
     sigemptyset(&mask);
     //sigaddset(&mask, SIGTERM);
@@ -40,22 +38,18 @@ were_signal_handler::were_signal_handler() :
 {
     auto this_wop = were_pointer(this);
 
-    were::connect(fd_, &were_fd::event, this_wop, [this_wop](uint32_t events){ this_wop->event(events); });
-}
-
-void were_signal_handler::event(uint32_t events)
-{
-    auto this_wop = were_pointer(this);
-
-    if (events == EPOLLIN)
+    were::connect(fd_, &were_fd::event, this_wop, [this_wop](uint32_t events)
     {
-        struct signalfd_siginfo si;
+        if (events == EPOLLIN)
+        {
+            struct signalfd_siginfo si;
 
-        if (fd_->read(&si, sizeof(struct signalfd_siginfo)) != sizeof(struct signalfd_siginfo))
+            if (this_wop->fd_->read(&si, sizeof(struct signalfd_siginfo)) != sizeof(struct signalfd_siginfo))
+                throw were_exception(WE_SIMPLE);
+
+            were::emit(this_wop, &were_signal_handler::signal, si.ssi_signo);
+        }
+        else
             throw were_exception(WE_SIMPLE);
-
-        were::emit(this_wop, &were_signal_handler::signal, si.ssi_signo);
-    }
-    else
-        throw were_exception(WE_SIMPLE);
+    });
 }

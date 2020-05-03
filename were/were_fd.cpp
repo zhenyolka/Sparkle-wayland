@@ -6,7 +6,7 @@
 
 were_fd::~were_fd()
 {
-    close(fd_);
+    close();
 }
 
 were_fd::were_fd(int fd, uint32_t events) :
@@ -17,35 +17,28 @@ were_fd::were_fd(int fd, uint32_t events) :
     if (fd_ == -1)
         throw were_exception(WE_SIMPLE);
 
-    enable();
-}
-
-void were_fd::enable()
-{
-    auto this_wop = were_pointer(this);
-
-    if (events() != 0)
+    if (events_ != 0)
     {
         thread()->register_fd(this_wop);
         were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
         {
-            this_wop->disable(); // XXX1 check enabled
+            this_wop->close();
         });
     }
 }
 
-void were_fd::disable()
+void were_fd::close()
 {
     auto this_wop = were_pointer(this);
+
+    if (fd_ == -1)
+        return;
 
     thread()->unregister_fd(this_wop);
-}
 
-void were_fd::event_(uint32_t events)
-{
-    auto this_wop = were_pointer(this);
+    ::close(fd_);
 
-    were::emit(this_wop, &were_fd::event, events);
+    fd_ = -1;
 }
 
 ssize_t were_fd::read(void *buffer, size_t count)
@@ -56,4 +49,11 @@ ssize_t were_fd::read(void *buffer, size_t count)
 ssize_t were_fd::write(const void *buffer, size_t count)
 {
     return ::write(fd_, buffer, count);
+}
+
+void were_fd::event_(uint32_t events)
+{
+    auto this_wop = were_pointer(this);
+
+    were::emit(this_wop, &were_fd::event, events);
 }

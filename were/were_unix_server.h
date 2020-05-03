@@ -21,9 +21,6 @@ signals:
     were_signal<void ()> new_connection;
 
 private:
-    void event(uint32_t events);
-
-private:
     std::string path_;
     were_pointer<were_fd> fd_;
 };

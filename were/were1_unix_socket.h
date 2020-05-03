@@ -8,12 +8,12 @@ extern "C" {
 #endif
 
 int were1_unix_server_create(const char *path);
-void were1_unix_server_destroy(const char *path, int fd);
+void were1_unix_server_shutdown(const char *path, int fd);
 int were1_unix_server_accept(int fd);
 void were1_unix_server_reject(int fd);
 
 int were1_unix_socket_connect(const char *path);
-void were1_unix_socket_destroy(int fd);
+void were1_unix_socket_shutdown(int fd);
 int were1_unix_socket_send_all(int fd, const void *buffer, size_t length);
 int were1_unix_socket_receive_all(int fd, void *buffer, size_t length);
 int were1_unix_socket_bytes_available(int fd);

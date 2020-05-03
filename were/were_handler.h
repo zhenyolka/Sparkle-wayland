@@ -17,9 +17,6 @@ public:
     void post(const std::function<void ()> &call);
 
 private:
-    void event(uint32_t events);
-
-private:
     were_pointer<were_fd> fd_;
     std::queue< std::function<void ()> > call_queue_;
     std::mutex call_queue_mutex_;
