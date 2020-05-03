@@ -61,7 +61,8 @@ static int sparkle_finish(snd_pcm_sparkle_t *sparkle)
 {
     if (sparkle->fd > 0)
     {
-        were1_unix_socket_destroy(sparkle->fd);
+        were1_unix_socket_shutdown(sparkle->fd);
+        close(sparkle->fd);
         sparkle->fd = -1;
     }
 
