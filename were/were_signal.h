@@ -24,9 +24,15 @@ private:
     uint64_t id_;
 };
 
+class were_signal_base
+{
+public:
+    virtual void remove_connection(uint64_t id) = 0;
+};
+
 template <typename Signature> class were_signal;
 template <typename ...Args>
-class were_signal<void (Args... args)>
+class were_signal<void (Args... args)> : public were_signal_base
 {
 
     using function_type = std::function<void (Args... args)>;

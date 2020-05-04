@@ -1,7 +1,7 @@
 #include "were_connect.h"
 #include <atomic>
 
-static std::atomic<uint64_t> next_id_;
+static std::atomic<uint64_t> next_id_ = 0;
 
 namespace were
 {

@@ -9,44 +9,43 @@
 #include <functional>
 
 
+class were_breaker
+{
+    struct were_breaker_item
+    {
+        were_pointer<were_capability_rc> object;
+        were_signal_base *signal;
+        uint64_t id;
+    };
+public:
+
+    void add_item(const were_breaker_item &item)
+    {
+        items_.push_back(item);
+    }
+
+    void operator()() const
+    {
+        for (auto &item : items_)
+        {
+            item.signal->remove_connection(item.id);
+        }
+    }
+
+private:
+    std::vector<were_breaker_item> items_;
+};
+
+
 namespace were
 {
     uint64_t next_id();
 
-    template <typename SourceType, typename SignalType, typename ContextType>
-    void disconnect(were_pointer<SourceType> source,
-                    SignalType signal,
-                    were_pointer<ContextType> context,
-                    uint64_t pc_id, uint64_t sb_id, uint64_t cb_id)
-    {
-        auto signal1__ = &((source.access_UNSAFE())->*signal);
-        auto signal2__ = &((source.access_UNSAFE())->destroyed);
-        auto signal3__ = &((context.access_UNSAFE())->destroyed);
-
-        signal1__->remove_connection(pc_id);
-        signal2__->remove_connection(sb_id);
-        signal3__->remove_connection(cb_id);
-    }
-
-    template <typename SourceType, typename SignalType, typename ContextType, typename ...Args>
-    static std::function<void ()> make_breaker( were_pointer<SourceType> source,
-                                                were_signal<void (Args...)> SignalType::*signal,
-                                                were_pointer<ContextType> context,
-                                                uint64_t pc_id, uint64_t sb_id, uint64_t cb_id)
-    {
-        std::function<void ()> breaker = [source, signal, context, pc_id, sb_id, cb_id]()
-        {
-            were::disconnect(source, signal, context, pc_id, sb_id, cb_id);
-        };
-
-        return breaker;
-    }
-
     template <typename ContextType, typename ...Args>
-    static std::function<void (Args...)> make_queued_call(  const std::function<void (Args...)> &call,
+    static std::function<void (Args... args)> make_queued_call(  const std::function<void (Args... args)> &call,
                                                             were_pointer<ContextType> context)
     {
-        std::function<void (Args...)> queued_call = [context, call](Args... args)
+        std::function<void (Args... args)> queued_call = [context, call](Args... args)
         {
             context.template capability<were_capability_thread>()->thread()->handler()->post([call, args...]()
             {
@@ -58,8 +57,8 @@ namespace were
     }
 
     template <typename SourceType, typename SignalType, typename ContextType, typename Functor, typename ...Args>
-    void connect(   were_pointer<SourceType> source,
-                    were_signal<void (Args...)> SignalType::*signal,
+    were_breaker connect(   were_pointer<SourceType> source,
+                    were_signal<void (Args... args)> SignalType::*signal,
                     were_pointer<ContextType> context,
                     Functor call)
     {
@@ -67,22 +66,28 @@ namespace were
         uint64_t sb_id = next_id();
         uint64_t cb_id = next_id();
 
-        std::function<void (Args...)> call__;
+        std::function<void (Args... args)> call__;
 
         if (context.template capability<were_capability_thread>()->thread() == source.template capability<were_capability_thread>()->thread())
-            call__ = std::function<void (Args...)>(call);
+            call__ = std::function<void (Args... args)>(call);
         else
-            call__ = make_queued_call(std::function<void (Args...)>(call), context);
-
-        std::function<void ()> breaker = make_breaker(source, signal, context, pc_id, sb_id, cb_id);
+            call__ = make_queued_call(std::function<void (Args... args)>(call), context);
 
         auto signal1__ = &((source.access_UNSAFE())->*signal);
         auto signal2__ = &((source.access_UNSAFE())->destroyed);
         auto signal3__ = &((context.access_UNSAFE())->destroyed);
 
+        were_breaker breaker;
+
+        breaker.add_item({source, signal1__, pc_id});
+        breaker.add_item({source, signal2__, sb_id});
+        breaker.add_item({context, signal3__, cb_id});
+
         signal1__->add_connection(call__, pc_id);
         signal2__->add_connection(breaker, sb_id);
         signal3__->add_connection(breaker, cb_id);
+
+        return breaker;
     };
 
     template <typename SourceType, typename SignalType, typename ...Args>
