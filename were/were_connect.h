@@ -7,6 +7,7 @@
 #include "were_signal.h"
 #include <cstdint>
 #include <functional>
+#include <vector>
 
 
 class were_breaker
