@@ -58,7 +58,14 @@ public:
     {
         // TODO: Sentinel
 
-        return object_;
+        if constexpr (std::is_same<Capability, were_capability_rc>::value)
+        {
+            return const_cast<Capability *>(static_cast<const Capability *>(object_));
+        }
+        else
+        {
+            return object_;
+        }
     }
 
     T *access() const

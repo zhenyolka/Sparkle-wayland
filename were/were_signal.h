@@ -50,7 +50,7 @@ public:
     void add_connection(const function_type &call, uint64_t id)
     {
         mutex_.lock();
-        were_pointer<wrapped_connection_list_type> connections = connections_;
+        were_pointer<const wrapped_connection_list_type> connections = connections_;
         were_pointer<wrapped_connection_list_type> new_connections(new wrapped_connection_list_type(*connections));
         new_connections->push_back(were_signal_connection<void (Args... args)>(call, id));
         connections_ = new_connections;
@@ -60,7 +60,7 @@ public:
     void remove_connection(uint64_t id)
     {
         mutex_.lock();
-        were_pointer<wrapped_connection_list_type> connections = connections_;
+        were_pointer<const wrapped_connection_list_type> connections = connections_;
         were_pointer<wrapped_connection_list_type> new_connections(new wrapped_connection_list_type(*connections));
         new_connections->remove_if([id](connection_type &connection)
         {
@@ -72,7 +72,7 @@ public:
 
     void emit(Args... args)
     {
-        were_pointer<wrapped_connection_list_type> connections = connections_;
+        were_pointer<const wrapped_connection_list_type> connections = connections_;
         for (auto &connection : *connections)
         {
             connection.call()(args...);
@@ -80,7 +80,7 @@ public:
     }
 
 private:
-    were_pointer<wrapped_connection_list_type> connections_;
+    were_pointer<const wrapped_connection_list_type> connections_;
     std::mutex mutex_;
 };
 
