@@ -190,7 +190,7 @@ void scanner_write_source(struct interface *i)
     else
         fprintf(output, "    sparkle_resource(client, &%s_interface, version, id, &interface)\n{\n", i->name);
 
-    fprintf(output, "}\n");
+    fprintf(output, "}\n\n");
 
     fprintf(output, "sparkle_%s::sparkle_%s(struct wl_resource *resource) :\n", i->name, i->name);
     fprintf(output, "    sparkle_resource(resource)\n{\n");

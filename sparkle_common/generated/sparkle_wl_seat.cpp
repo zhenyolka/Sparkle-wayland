@@ -16,6 +16,7 @@ sparkle_wl_seat::sparkle_wl_seat(struct wl_client *client, int version, uint32_t
     sparkle_resource(client, &wl_seat_interface, version, id, &interface)
 {
 }
+
 sparkle_wl_seat::sparkle_wl_seat(struct wl_resource *resource) :
     sparkle_resource(resource)
 {

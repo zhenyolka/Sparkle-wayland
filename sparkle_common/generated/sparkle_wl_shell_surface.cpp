@@ -22,6 +22,7 @@ sparkle_wl_shell_surface::sparkle_wl_shell_surface(struct wl_client *client, int
     sparkle_resource(client, &wl_shell_surface_interface, version, id, &interface)
 {
 }
+
 sparkle_wl_shell_surface::sparkle_wl_shell_surface(struct wl_resource *resource) :
     sparkle_resource(resource)
 {

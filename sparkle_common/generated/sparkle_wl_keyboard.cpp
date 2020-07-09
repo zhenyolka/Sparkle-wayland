@@ -13,6 +13,7 @@ sparkle_wl_keyboard::sparkle_wl_keyboard(struct wl_client *client, int version, 
     sparkle_resource(client, &wl_keyboard_interface, version, id, &interface)
 {
 }
+
 sparkle_wl_keyboard::sparkle_wl_keyboard(struct wl_resource *resource) :
     sparkle_resource(resource)
 {

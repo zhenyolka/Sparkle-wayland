@@ -14,6 +14,7 @@ sparkle_wl_pointer::sparkle_wl_pointer(struct wl_client *client, int version, ui
     sparkle_resource(client, &wl_pointer_interface, version, id, &interface)
 {
 }
+
 sparkle_wl_pointer::sparkle_wl_pointer(struct wl_resource *resource) :
     sparkle_resource(resource)
 {

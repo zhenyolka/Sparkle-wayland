@@ -13,6 +13,7 @@ sparkle_wl_buffer::sparkle_wl_buffer(struct wl_client *client, int version, uint
     sparkle_resource(client, &wl_buffer_interface, version, id, &interface)
 {
 }
+
 sparkle_wl_buffer::sparkle_wl_buffer(struct wl_resource *resource) :
     sparkle_resource(resource)
 {

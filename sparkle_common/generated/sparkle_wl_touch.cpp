@@ -13,6 +13,7 @@ sparkle_wl_touch::sparkle_wl_touch(struct wl_client *client, int version, uint32
     sparkle_resource(client, &wl_touch_interface, version, id, &interface)
 {
 }
+
 sparkle_wl_touch::sparkle_wl_touch(struct wl_resource *resource) :
     sparkle_resource(resource)
 {

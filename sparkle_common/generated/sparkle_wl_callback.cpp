@@ -9,6 +9,7 @@ sparkle_wl_callback::sparkle_wl_callback(struct wl_client *client, int version, 
     sparkle_resource(client, &wl_callback_interface, version, id, nullptr)
 {
 }
+
 sparkle_wl_callback::sparkle_wl_callback(struct wl_resource *resource) :
     sparkle_resource(resource)
 {

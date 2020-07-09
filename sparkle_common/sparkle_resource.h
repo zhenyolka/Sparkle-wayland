@@ -10,6 +10,7 @@ public:
     ~sparkle_resource();
     sparkle_resource(struct wl_client *client, const struct wl_interface *interface, int version, uint32_t id, const void *implementation);
     sparkle_resource(struct wl_resource *resource);
+    void managed() override;
 
     struct wl_resource *resource() const;
     int version() const;

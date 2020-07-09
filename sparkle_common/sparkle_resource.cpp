@@ -20,8 +20,6 @@ sparkle_resource::~sparkle_resource()
 
 sparkle_resource::sparkle_resource(struct wl_client *client, const struct wl_interface *interface, int version, uint32_t id, const void *implementation)
 {
-    auto this_wop = were_pointer(this);
-
     resource_ = wl_resource_create(client, interface, version, id);
     if (resource_ == nullptr)
         throw were_exception(WE_SIMPLE);
@@ -31,26 +29,20 @@ sparkle_resource::sparkle_resource(struct wl_client *client, const struct wl_int
     reference();
     listener_.notify = sparkle_resource::destroy_;
     wl_resource_add_destroy_listener(resource_, &listener_);
-
-    were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
-    {
-        if (this_wop->resource_ != nullptr)
-        {
-            wl_list_remove(&this_wop->listener_.link);
-            this_wop->unreference();
-        }
-    });
 }
 
 sparkle_resource::sparkle_resource(struct wl_resource *resource)
 {
-    auto this_wop = were_pointer(this);
-
     resource_ = resource;
 
     reference();
     listener_.notify = sparkle_resource::destroy_;
     wl_resource_add_destroy_listener(resource_, &listener_);
+}
+
+void sparkle_resource::managed()
+{
+    auto this_wop = were_pointer(this);
 
     were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
     {

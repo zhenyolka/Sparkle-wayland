@@ -13,6 +13,7 @@ sparkle_wl_output::sparkle_wl_output(struct wl_client *client, int version, uint
     sparkle_resource(client, &wl_output_interface, version, id, &interface)
 {
 }
+
 sparkle_wl_output::sparkle_wl_output(struct wl_resource *resource) :
     sparkle_resource(resource)
 {
