@@ -19,13 +19,14 @@ class were_x11_surface : virtual public were_object
 public:
     ~were_x11_surface();
     were_x11_surface(were_pointer<were_x11_compositor> compositor, were_pointer<were_surface> surface);
+    void managed() override;
 
 private:
     void process(xcb_generic_event_t *event);
     void update(bool full = false);
 
 private:
-    were_pointer<x11_display> display_;
+    were_pointer<were_x11_compositor> compositor_;
     were_pointer<were_surface> surface_;
     struct were1_xcb_window *window_;
     were_rect<int> damage_;

@@ -12,7 +12,11 @@ were_handler::~were_handler()
 }
 
 were_handler::were_handler() :
-    fd_(new were_fd(eventfd(0, 0), EPOLLIN | EPOLLET))
+    fd_(were_new<were_fd>(eventfd(0, 0), EPOLLIN | EPOLLET))
+{
+}
+
+void were_handler::managed()
 {
     auto this_wop = were_pointer(this);
 

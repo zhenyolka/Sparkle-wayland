@@ -15,6 +15,10 @@ public:
     sparkle_seat(struct wl_client *client, int version, uint32_t id, were_pointer<sparkle_display> display) :
         sparkle_wl_seat(client, version, id), display_(display)
     {
+    }
+
+    void managed() override
+    {
         // XXX3 Move to cpp
 
         auto this_wop = were_pointer(this);
@@ -26,24 +30,24 @@ public:
 
         send_capabilities(caps);
 
-        if (version >= WL_SEAT_NAME_SINCE_VERSION)
+        if (version() >= WL_SEAT_NAME_SINCE_VERSION)
             send_name("Sparkle");
 
         were::connect(this_wop, &sparkle_seat::get_keyboard, this_wop, [this_wop](uint32_t id)
         {
-            were_pointer<sparkle_keyboard> keyboard(new sparkle_keyboard(this_wop->client(), this_wop->version(), id, this_wop->display_));
+            were_pointer<sparkle_keyboard> keyboard = were_new<sparkle_keyboard>(this_wop->client(), this_wop->version(), id, this_wop->display_);
             were::emit(this_wop, &sparkle_seat::keyboard_created, keyboard);
         });
 
         were::connect(this_wop, &sparkle_seat::get_pointer, this_wop, [this_wop](uint32_t id)
         {
-            were_pointer<sparkle_pointer> pointer(new sparkle_pointer(this_wop->client(), this_wop->version(), id, this_wop->display_));
+            were_pointer<sparkle_pointer> pointer = were_new<sparkle_pointer>(this_wop->client(), this_wop->version(), id, this_wop->display_);
             were::emit(this_wop, &sparkle_seat::pointer_created, pointer);
         });
 
         were::connect(this_wop, &sparkle_seat::get_touch, this_wop, [this_wop](uint32_t id)
         {
-            were_pointer<sparkle_touch> touch(new sparkle_touch(this_wop->client(), this_wop->version(), id, this_wop->display_));
+            were_pointer<sparkle_touch> touch = were_new<sparkle_touch>(this_wop->client(), this_wop->version(), id, this_wop->display_);
             were::emit(this_wop, &sparkle_seat::touch_created, touch);
         });
     }

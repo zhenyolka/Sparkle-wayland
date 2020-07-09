@@ -39,7 +39,7 @@ void were_log::capture_stdout()
     setvbuf(stdout, NULL, _IOLBF, 0);
     setvbuf(stderr, NULL, _IOLBF, 0);
 
-    were_pointer<were_fd> fd(new were_fd(fd__, EPOLLIN));
+    were_pointer<were_fd> fd = were_new<were_fd>(fd__, EPOLLIN);
     were::connect(fd, &were_fd::event, this_wop, [this_wop, fd](uint32_t events){ this_wop->event(fd, events); });
     were::link(fd, this_wop);
 }

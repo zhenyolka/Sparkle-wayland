@@ -56,7 +56,7 @@ void sparkle_main_activity::stop()
 extern "C" JNIEXPORT jlong JNICALL
 Java_com_sion_sparkle_MainActivity_native_1create(JNIEnv *env, jobject instance)
 {
-    were_pointer<sparkle_main_activity> native__(new sparkle_main_activity(env, instance));
+    were_pointer<sparkle_main_activity> native__ = were_new<sparkle_main_activity>(env, instance);
     native__.increment_reference_count();
     return jlong(native__.access());
 }

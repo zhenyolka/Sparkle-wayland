@@ -11,7 +11,11 @@ were_x11_compositor::~were_x11_compositor()
 }
 
 were_x11_compositor::were_x11_compositor() :
-    display_(new x11_display(were1_xcb_display_open()))
+    display_(were_new<x11_display>(were1_xcb_display_open()))
+{
+}
+
+void were_x11_compositor::managed()
 {
     auto this_wop = were_pointer(this);
 
@@ -22,7 +26,7 @@ were_x11_compositor::were_x11_compositor() :
 
     int fd__ = were1_xcb_display_fd(display_->get());
 
-    were_pointer<were_fd> fd(new were_fd(fd__, EPOLLIN | EPOLLET));
+    were_pointer<were_fd> fd = were_new<were_fd>(fd__, EPOLLIN | EPOLLET);
     were::link(fd, this_wop);
 
     were::connect(fd, &were_fd::event, this_wop, [this_wop](uint32_t events)
@@ -37,7 +41,7 @@ void were_x11_compositor::register_producer(were_pointer<were_surface_producer> 
 
     were::connect(producer, &were_surface_producer::surface_created, this_wop, [this_wop](were_pointer<were_surface> surface)
     {
-        were_pointer<were_x11_surface> x11_surface(new were_x11_surface(this_wop, surface));
+        were_pointer<were_x11_surface> x11_surface = were_new<were_x11_surface>(this_wop, surface);
         were::link(x11_surface, surface);
     });
 }

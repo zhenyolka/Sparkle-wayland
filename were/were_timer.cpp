@@ -14,6 +14,10 @@ were_timer::were_timer(int interval, bool single_shot) :
     interval_(interval), single_shot_(single_shot),
     fd_(new were_fd(timerfd_create(CLOCK_MONOTONIC, 0), EPOLLIN | EPOLLET))
 {
+}
+
+void were_timer::managed()
+{
     auto this_wop = were_pointer(this);
 
     were::connect(fd_, &were_fd::event, this_wop, [this_wop](uint32_t events)

@@ -5,7 +5,7 @@
 #include <csignal>
 #include <sys/signalfd.h>
 
-static were_fd *create_fd()
+static were_pointer<were_fd> create_fd()
 {
     sigset_t mask;
     sigemptyset(&mask);
@@ -18,7 +18,7 @@ static were_fd *create_fd()
     if (fd__ == -1)
         throw were_exception(WE_SIMPLE);
 
-    return new were_fd(fd__, EPOLLIN | EPOLLET);
+    return were_new<were_fd>(fd__, EPOLLIN | EPOLLET);
 }
 
 were_signal_handler::~were_signal_handler()
@@ -35,6 +35,10 @@ were_signal_handler::~were_signal_handler()
 
 were_signal_handler::were_signal_handler() :
     fd_(create_fd())
+{
+}
+
+void were_signal_handler::managed()
 {
     auto this_wop = were_pointer(this);
 

@@ -16,11 +16,14 @@ were_thread::~were_thread()
 were_thread::were_thread() :
     reference_count_(0), collapsed_(false), exit_(false)
 {
-    auto this_wop = were_pointer(this);
-
     epoll_fd_ = epoll_create1(0);
     if (epoll_fd_ == -1)
         throw were_exception(WE_SIMPLE);
+}
+
+void were_thread::managed()
+{
+    auto this_wop = were_pointer(this);
 }
 
 void were_thread::register_fd(were_pointer<were_fd> fd)

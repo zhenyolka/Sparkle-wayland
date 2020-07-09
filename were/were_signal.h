@@ -43,7 +43,7 @@ class were_signal<void (Args... args)> : public were_signal_base
 public:
 
     were_signal() :
-        connections_(new wrapped_connection_list_type())
+        connections_(were_new<wrapped_connection_list_type>())
     {
     }
 
@@ -51,7 +51,7 @@ public:
     {
         mutex_.lock();
         were_pointer<const wrapped_connection_list_type> connections = connections_;
-        were_pointer<wrapped_connection_list_type> new_connections(new wrapped_connection_list_type(*connections));
+        were_pointer<wrapped_connection_list_type> new_connections = were_new<wrapped_connection_list_type>(*connections);
         new_connections->push_back(were_signal_connection<void (Args... args)>(call, id));
         connections_ = new_connections;
         mutex_.unlock();
@@ -61,7 +61,7 @@ public:
     {
         mutex_.lock();
         were_pointer<const wrapped_connection_list_type> connections = connections_;
-        were_pointer<wrapped_connection_list_type> new_connections(new wrapped_connection_list_type(*connections));
+        were_pointer<wrapped_connection_list_type> new_connections = were_new<wrapped_connection_list_type>(*connections);
         new_connections->remove_if([id](connection_type &connection)
         {
             return connection.id() == id;

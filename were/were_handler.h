@@ -12,6 +12,7 @@ class were_handler : public were_object
 public:
     ~were_handler();
     were_handler();
+    void managed() override;
 
     void process_queue();
     void post(const std::function<void ()> &call);

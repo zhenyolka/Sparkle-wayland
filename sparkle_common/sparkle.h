@@ -28,6 +28,7 @@ class sparkle : virtual public were_object
 public:
     ~sparkle();
     sparkle(const std::string &home_dir = std::string());
+    void managed() override;
 
     were_pointer<sparkle_global<sparkle_output>> output() const;
     were_pointer<sparkle_global<sparkle_compositor>> compositor() const;

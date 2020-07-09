@@ -13,6 +13,7 @@ class were_unix_server : virtual public were_object
 public:
     ~were_unix_server();
     were_unix_server(const std::string &path);
+    void managed() override;
 
     were_pointer<were_unix_socket> accept();
     void reject();

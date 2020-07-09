@@ -12,10 +12,13 @@ were_fd::~were_fd()
 were_fd::were_fd(int fd, uint32_t events) :
     fd_(fd), events_(events)
 {
-    auto this_wop = were_pointer(this);
-
     if (fd_ == -1)
         throw were_exception(WE_SIMPLE);
+}
+
+void were_fd::managed()
+{
+    auto this_wop = were_pointer(this);
 
     if (events_ != 0)
     {

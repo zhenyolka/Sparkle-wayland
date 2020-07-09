@@ -21,31 +21,28 @@ public:
 
     ~sparkle_x11()
     {
-
     }
 
     sparkle_x11()
     {
+    }
+
+    void managed() override
+    {
+        were_object::managed();
+
         auto this_wop = were_pointer(this);
 
-        //were_pointer<were_log> logger(new were_log());
-        //logger->link(this_wop);
-        //logger->capture_stdout();
-        //logger->enable_stdout();
-        //logger->enable_file("/tmp/sparkle.log");
-        //global_set<were_log>(logger);
-
-
-        were_pointer<sparkle_settings> settings(new sparkle_settings("./sparkle.config"));
+        were_pointer<sparkle_settings> settings = were_new<sparkle_settings>("./sparkle.config");
         were::link(settings, this_wop);
         settings->load();
         global_set<sparkle_settings>(settings);
 
 
-        were_pointer<sparkle> sparkle__(new sparkle());
+        were_pointer<sparkle> sparkle__ = were_new<sparkle>();
         were::link(sparkle__, this_wop);
 
-        were_pointer<were_x11_compositor> compositor__(new were_x11_compositor());
+        were_pointer<were_x11_compositor> compositor__ = were_new<were_x11_compositor>();
         were::link(compositor__, this_wop);
 
         were::connect(sparkle__->shell(), &sparkle_global<sparkle_shell>::instance, compositor__, [compositor__, this_wop](were_pointer<sparkle_shell> shell)
@@ -53,7 +50,7 @@ public:
             compositor__->register_producer(shell);
         });
 
-        were_pointer<were_signal_handler> sh(new were_signal_handler());
+        were_pointer<were_signal_handler> sh = were_new<were_signal_handler>();
         were::link(sh, this_wop);
         were::connect(sh, &were_signal_handler::signal, this_wop, [this_wop](uint32_t number) mutable
         {
@@ -63,7 +60,6 @@ public:
                 t_l_global<were_thread>()->exit();
             }
         });
-
     }
 };
 
@@ -75,14 +71,14 @@ int main(int argc, char *argv[])
     were_debug *debug = new were_debug();
     were_registry<were_debug *>::set(debug);
 
-    were_pointer<were_thread> thread(new were_thread());
+    were_pointer<were_thread> thread = were_new<were_thread>();
     t_l_global_set<were_thread>(thread);
 
-    were_pointer<were_handler> handler(new were_handler());
+    were_pointer<were_handler> handler = were_new<were_handler>();
     thread->set_handler(handler);
 
     {
-        were_pointer<sparkle_x11> sparkle__(new sparkle_x11());
+        were_pointer<sparkle_x11> sparkle__ = were_new<sparkle_x11>();
     }
 
     debug->start();

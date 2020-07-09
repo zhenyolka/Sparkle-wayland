@@ -3,9 +3,15 @@
 
 #include "were_capability_rc.h"
 #include "were_capability_sentinel.h"
+#include "were_capability_managed.h"
 #include "were_exception.h"
 
 
+template <typename Second, typename First>
+inline Second safe_cast(First object__)
+{
+    return object__;
+}
 
 template <typename T>
 class were_pointer
@@ -22,6 +28,9 @@ public:
         object_ = object__;
 
         if (object_ == nullptr)
+            throw were_exception(WE_SIMPLE);
+
+        if (!(capability<were_capability_rc>()->reference_count() > 0))
             throw were_exception(WE_SIMPLE);
 
         capability<were_capability_rc>()->reference();
@@ -104,5 +113,21 @@ private:
     T *object_;
 };
 
+
+template <typename T, typename... Args>
+were_pointer<T> were_new(Args &&...args)
+{
+    T *object__ = new T(std::forward<Args>(args)...);
+    safe_cast<were_capability_rc *>(object__)->reference();
+    were_pointer<T> result(object__);
+    safe_cast<were_capability_rc *>(object__)->unreference();
+
+    if constexpr (std::is_base_of<were_capability_managed, T>::value)
+    {
+        safe_cast<were_capability_managed *>(object__)->managed();
+    }
+
+    return result;
+}
 
 #endif // WERE_POINTER_H

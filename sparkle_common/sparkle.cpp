@@ -28,16 +28,14 @@ sparkle::~sparkle()
 }
 
 sparkle::sparkle(const std::string &home_dir) :
-    display_(new sparkle_display(wl_display_create())),
-    output_(new sparkle_global<sparkle_output>(display_, &wl_output_interface, 3)),
-    compositor_(new sparkle_global<sparkle_compositor>(display_, &wl_compositor_interface, 4)),
-    seat_(new sparkle_global<sparkle_seat>(display_, &wl_seat_interface, 5)),
-    shell_(new sparkle_global<sparkle_shell>(display_, &wl_shell_interface, 1)),
+    display_(were_new<sparkle_display>(wl_display_create())),
+    output_(were_new<sparkle_global<sparkle_output>>(display_, &wl_output_interface, 3)),
+    compositor_(were_new<sparkle_global<sparkle_compositor>>(display_, &wl_compositor_interface, 4)),
+    seat_(were_new<sparkle_global<sparkle_seat>>(display_, &wl_seat_interface, 5)),
+    shell_(were_new<sparkle_global<sparkle_shell>>(display_, &wl_shell_interface, 1)),
     width_(1280), height_(720)
 
 {
-    auto this_wop = were_pointer(this);
-
     display_->set_destructor([](struct wl_display *&display)
     {
         wl_display_destroy(display);
@@ -64,10 +62,17 @@ sparkle::sparkle(const std::string &home_dir) :
 #endif
 
 
+
+}
+
+void sparkle::managed()
+{
+    auto this_wop = were_pointer(this);
+
     struct wl_event_loop *loop = wl_display_get_event_loop(display_->get());
     int fd__ = wl_event_loop_get_fd(loop);
 
-    were_pointer<were_fd> fd(new were_fd(fd__, EPOLLIN | EPOLLET));
+    were_pointer<were_fd> fd = were_new<were_fd>(fd__, EPOLLIN | EPOLLET);
     were::link(fd, this_wop);
 
     were::connect(fd, &were_fd::event, this_wop, [this_wop](uint32_t events)
@@ -165,7 +170,7 @@ sparkle::sparkle(const std::string &home_dir) :
     });
 
 #if 0
-    were_pointer<were_timer> timer(new were_timer(1000, false));
+    were_pointer<were_timer> timer = were_new<were_timer>(1000, false);
     timer->link(this_wop);
     timer->start();
     were::connect(timer, &were_timer::timeout, this_wop, [this_wop]()

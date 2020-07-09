@@ -15,6 +15,10 @@ were_unix_socket::~were_unix_socket()
 were_unix_socket::were_unix_socket(int fd) :
     fd_(new were_fd(fd, EPOLLIN | EPOLLET))
 {
+}
+
+void were_unix_socket::managed()
+{
     auto this_wop = were_pointer(this);
 
     were::connect(fd_, &were_fd::event, this_wop, [this_wop](uint32_t events)

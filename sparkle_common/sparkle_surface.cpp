@@ -36,7 +36,7 @@ sparkle_surface::sparkle_surface(struct wl_client *client, int version, uint32_t
             this_wop->buffer_.reset();
         }
 
-        this_wop->buffer_ = were_pointer<sparkle_wl_buffer>(new sparkle_wl_buffer(buffer));
+        this_wop->buffer_ = were_new<sparkle_wl_buffer>(buffer);
     });
 
     were::connect(this_wop, &sparkle_wl_surface::damage, this_wop, [this_wop](int32_t x, int32_t y, int32_t width, int32_t height)
@@ -72,7 +72,7 @@ sparkle_surface::sparkle_surface(struct wl_client *client, int version, uint32_t
             this_wop->callback_.reset();
         }
 
-        this_wop->callback_ = were_pointer<sparkle_wl_callback>(new sparkle_wl_callback(this_wop->client(), 1, callback));
+        this_wop->callback_ = were_new<sparkle_wl_callback>(this_wop->client(), 1, callback);
     });
 }
 

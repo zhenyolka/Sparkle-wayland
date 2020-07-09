@@ -16,6 +16,10 @@ were_unix_server::were_unix_server(const std::string &path) :
     path_(path),
     fd_(new were_fd(were1_unix_server_create(path_.c_str()), EPOLLIN))
 {
+}
+
+void were_unix_server::managed()
+{
     auto this_wop = were_pointer(this);
 
     were::connect(fd_, &were_fd::event, this_wop, [this_wop](uint32_t events)
@@ -33,7 +37,7 @@ were_pointer<were_unix_socket> were_unix_server::accept()
     if (fd == -1)
         throw were_exception(WE_SIMPLE);
 
-    were_pointer<were_unix_socket> socket(new were_unix_socket(fd));
+    were_pointer<were_unix_socket> socket = were_new<were_unix_socket>(fd);
 
     return socket;
 }

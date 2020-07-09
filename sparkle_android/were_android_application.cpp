@@ -26,7 +26,7 @@ were_android_application::were_android_application(JNIEnv *env, jobject instance
     files_dir_ = call_string_method("files_dir", "()Ljava/lang/String;");
     home_dir_ = call_string_method("home_dir", "()Ljava/lang/String;");
 
-    were_pointer<were_log> logger(new were_log());
+    were_pointer<were_log> logger = were_new<were_log>();
     were::link(logger, this_wop);
     logger->capture_stdout();
     logger->enable_file(files_dir_ + "/log.txt");
@@ -36,7 +36,7 @@ were_android_application::were_android_application(JNIEnv *env, jobject instance
     setup();
 
 
-    were_pointer<sparkle_settings> settings(new sparkle_settings(files_dir_ + "/sparkle.config"));
+    were_pointer<sparkle_settings> settings = were_new<sparkle_settings>(files_dir_ + "/sparkle.config");
     were::link(settings, this_wop);
     settings->load();
     global_set<sparkle_settings>(settings);
@@ -117,13 +117,13 @@ Java_com_sion_sparkle_WereApplication_native_1create(JNIEnv *env, jobject instan
     were_registry<were_debug *>::set(debug);
     debug->start();
 
-    were_pointer<were_thread> thread(new were_thread());
+    were_pointer<were_thread> thread = were_new<were_thread>();
     t_l_global_set<were_thread>(thread);
 
-    were_pointer<were_handler> handler(new were_handler());
+    were_pointer<were_handler> handler = were_new<were_handler>();
     thread->set_handler(handler);
 
-    were_pointer<were_android_application> native__(new were_android_application(env, instance));
+    were_pointer<were_android_application> native__ = were_new<were_android_application>(env, instance);
     native__.increment_reference_count();
 
     native__->enable_native_loop(dup(thread->fd()));
