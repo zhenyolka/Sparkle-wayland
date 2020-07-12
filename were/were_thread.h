@@ -41,6 +41,7 @@ public:
 
     were_pointer<were_handler> handler() const { return handler_.value(); }
     void set_handler(were_pointer<were_handler> handler) { handler_ = handler; }
+    void unset_handler() { handler_.reset(); }
 
     std::string dump() const override;
 

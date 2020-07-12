@@ -48,11 +48,11 @@ public:
 
             were_pointer<were_signal_handler> sh = were_new<were_signal_handler>();
             were::link(sh, this_wop);
-            were::connect(sh, &were_signal_handler::signal, this_wop, [this_wop](uint32_t number) mutable
+            were::connect(sh, &were_signal_handler::signal, this_wop, [this_wop](uint32_t number)
             {
                 if (number == SIGINT)
                 {
-                    this_wop.collapse();
+                    //this_wop.collapse();
                     t_l_global<were_thread>()->exit();
                 }
             });
@@ -69,24 +69,36 @@ int main(int argc, char *argv[])
     were_debug *debug = new were_debug();
     were_registry<were_debug *>::set(debug);
 
-    were_pointer<were_thread> thread = were_new<were_thread>();
-    t_l_global_set<were_thread>(thread);
-
-    were_pointer<were_handler> handler = were_new<were_handler>();
-    thread->set_handler(handler);
 
     {
+        were_pointer<were_thread> thread = were_new<were_thread>();
+        t_l_global_set<were_thread>(thread);
+
+        were_pointer<were_handler> handler = were_new<were_handler>();
+        thread->set_handler(handler);
+
+
         were_pointer<sparkle_x11> sparkle__ = were_new<sparkle_x11>();
+
+        debug->start(); // After sigint blocked
+
+
+        thread->run();
+
+        sparkle__.collapse();
+
+        thread->run_for(1000);
+
+        thread->unset_handler();
+        handler.collapse();
+        thread.collapse();
+
+        thread->run_for(1000);
+
+        t_l_global_clear<were_thread>();
     }
 
-    debug->start();
-
-    thread->run();
-
-    thread->run_for(1000);
-
     debug->stop();
-
     were_registry<were_debug *>::clear();
     delete debug;
 
