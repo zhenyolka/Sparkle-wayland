@@ -17,7 +17,7 @@ sparkle_surface::~sparkle_surface()
 
     if (callback_.has_value())
     {
-        callback_.value().collapse();
+        //callback_.value().collapse(); // XXX1
         callback_.reset();
     }
 }
@@ -58,8 +58,8 @@ sparkle_surface::sparkle_surface(struct wl_client *client, int version, uint32_t
             if (this_wop->callback_.has_value())
             {
                 this_wop->callback_.value()->send_done(sparkle::current_msecs());
-                wl_resource_destroy(this_wop->callback_.value()->resource()); //XXX1
-                this_wop->callback_.value().collapse();
+                wl_resource_destroy(this_wop->callback_.value()->resource()); // XXX1
+                //this_wop->callback_.value().collapse();
                 this_wop->callback_.reset();
             }
         });
@@ -69,8 +69,8 @@ sparkle_surface::sparkle_surface(struct wl_client *client, int version, uint32_t
             if (this_wop->callback_.has_value())
             {
                 this_wop->callback_.value()->send_done(sparkle::current_msecs());
-                wl_resource_destroy(this_wop->callback_.value()->resource()); //XXX1
-                this_wop->callback_.value().collapse();
+                wl_resource_destroy(this_wop->callback_.value()->resource()); // XXX1
+                //this_wop->callback_.value().collapse();
                 this_wop->callback_.reset();
             }
 

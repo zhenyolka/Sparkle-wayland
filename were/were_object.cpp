@@ -1,27 +1,23 @@
 #include "were_object.h"
-#include "were_connect.h"
 #include "were_thread.h"
-#include "were_debug.h"
 
-
-were_object::~were_object()
-{
-}
-
-were_object::were_object() :
-    thread_(were_t_l_registry<were_pointer<were_thread>>::get())
-{
-}
-
-were_pointer<were_thread> were_object::thread() const
-{
-    return thread_;
-}
+static const char *state_initial = "INITIAL";
+static const char *state_integrated = "INTEGRATED";
+static const char *state_disintegrated = "DISINTEGRATED";
 
 std::string were_object::dump() const
 {
+    const char *state__ = nullptr;
+
+    if (state() == integration_state::initial)
+        state__ = state_initial;
+    else if (state() == integration_state::integrated)
+        state__ = state_integrated;
+    else if (state() == integration_state::disintegrated)
+        state__ = state_disintegrated;
+
     char buffer[1024];
-    snprintf(buffer, 1024, "%-20p%-45.44s%-5d%-10s", this, typeid(*this).name(), reference_count(), "?");
+    snprintf(buffer, 1024, "%-20p%-45.44s%-5d%-10s", this, typeid(*this).name(), reference_count(), state__);
 
     return std::string(buffer);
 }

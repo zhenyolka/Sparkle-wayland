@@ -28,7 +28,6 @@ public:
     void register_touch(were_pointer<sparkle_touch> touch);
 
 private:
-
     std::optional<were_pointer<sparkle_wl_buffer>> buffer_;
     std::optional<were_pointer<sparkle_wl_callback>> callback_;
 };

@@ -9,9 +9,6 @@
 #include "were_connect.h"
 #include <cstdint>
 #include <sys/epoll.h> // XXX3
-#include <functional>
-#include <atomic>
-
 
 
 class were_fd;
