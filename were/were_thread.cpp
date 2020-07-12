@@ -14,7 +14,7 @@ were_thread::~were_thread()
 }
 
 were_thread::were_thread() :
-    reference_count_(0), collapsed_(false), exit_(false)
+    exit_(false)
 {
     epoll_fd_ = epoll_create1(0);
     if (epoll_fd_ == -1)
@@ -106,14 +106,8 @@ were_pointer<were_thread> were_thread::thread() const
 
 std::string were_thread::dump() const
 {
-    const char *state = "NORMAL";
-    if (collapsed())
-        state = "COLLAPSED";
-    else if (reference_count() == 0)
-        state = "LOST";
-
     char buffer[1024];
-    snprintf(buffer, 1024, "%-20p%-45.44s%-5d%-10s", this, typeid(*this).name(), reference_count(), state);
+    snprintf(buffer, 1024, "%-20p%-45.44s%-5d%-10s", this, typeid(*this).name(), reference_count(), "?");
 
     return std::string(buffer);
 }

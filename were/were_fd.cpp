@@ -6,7 +6,6 @@
 
 were_fd::~were_fd()
 {
-    close();
 }
 
 were_fd::were_fd(int fd, uint32_t events) :

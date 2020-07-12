@@ -97,8 +97,8 @@ public:
     T &operator*() const { return *access(); }
     bool operator==(const were_pointer &other) const { return object_ == other.object_; }
     bool operator!=(const were_pointer &other) const { return object_ != other.object_; }
-    void increment_reference_count() { object_->reference(); }
-    void decrement_reference_count() { object_->unreference(); }
+    void increment_reference_count() const { capability<were_capability_rc>()->reference(); }
+    void decrement_reference_count() const { capability<were_capability_rc>()->unreference(); }
     bool operator<(const were_pointer &other) const { return object_ < other.object_; }
 
 private:

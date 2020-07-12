@@ -9,7 +9,6 @@ were_object::~were_object()
 }
 
 were_object::were_object() :
-    reference_count_(0), collapsed_(false),
     thread_(were_t_l_registry<were_pointer<were_thread>>::get())
 {
 }
@@ -17,24 +16,7 @@ were_object::were_object() :
 void were_object::collapse()
 {
     auto this_wop = were_pointer(this);
-
     were::emit(this_wop, &were_object::destroyed);
-    collapsed_ = true;
-}
-
-void were_object::reference()
-{
-    reference_count_++;
-}
-
-void were_object::unreference()
-{
-    if (reference_count_ == 1 && collapsed_)
-    {
-        thread()->handler()->post([this](){ delete this; });
-    }
-    else
-        reference_count_--;
 }
 
 were_pointer<were_thread> were_object::thread() const
@@ -44,14 +26,8 @@ were_pointer<were_thread> were_object::thread() const
 
 std::string were_object::dump() const
 {
-    const char *state = "NORMAL";
-    if (collapsed())
-        state = "COLLAPSED";
-    else if (reference_count() == 0)
-        state = "LOST";
-
     char buffer[1024];
-    snprintf(buffer, 1024, "%-20p%-45.44s%-5d%-10s", this, typeid(*this).name(), reference_count(), state);
+    snprintf(buffer, 1024, "%-20p%-45.44s%-5d%-10s", this, typeid(*this).name(), reference_count(), "?");
 
     return std::string(buffer);
 }

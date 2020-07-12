@@ -2,6 +2,7 @@
 #define WERE_THREAD_H
 
 #include "were_pointer.h"
+#include "were_capability_rc_simple.h"
 #include "were_capability_thread.h"
 #include "were_registry.h"
 #include "were_handler.h"
@@ -16,7 +17,7 @@
 class were_fd;
 class were_handler;
 
-class were_thread : virtual public were_capability_rc,
+class were_thread : virtual public were_capability_rc_simple,
                     virtual public were_capability_integrator,
                     virtual public were_capability_thread,
                     virtual public were_capability_collapse,
@@ -37,23 +38,12 @@ public:
     void run_once();
     void run_for(int ms);
 
-    bool collapsed() const override { return collapsed_; }
     void collapse() override
     {
         auto this_wop = were_pointer(this);
-
         were::emit(this_wop, &were_object::destroyed);
-        collapsed_ = true;
     }
-    void reference() override { reference_count_++; }
-    void unreference() override
-    {
-        if (reference_count_ == 1 && collapsed_)
-            delete this;
-        else
-            reference_count_--;
-    }
-    int reference_count() const override { return reference_count_.load(); }
+
     were_pointer<were_thread> thread() const override;
 
     void exit() { exit_ = true; }
@@ -68,8 +58,6 @@ signals:
 
 
 private:
-    std::atomic<int> reference_count_;
-    bool collapsed_;
     int epoll_fd_;
     bool exit_;
     std::optional<were_pointer<were_handler>> handler_;

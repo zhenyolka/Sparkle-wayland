@@ -26,7 +26,9 @@ sparkle_resource::sparkle_resource(struct wl_client *client, const struct wl_int
 
     wl_resource_set_implementation(resource_, implementation, this, nullptr);
 
-    reference();
+    auto this_wop = were_pointer(this);
+    this_wop.increment_reference_count();
+
     listener_.notify = sparkle_resource::destroy_;
     wl_resource_add_destroy_listener(resource_, &listener_);
 }
@@ -35,7 +37,9 @@ sparkle_resource::sparkle_resource(struct wl_resource *resource)
 {
     resource_ = resource;
 
-    reference();
+    auto this_wop = were_pointer(this);
+    this_wop.increment_reference_count();
+
     listener_.notify = sparkle_resource::destroy_;
     wl_resource_add_destroy_listener(resource_, &listener_);
 
@@ -48,7 +52,7 @@ sparkle_resource::sparkle_resource(struct wl_resource *resource)
             if (this_wop->resource_ != nullptr)
             {
                 wl_list_remove(&this_wop->listener_.link);
-                this_wop->unreference();
+                this_wop.decrement_reference_count();
             }
         });
     });
@@ -62,8 +66,7 @@ void sparkle_resource::destroy_(struct wl_listener *listener, void *data)
 
     were_pointer<sparkle_resource> instance__(instance);
     instance__->collapse();
-
-    instance->unreference();
+    instance__.decrement_reference_count();
 }
 
 struct wl_resource *sparkle_resource::resource() const

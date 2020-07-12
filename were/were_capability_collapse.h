@@ -6,8 +6,6 @@
 class were_capability_collapse
 {
 public:
-
-    virtual bool collapsed() const = 0;
     virtual void collapse() = 0;
 
 signals:
