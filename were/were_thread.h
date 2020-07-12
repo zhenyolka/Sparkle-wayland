@@ -38,12 +38,6 @@ public:
     void run_once();
     void run_for(int ms);
 
-    void collapse() override
-    {
-        auto this_wop = were_pointer(this);
-        were::emit(this_wop, &were_object::destroyed);
-    }
-
     were_pointer<were_thread> thread() const override;
 
     void exit() { exit_ = true; }

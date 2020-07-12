@@ -6,7 +6,9 @@
 class were_capability_collapse
 {
 public:
-    virtual void collapse() = 0;
+    were_capability_collapse();
+
+    void collapse();
 
 signals:
     were_signal<void ()> destroyed;

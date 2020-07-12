@@ -13,12 +13,6 @@ were_object::were_object() :
 {
 }
 
-void were_object::collapse()
-{
-    auto this_wop = were_pointer(this);
-    were::emit(this_wop, &were_object::destroyed);
-}
-
 were_pointer<were_thread> were_object::thread() const
 {
     return thread_;

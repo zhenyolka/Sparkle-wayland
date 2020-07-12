@@ -9,10 +9,6 @@ class were_class_wrapper : public were_capability_rc_simple, public T
 {
 public:
 
-    virtual ~were_class_wrapper()
-    {
-    }
-
     template <typename ...Args>
     were_class_wrapper(Args... args) : T(args...)
     {

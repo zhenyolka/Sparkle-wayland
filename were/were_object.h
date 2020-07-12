@@ -19,7 +19,6 @@ public:
     virtual ~were_object();
     were_object();
 
-    void collapse() override;
     were_pointer<were_thread> thread() const override;
     std::string dump() const override;
 
