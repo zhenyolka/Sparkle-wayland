@@ -36,24 +36,23 @@ were_signal_handler::~were_signal_handler()
 were_signal_handler::were_signal_handler() :
     fd_(create_fd())
 {
-}
-
-void were_signal_handler::managed()
-{
-    auto this_wop = were_pointer(this);
-
-    were::connect(fd_, &were_fd::event, this_wop, [this_wop](uint32_t events)
+    add_integrator([this]()
     {
-        if (events == EPOLLIN)
+        auto this_wop = were_pointer(this);
+
+        were::connect(fd_, &were_fd::event, this_wop, [this_wop](uint32_t events)
         {
-            struct signalfd_siginfo si;
+            if (events == EPOLLIN)
+            {
+                struct signalfd_siginfo si;
 
-            if (this_wop->fd_->read(&si, sizeof(struct signalfd_siginfo)) != sizeof(struct signalfd_siginfo))
+                if (this_wop->fd_->read(&si, sizeof(struct signalfd_siginfo)) != sizeof(struct signalfd_siginfo))
+                    throw were_exception(WE_SIMPLE);
+
+                were::emit(this_wop, &were_signal_handler::signal, si.ssi_signo);
+            }
+            else
                 throw were_exception(WE_SIMPLE);
-
-            were::emit(this_wop, &were_signal_handler::signal, si.ssi_signo);
-        }
-        else
-            throw were_exception(WE_SIMPLE);
+        });
     });
 }

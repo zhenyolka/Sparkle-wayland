@@ -14,20 +14,20 @@ were_fd::were_fd(int fd, uint32_t events) :
 {
     if (fd_ == -1)
         throw were_exception(WE_SIMPLE);
-}
 
-void were_fd::managed()
-{
-    auto this_wop = were_pointer(this);
-
-    if (events_ != 0)
+    add_integrator([this]()
     {
-        thread()->register_fd(this_wop);
-        were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
+        auto this_wop = were_pointer(this);
+
+        if (events_ != 0)
         {
-            this_wop->close();
-        });
-    }
+            thread()->register_fd(this_wop);
+            were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
+            {
+                this_wop->close();
+            });
+        }
+    });
 }
 
 void were_fd::close()

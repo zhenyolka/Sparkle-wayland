@@ -20,8 +20,6 @@ sparkle_view::sparkle_view(JNIEnv *env, were_pointer<sparkle_service> service, w
     surface_(surface),
     window_(nullptr)
 {
-    auto this_wop = were_pointer(this);
-
     reference();
 
     width_ = 100;
@@ -35,20 +33,25 @@ sparkle_view::sparkle_view(JNIEnv *env, were_pointer<sparkle_service> service, w
 
     no_damage_ = global<sparkle_settings>()->get<bool>("no_damage", false);
 
-    were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
+    add_integrator([this]()
     {
-        this_wop->call_void_method("collapse", "()V");
-        this_wop->unreference();
-    });
+        auto this_wop = were_pointer(this);
 
-    were::connect(surface, &were_surface::damage, this_wop, [this_wop](int x, int y, int width, int height)
-    {
-        this_wop->damage_.expand(x, y, x + width, y + height);
-    });
+        were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
+        {
+            this_wop->call_void_method("collapse", "()V");
+            this_wop->unreference();
+        });
 
-    were::connect(surface, &were_surface::commit, this_wop, [this_wop]()
-    {
-        this_wop->update(false);
+        were::connect(surface_, &were_surface::damage, this_wop, [this_wop](int x, int y, int width, int height)
+        {
+            this_wop->damage_.expand(x, y, x + width, y + height);
+        });
+
+        were::connect(surface_, &were_surface::commit, this_wop, [this_wop]()
+        {
+            this_wop->update(false);
+        });
     });
 }
 

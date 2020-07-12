@@ -38,19 +38,19 @@ sparkle_resource::sparkle_resource(struct wl_resource *resource)
     reference();
     listener_.notify = sparkle_resource::destroy_;
     wl_resource_add_destroy_listener(resource_, &listener_);
-}
 
-void sparkle_resource::managed()
-{
-    auto this_wop = were_pointer(this);
-
-    were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
+    add_integrator([this]()
     {
-        if (this_wop->resource_ != nullptr)
+        auto this_wop = were_pointer(this);
+
+        were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
         {
-            wl_list_remove(&this_wop->listener_.link);
-            this_wop->unreference();
-        }
+            if (this_wop->resource_ != nullptr)
+            {
+                wl_list_remove(&this_wop->listener_.link);
+                this_wop->unreference();
+            }
+        });
     });
 }
 

@@ -61,143 +61,141 @@ sparkle::sparkle(const std::string &home_dir) :
     }
 #endif
 
-
-
-}
-
-void sparkle::managed()
-{
-    auto this_wop = were_pointer(this);
-
-    struct wl_event_loop *loop = wl_display_get_event_loop(display_->get());
-    int fd__ = wl_event_loop_get_fd(loop);
-
-    were_pointer<were_fd> fd = were_new<were_fd>(fd__, EPOLLIN | EPOLLET);
-    were::link(fd, this_wop);
-
-    were::connect(fd, &were_fd::event, this_wop, [this_wop](uint32_t events)
+    add_integrator([this]()
     {
-        struct wl_event_loop *loop = wl_display_get_event_loop(this_wop->display_->get());
-        wl_display_flush_clients(this_wop->display_->get());
-        wl_event_loop_dispatch(loop, 0);
-    });
+        auto this_wop = were_pointer(this);
 
-    were::connect(thread(), &were_thread::idle, this_wop, [this_wop]()
-    {
-        wl_display_flush_clients(this_wop->display_->get());
-    });
+        struct wl_event_loop *loop = wl_display_get_event_loop(display_->get());
+        int fd__ = wl_event_loop_get_fd(loop);
 
-    were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
-    {
-        wl_display_destroy_clients(this_wop->display_->get()); // XXX2
-    });
+        were_pointer<were_fd> fd = were_new<were_fd>(fd__, EPOLLIN | EPOLLET);
+        were::link(fd, this_wop);
 
-    were::connect(output_, &sparkle_global<sparkle_output>::instance, this_wop, [this_wop](were_pointer<sparkle_output> output)
-    {
-        int width = this_wop->width_;
-        int height = this_wop->height_;
-        int dpi = global<sparkle_settings>()->get<int>("DPI", 96);
-        int mm_width = width * 254 / (dpi * 10);
-        int mm_height = height * 254 / (dpi * 10);
-
-        fprintf(stdout, "display size: %dx%d %dx%d\n", width, height, mm_width, mm_height);
-
-        output->send_geometry(0, 0, mm_width, mm_height, 0, "Barely working solutions", "Sparkle", 0);
-
-        if (output->version() >= WL_OUTPUT_SCALE_SINCE_VERSION)
-            output->send_scale(1);
-
-        output->send_mode(WL_OUTPUT_MODE_CURRENT | WL_OUTPUT_MODE_PREFERRED, width, height, 60000);
-
-        if (output->version() >= WL_OUTPUT_DONE_SINCE_VERSION)
-            output->send_done();
-    });
-
-    were::connect(shell_, &sparkle_global<sparkle_shell>::instance, this_wop, [this_wop](were_pointer<sparkle_shell> shell)
-    {
-        were::connect(shell, &sparkle_shell::shell_surface_created, this_wop, [this_wop](were_pointer<sparkle_shell_surface> shell_surface, were_pointer<sparkle_surface> surface)
+        were::connect(fd, &were_fd::event, this_wop, [this_wop](uint32_t events)
         {
-            were::connect(this_wop, &sparkle::keyboard_created, surface, [surface](were_pointer<sparkle_keyboard> keyboard)
-            {
-                surface->register_keyboard(keyboard);
-            });
-
-            were::connect(this_wop, &sparkle::pointer_created, surface, [surface](were_pointer<sparkle_pointer> pointer)
-            {
-                surface->register_pointer(pointer);
-            });
-
-            were::connect(this_wop, &sparkle::touch_created, surface, [surface](were_pointer<sparkle_touch> touch)
-            {
-                surface->register_touch(touch);
-            });
-
-            were::emit(this_wop, &sparkle::surface_created, surface);
-        });
-    });
-
-    were::connect(seat_, &sparkle_global<sparkle_seat>::instance, this_wop, [this_wop](were_pointer<sparkle_seat> seat)
-    {
-        were::connect(seat, &sparkle_seat::keyboard_created, this_wop, [this_wop](were_pointer<sparkle_keyboard> keyboard)
-        {
-            were::connect(this_wop, &sparkle::surface_created, keyboard, [keyboard](were_pointer<sparkle_surface> surface)
-            {
-                surface->register_keyboard(keyboard);
-            });
-
-            were::emit(this_wop, &sparkle::keyboard_created, keyboard);
+            struct wl_event_loop *loop = wl_display_get_event_loop(this_wop->display_->get());
+            wl_display_flush_clients(this_wop->display_->get());
+            wl_event_loop_dispatch(loop, 0);
         });
 
-        were::connect(seat, &sparkle_seat::pointer_created, this_wop, [this_wop](were_pointer<sparkle_pointer> pointer)
+        were::connect(thread(), &were_thread::idle, this_wop, [this_wop]()
         {
-            were::connect(this_wop, &sparkle::surface_created, pointer, [pointer](were_pointer<sparkle_surface> surface)
-            {
-                surface->register_pointer(pointer);
-            });
-
-            were::emit(this_wop, &sparkle::pointer_created, pointer);
+            wl_display_flush_clients(this_wop->display_->get());
         });
 
-        were::connect(seat, &sparkle_seat::touch_created, this_wop, [this_wop](were_pointer<sparkle_touch> touch)
+        were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
         {
-            were::connect(this_wop, &sparkle::surface_created, touch, [touch](were_pointer<sparkle_surface> surface)
+            wl_display_destroy_clients(this_wop->display_->get()); // XXX2
+        });
+
+        were::connect(output_, &sparkle_global<sparkle_output>::instance, this_wop, [this_wop](were_pointer<sparkle_output> output)
+        {
+            int width = this_wop->width_;
+            int height = this_wop->height_;
+            int dpi = global<sparkle_settings>()->get<int>("DPI", 96);
+            int mm_width = width * 254 / (dpi * 10);
+            int mm_height = height * 254 / (dpi * 10);
+
+            fprintf(stdout, "display size: %dx%d %dx%d\n", width, height, mm_width, mm_height);
+
+            output->send_geometry(0, 0, mm_width, mm_height, 0, "Barely working solutions", "Sparkle", 0);
+
+            if (output->version() >= WL_OUTPUT_SCALE_SINCE_VERSION)
+                output->send_scale(1);
+
+            output->send_mode(WL_OUTPUT_MODE_CURRENT | WL_OUTPUT_MODE_PREFERRED, width, height, 60000);
+
+            if (output->version() >= WL_OUTPUT_DONE_SINCE_VERSION)
+                output->send_done();
+        });
+
+        were::connect(shell_, &sparkle_global<sparkle_shell>::instance, this_wop, [this_wop](were_pointer<sparkle_shell> shell)
+        {
+            were::connect(shell, &sparkle_shell::shell_surface_created, this_wop, [this_wop](were_pointer<sparkle_shell_surface> shell_surface, were_pointer<sparkle_surface> surface)
             {
-                surface->register_touch(touch);
+                were::connect(this_wop, &sparkle::keyboard_created, surface, [surface](were_pointer<sparkle_keyboard> keyboard)
+                {
+                    surface->register_keyboard(keyboard);
+                });
+
+                were::connect(this_wop, &sparkle::pointer_created, surface, [surface](were_pointer<sparkle_pointer> pointer)
+                {
+                    surface->register_pointer(pointer);
+                });
+
+                were::connect(this_wop, &sparkle::touch_created, surface, [surface](were_pointer<sparkle_touch> touch)
+                {
+                    surface->register_touch(touch);
+                });
+
+                were::emit(this_wop, &sparkle::surface_created, surface);
+            });
+        });
+
+        were::connect(seat_, &sparkle_global<sparkle_seat>::instance, this_wop, [this_wop](were_pointer<sparkle_seat> seat)
+        {
+            were::connect(seat, &sparkle_seat::keyboard_created, this_wop, [this_wop](were_pointer<sparkle_keyboard> keyboard)
+            {
+                were::connect(this_wop, &sparkle::surface_created, keyboard, [keyboard](were_pointer<sparkle_surface> surface)
+                {
+                    surface->register_keyboard(keyboard);
+                });
+
+                were::emit(this_wop, &sparkle::keyboard_created, keyboard);
             });
 
-            were::emit(this_wop, &sparkle::touch_created, touch);
+            were::connect(seat, &sparkle_seat::pointer_created, this_wop, [this_wop](were_pointer<sparkle_pointer> pointer)
+            {
+                were::connect(this_wop, &sparkle::surface_created, pointer, [pointer](were_pointer<sparkle_surface> surface)
+                {
+                    surface->register_pointer(pointer);
+                });
+
+                were::emit(this_wop, &sparkle::pointer_created, pointer);
+            });
+
+            were::connect(seat, &sparkle_seat::touch_created, this_wop, [this_wop](were_pointer<sparkle_touch> touch)
+            {
+                were::connect(this_wop, &sparkle::surface_created, touch, [touch](were_pointer<sparkle_surface> surface)
+                {
+                    surface->register_touch(touch);
+                });
+
+                were::emit(this_wop, &sparkle::touch_created, touch);
+            });
         });
-    });
 
-#if 0
-    were_pointer<were_timer> timer = were_new<were_timer>(1000, false);
-    timer->link(this_wop);
-    timer->start();
-    were::connect(timer, &were_timer::timeout, this_wop, [this_wop]()
-    {
-        int clients = 0;
-        int resources = 0;
-
-        struct wl_list *list = wl_display_get_client_list(this_wop->display_->get());
-        struct wl_client *client = nullptr;
-        wl_client_for_each(client, list)
+    #if 0
+        were_pointer<were_timer> timer = were_new<were_timer>(1000, false);
+        timer->link(this_wop);
+        timer->start();
+        were::connect(timer, &were_timer::timeout, this_wop, [this_wop]()
         {
-            clients += 1;
+            int clients = 0;
+            int resources = 0;
 
-            wl_client_for_each_resource(client,
-                            [](struct wl_resource *resource, void *user_data) -> wl_iterator_result
-                            {
-                                int *resources = (int *)user_data;
-                                *resources += 1;
-                                return WL_ITERATOR_CONTINUE;
-                            },
-                            &resources);
+            struct wl_list *list = wl_display_get_client_list(this_wop->display_->get());
+            struct wl_client *client = nullptr;
+            wl_client_for_each(client, list)
+            {
+                clients += 1;
 
-        }
+                wl_client_for_each_resource(client,
+                                [](struct wl_resource *resource, void *user_data) -> wl_iterator_result
+                                {
+                                    int *resources = (int *)user_data;
+                                    *resources += 1;
+                                    return WL_ITERATOR_CONTINUE;
+                                },
+                                &resources);
 
-        fprintf(stdout, "clients %d, resources %d.\n", clients, resources);
+            }
+
+            fprintf(stdout, "clients %d, resources %d.\n", clients, resources);
+        });
+    #endif
     });
-#endif
+
 }
 
 were_pointer<sparkle_global<sparkle_output>> sparkle::output() const

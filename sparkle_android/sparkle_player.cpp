@@ -69,13 +69,16 @@ sparkle_player::sparkle_player() :
     result = (*player_buffer_queue_)->RegisterCallback(player_buffer_queue_, callback, this);
     check_result(result);
 
-
-    auto this_wop = were_pointer(this);
-
-    were::connect(check_timer_, &were_timer::timeout, this_wop, [this_wop]()
+    add_integrator([this]()
     {
-        this_wop->check();
-    }); // XXX3 Find better solution
+        auto this_wop = were_pointer(this);
+
+        were::connect(check_timer_, &were_timer::timeout, this_wop, [this_wop]()
+        {
+            this_wop->check();
+        }); // XXX3 Find better solution
+    });
+
 
     state_ = 100;
     stop();

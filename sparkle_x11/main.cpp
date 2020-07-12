@@ -25,42 +25,40 @@ public:
 
     sparkle_x11()
     {
-    }
-
-    void managed() override
-    {
-        were_object::managed();
-
-        auto this_wop = were_pointer(this);
-
-        were_pointer<sparkle_settings> settings = were_new<sparkle_settings>("./sparkle.config");
-        were::link(settings, this_wop);
-        settings->load();
-        global_set<sparkle_settings>(settings);
-
-
-        were_pointer<sparkle> sparkle__ = were_new<sparkle>();
-        were::link(sparkle__, this_wop);
-
-        were_pointer<were_x11_compositor> compositor__ = were_new<were_x11_compositor>();
-        were::link(compositor__, this_wop);
-
-        were::connect(sparkle__->shell(), &sparkle_global<sparkle_shell>::instance, compositor__, [compositor__, this_wop](were_pointer<sparkle_shell> shell)
+        add_integrator([this]()
         {
-            compositor__->register_producer(shell);
-        });
+            auto this_wop = were_pointer(this);
 
-        were_pointer<were_signal_handler> sh = were_new<were_signal_handler>();
-        were::link(sh, this_wop);
-        were::connect(sh, &were_signal_handler::signal, this_wop, [this_wop](uint32_t number) mutable
-        {
-            if (number == SIGINT)
+            were_pointer<sparkle_settings> settings = were_new<sparkle_settings>("./sparkle.config");
+            were::link(settings, this_wop);
+            settings->load();
+            global_set<sparkle_settings>(settings);
+
+
+            were_pointer<sparkle> sparkle__ = were_new<sparkle>();
+            were::link(sparkle__, this_wop);
+
+            were_pointer<were_x11_compositor> compositor__ = were_new<were_x11_compositor>();
+            were::link(compositor__, this_wop);
+
+            were::connect(sparkle__->shell(), &sparkle_global<sparkle_shell>::instance, compositor__, [compositor__, this_wop](were_pointer<sparkle_shell> shell)
             {
-                this_wop->collapse();
-                t_l_global<were_thread>()->exit();
-            }
+                compositor__->register_producer(shell);
+            });
+
+            were_pointer<were_signal_handler> sh = were_new<were_signal_handler>();
+            were::link(sh, this_wop);
+            were::connect(sh, &were_signal_handler::signal, this_wop, [this_wop](uint32_t number) mutable
+            {
+                if (number == SIGINT)
+                {
+                    this_wop->collapse();
+                    t_l_global<were_thread>()->exit();
+                }
+            });
         });
     }
+
 };
 
 int main(int argc, char *argv[])

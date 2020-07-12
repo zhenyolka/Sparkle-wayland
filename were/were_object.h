@@ -8,12 +8,11 @@
 #include <atomic>
 
 
-class were_object :
-    virtual public were_capability_rc,
-    virtual public were_capability_collapse,
-    virtual public were_capability_thread,
-    virtual public were_capability_debug,
-    virtual public were_capability_managed
+class were_object : virtual public were_capability_rc,
+                    virtual public were_capability_integrator,
+                    virtual public were_capability_collapse,
+                    virtual public were_capability_thread,
+                    virtual public were_capability_debug
 {
 public:
 

@@ -21,11 +21,6 @@ were_thread::were_thread() :
         throw were_exception(WE_SIMPLE);
 }
 
-void were_thread::managed()
-{
-    auto this_wop = were_pointer(this);
-}
-
 void were_thread::register_fd(were_pointer<were_fd> fd)
 {
     auto this_wop = were_pointer(this);

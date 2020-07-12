@@ -16,18 +16,17 @@ were_unix_server::were_unix_server(const std::string &path) :
     path_(path),
     fd_(new were_fd(were1_unix_server_create(path_.c_str()), EPOLLIN))
 {
-}
-
-void were_unix_server::managed()
-{
-    auto this_wop = were_pointer(this);
-
-    were::connect(fd_, &were_fd::event, this_wop, [this_wop](uint32_t events)
+    add_integrator([this]()
     {
-        if (events == EPOLLIN)
-            were::emit(this_wop, &were_unix_server::new_connection);
-        else
-            throw were_exception(WE_SIMPLE);
+        auto this_wop = were_pointer(this);
+
+        were::connect(fd_, &were_fd::event, this_wop, [this_wop](uint32_t events)
+        {
+            if (events == EPOLLIN)
+                were::emit(this_wop, &were_unix_server::new_connection);
+            else
+                throw were_exception(WE_SIMPLE);
+        });
     });
 }
 

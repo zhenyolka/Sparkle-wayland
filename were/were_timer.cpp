@@ -14,25 +14,24 @@ were_timer::were_timer(int interval, bool single_shot) :
     interval_(interval), single_shot_(single_shot),
     fd_(new were_fd(timerfd_create(CLOCK_MONOTONIC, 0), EPOLLIN | EPOLLET))
 {
-}
-
-void were_timer::managed()
-{
-    auto this_wop = were_pointer(this);
-
-    were::connect(fd_, &were_fd::event, this_wop, [this_wop](uint32_t events)
+    add_integrator([this]()
     {
-        if (events == EPOLLIN)
+        auto this_wop = were_pointer(this);
+
+        were::connect(fd_, &were_fd::event, this_wop, [this_wop](uint32_t events)
         {
-            uint64_t expirations;
+            if (events == EPOLLIN)
+            {
+                uint64_t expirations;
 
-            if (this_wop->fd_->read(&expirations, sizeof(uint64_t)) != sizeof(uint64_t))
+                if (this_wop->fd_->read(&expirations, sizeof(uint64_t)) != sizeof(uint64_t))
+                    throw were_exception(WE_SIMPLE);
+
+                were::emit(this_wop, &were_timer::timeout);
+            }
+            else
                 throw were_exception(WE_SIMPLE);
-
-            were::emit(this_wop, &were_timer::timeout);
-        }
-        else
-            throw were_exception(WE_SIMPLE);
+        });
     });
 }
 

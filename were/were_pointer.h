@@ -2,8 +2,8 @@
 #define WERE_POINTER_H
 
 #include "were_capability_rc.h"
+#include "were_capability_integrator.h"
 #include "were_capability_sentinel.h"
-#include "were_capability_managed.h"
 #include "were_exception.h"
 
 
@@ -122,9 +122,9 @@ were_pointer<T> were_new(Args &&...args)
     were_pointer<T> result(object__);
     safe_cast<were_capability_rc *>(object__)->unreference();
 
-    if constexpr (std::is_base_of<were_capability_managed, T>::value)
+    if constexpr (std::is_base_of<were_capability_integrator, T>::value)
     {
-        safe_cast<were_capability_managed *>(object__)->managed();
+        safe_cast<were_capability_integrator *>(object__)->integrate();
     }
 
     return result;

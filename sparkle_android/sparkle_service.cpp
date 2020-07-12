@@ -20,18 +20,21 @@ sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
 {
     fprintf(stdout, "sparkle_service\n");
 
-    auto this_wop = were_pointer(this);
-
-    were::link(sparkle_, this_wop);
-
     sparkle_->set_size(display_width(), display_height());
 
-    were_pointer<sparkle_audio> sparkle_audio__ = were_new<sparkle_audio>(global<were_android_application>()->files_dir() + "/audio-0");
-    were::link(sparkle_audio__, this_wop);
-
-    were::connect(sparkle_->shell(), &sparkle_global<sparkle_shell>::instance, this_wop, [this_wop](were_pointer<sparkle_shell> shell)
+    add_integrator([this]()
     {
-        this_wop->register_producer(shell);
+        auto this_wop = were_pointer(this);
+
+        were::link(sparkle_, this_wop);
+
+        were_pointer<sparkle_audio> sparkle_audio__ = were_new<sparkle_audio>(global<were_android_application>()->files_dir() + "/audio-0");
+        were::link(sparkle_audio__, this_wop);
+
+        were::connect(sparkle_->shell(), &sparkle_global<sparkle_shell>::instance, this_wop, [this_wop](were_pointer<sparkle_shell> shell)
+        {
+            this_wop->register_producer(shell);
+        });
     });
 }
 
@@ -51,7 +54,7 @@ void sparkle_service::register_producer(were_pointer<were_surface_producer> prod
 
     were::connect(producer, &were_surface_producer::surface_created, this_wop, [this_wop](were_pointer<were_surface> surface)
     {
-        were_pointer<sparkle_view> view = new were_new<sparkle_view>(env(), this_wop, surface);
+        were_pointer<sparkle_view> view = were_new<sparkle_view>(env(), this_wop, surface);
         were::link(view, surface);
     });
 }

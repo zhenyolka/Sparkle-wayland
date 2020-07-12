@@ -19,27 +19,28 @@ were_android_application::~were_android_application()
 were_android_application::were_android_application(JNIEnv *env, jobject instance) :
     sparkle_java_object(env, instance)
 {
-    auto this_wop = were_pointer(this);
-
     fprintf(stdout, "were_android_application\n");
 
     files_dir_ = call_string_method("files_dir", "()Ljava/lang/String;");
     home_dir_ = call_string_method("home_dir", "()Ljava/lang/String;");
 
-    were_pointer<were_log> logger = were_new<were_log>();
-    were::link(logger, this_wop);
-    logger->capture_stdout();
-    logger->enable_file(files_dir_ + "/log.txt");
-    global_set<were_log>(logger);
+    add_integrator([this]()
+    {
+        auto this_wop = were_pointer(this);
 
+        were_pointer<were_log> logger = were_new<were_log>();
+        were::link(logger, this_wop);
+        logger->capture_stdout();
+        logger->enable_file(files_dir_ + "/log.txt");
+        global_set<were_log>(logger);
+
+        were_pointer<sparkle_settings> settings = were_new<sparkle_settings>(files_dir_ + "/sparkle.config");
+        were::link(settings, this_wop);
+        settings->load();
+        global_set<sparkle_settings>(settings);
+    });
 
     setup();
-
-
-    were_pointer<sparkle_settings> settings = were_new<sparkle_settings>(files_dir_ + "/sparkle.config");
-    were::link(settings, this_wop);
-    settings->load();
-    global_set<sparkle_settings>(settings);
 }
 
 void were_android_application::enable_native_loop(int fd)

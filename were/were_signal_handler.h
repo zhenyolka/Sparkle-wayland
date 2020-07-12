@@ -10,7 +10,6 @@ class were_signal_handler : virtual public were_object
 public:
     ~were_signal_handler();
     were_signal_handler();
-    void managed() override;
 
 signals:
     were_signal<void (uint32_t number)> signal;

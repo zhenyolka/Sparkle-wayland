@@ -17,15 +17,14 @@ class were_fd;
 class were_handler;
 
 class were_thread : virtual public were_capability_rc,
+                    virtual public were_capability_integrator,
                     virtual public were_capability_thread,
                     virtual public were_capability_collapse,
-                    virtual public were_capability_debug,
-                    virtual public were_capability_managed
+                    virtual public were_capability_debug
 {
 public:
     virtual ~were_thread();
     were_thread();
-    void managed() override;
 
     int fd() const { return epoll_fd_; }
 

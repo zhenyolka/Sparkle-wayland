@@ -14,24 +14,23 @@ were_handler::~were_handler()
 were_handler::were_handler() :
     fd_(were_new<were_fd>(eventfd(0, 0), EPOLLIN | EPOLLET))
 {
-}
-
-void were_handler::managed()
-{
-    auto this_wop = were_pointer(this);
-
-    were::connect(fd_, &were_fd::event, this_wop, [this_wop](uint32_t events)
+    add_integrator([this]()
     {
-        if (events == EPOLLIN)
-        {
-            uint64_t counter = 0;
-            if (this_wop->fd_->read(&counter, sizeof(uint64_t)) != sizeof(uint64_t))
-                throw were_exception(WE_SIMPLE);
+        auto this_wop = were_pointer(this);
 
-            this_wop->process_queue();
-        }
-        else
-            throw were_exception(WE_SIMPLE);
+        were::connect(fd_, &were_fd::event, this_wop, [this_wop](uint32_t events)
+        {
+            if (events == EPOLLIN)
+            {
+                uint64_t counter = 0;
+                if (this_wop->fd_->read(&counter, sizeof(uint64_t)) != sizeof(uint64_t))
+                    throw were_exception(WE_SIMPLE);
+
+                this_wop->process_queue();
+            }
+            else
+                throw were_exception(WE_SIMPLE);
+        });
     });
 }
 

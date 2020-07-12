@@ -11,7 +11,6 @@ public:
 
     ~were_fd();
     were_fd(int fd, uint32_t events = 0);
-    void managed() override;
 
     int fd() const { return fd_; }
     uint32_t events() const { return events_; }

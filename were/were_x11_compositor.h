@@ -15,7 +15,6 @@ class were_x11_compositor : virtual public were_object
 public:
     ~were_x11_compositor();
     were_x11_compositor();
-    void managed() override;
 
     void register_producer(were_pointer<were_surface_producer> producer);
     were_pointer<x11_display> display() const { return display_; }

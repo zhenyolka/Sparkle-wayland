@@ -20,13 +20,16 @@ sparkle_audio::sparkle_audio(const std::string &path) :
     server_(new were_unix_server(path)),
     buffer_fd_(-1), buffer_(nullptr), connected_(false)
 {
-    auto this_wop = were_pointer(this);
-
-    chmod(path.c_str(), 0666);
-
-    were::connect(server_, &were_unix_server::new_connection, this_wop, [this_wop]()
+    add_integrator([this, path]()
     {
-        this_wop->connect_client();
+        auto this_wop = were_pointer(this);
+
+        chmod(path.c_str(), 0666);
+
+        were::connect(server_, &were_unix_server::new_connection, this_wop, [this_wop]()
+        {
+            this_wop->connect_client();
+        });
     });
 }
 

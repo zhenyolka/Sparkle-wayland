@@ -13,25 +13,24 @@ were_x11_compositor::~were_x11_compositor()
 were_x11_compositor::were_x11_compositor() :
     display_(were_new<x11_display>(were1_xcb_display_open()))
 {
-}
-
-void were_x11_compositor::managed()
-{
-    auto this_wop = were_pointer(this);
-
-    display_->set_destructor([](struct were1_xcb_display *&display)
+    add_integrator([this]()
     {
-        were1_xcb_display_close(display);
-    });
+        auto this_wop = were_pointer(this);
 
-    int fd__ = were1_xcb_display_fd(display_->get());
+        display_->set_destructor([](struct were1_xcb_display *&display)
+        {
+            were1_xcb_display_close(display);
+        });
 
-    were_pointer<were_fd> fd = were_new<were_fd>(fd__, EPOLLIN | EPOLLET);
-    were::link(fd, this_wop);
+        int fd__ = were1_xcb_display_fd(display_->get());
 
-    were::connect(fd, &were_fd::event, this_wop, [this_wop](uint32_t events)
-    {
-        were1_xcb_display_get_events(this_wop->display_->get(), &were_x11_compositor::handler, this_wop.access());
+        were_pointer<were_fd> fd = were_new<were_fd>(fd__, EPOLLIN | EPOLLET);
+        were::link(fd, this_wop);
+
+        were::connect(fd, &were_fd::event, this_wop, [this_wop](uint32_t events)
+        {
+            were1_xcb_display_get_events(this_wop->display_->get(), &were_x11_compositor::handler, this_wop.access());
+        });
     });
 }
 

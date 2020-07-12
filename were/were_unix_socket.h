@@ -11,7 +11,6 @@ class were_unix_socket : virtual public were_object
 public:
     ~were_unix_socket();
     were_unix_socket(int fd);
-    void managed() override;
 
     void disconnect();
 

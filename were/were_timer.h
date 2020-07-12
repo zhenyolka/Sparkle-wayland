@@ -10,7 +10,6 @@ class were_timer : virtual public were_object
 public:
     ~were_timer();
     were_timer(int interval, bool single_shot = false);
-    void managed() override;
 
     void start();
     void stop();
