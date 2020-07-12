@@ -11,8 +11,8 @@
 
 sparkle_audio::~sparkle_audio()
 {
-    server_->collapse();
-    player_->collapse();
+    server_.collapse();
+    player_.collapse();
 }
 
 sparkle_audio::sparkle_audio(const std::string &path) :
@@ -89,7 +89,7 @@ void sparkle_audio::disconnect_client(were_pointer<were_unix_socket> client)
         buffer_fd_ = -1;
     }
 
-    client->collapse();
+    client.collapse();
 
     connected_ = false;
 }

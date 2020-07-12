@@ -66,7 +66,7 @@ Java_com_sion_sparkle_MainActivity_native_1destroy(JNIEnv *env, jobject instance
 {
     were_pointer<sparkle_main_activity> native__(reinterpret_cast<sparkle_main_activity *>(native));
     native__.decrement_reference_count();
-    native__->collapse();
+    native__.collapse();
 }
 
 extern "C" JNIEXPORT void JNICALL

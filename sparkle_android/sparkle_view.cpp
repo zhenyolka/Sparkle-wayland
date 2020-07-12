@@ -20,8 +20,6 @@ sparkle_view::sparkle_view(JNIEnv *env, were_pointer<sparkle_service> service, w
     surface_(surface),
     window_(nullptr)
 {
-    reference();
-
     width_ = 100;
     height_ = 100;
 
@@ -36,11 +34,12 @@ sparkle_view::sparkle_view(JNIEnv *env, were_pointer<sparkle_service> service, w
     add_integrator([this]()
     {
         auto this_wop = were_pointer(this);
+        this_wop.increment_reference_count();
 
         were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
         {
             this_wop->call_void_method("collapse", "()V");
-            this_wop->unreference();
+            this_wop.decrement_reference_count();
         });
 
         were::connect(surface_, &were_surface::damage, this_wop, [this_wop](int x, int y, int width, int height)

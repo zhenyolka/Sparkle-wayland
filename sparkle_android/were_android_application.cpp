@@ -144,7 +144,7 @@ Java_com_sion_sparkle_WereApplication_native_1destroy(JNIEnv *env, jobject insta
     native__->disable_native_loop();
     //t_l_global<were_thread>()->run_for(1000);
 
-    native__->collapse();
+    native__.collapse();
 
     //fprintf(stdout, "SIGINT\n");
     //raise(SIGINT); /* That is how we deal with program termination and proper resource deallocation! Yeah! */

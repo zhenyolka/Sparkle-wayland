@@ -72,5 +72,5 @@ Java_com_sion_sparkle_SparkleService_native_1destroy(JNIEnv *env, jobject instan
 {
     were_pointer<sparkle_service> native__(reinterpret_cast<sparkle_service *>(native));
     native__.decrement_reference_count();
-    native__->collapse();
+    native__.collapse();
 }

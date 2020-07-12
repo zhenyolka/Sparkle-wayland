@@ -21,7 +21,7 @@ target_include_directories(sparkle_common PUBLIC
     ${SPARKLE_ROOT}/were
 )
 
-set_target_properties(sparkle_common PROPERTIES COMPILE_FLAGS "-Wall -Wextra -Wno-unused-parameter -O0")
+set_target_properties(sparkle_common PROPERTIES COMPILE_FLAGS "-Wall -Wextra -Wno-unused-parameter -O2")
 target_compile_options(sparkle_common PUBLIC $<$<COMPILE_LANGUAGE:CXX>:-std=c++17>)
 
 target_link_libraries(sparkle_common LINK_PUBLIC

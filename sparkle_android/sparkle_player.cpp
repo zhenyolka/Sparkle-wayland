@@ -6,7 +6,7 @@
 
 sparkle_player::~sparkle_player()
 {
-    check_timer_->collapse();
+    check_timer_.collapse();
     (*player_)->Destroy(player_);
     (*output_mix_)->Destroy(output_mix_);
     (*engine_)->Destroy(engine_);
