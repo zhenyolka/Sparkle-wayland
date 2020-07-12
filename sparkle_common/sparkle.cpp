@@ -20,11 +20,11 @@
 
 sparkle::~sparkle()
 {
-    shell_->collapse();
-    seat_->collapse();
-    compositor_->collapse();
-    output_->collapse();
-    display_->collapse();
+    shell_.collapse();
+    seat_.collapse();
+    compositor_.collapse();
+    output_.collapse();
+    display_.collapse();
 }
 
 sparkle::sparkle(const std::string &home_dir) :

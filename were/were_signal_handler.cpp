@@ -30,7 +30,7 @@ were_signal_handler::~were_signal_handler()
     sigprocmask(SIG_UNBLOCK, &mask, NULL);
     fprintf(stdout, "SIGINT unblocked\n");
 
-    fd_->collapse();
+    fd_.collapse();
 }
 
 were_signal_handler::were_signal_handler() :

@@ -105,7 +105,7 @@ namespace were
     {
         were::connect(second, &were_capability_collapse::destroyed, first, [first]()
         {
-            first->collapse();
+            first.collapse();
         });
     }
 

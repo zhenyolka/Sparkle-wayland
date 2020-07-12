@@ -52,7 +52,7 @@ public:
             {
                 if (number == SIGINT)
                 {
-                    this_wop->collapse();
+                    this_wop.collapse();
                     t_l_global<were_thread>()->exit();
                 }
             });

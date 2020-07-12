@@ -3,7 +3,7 @@
 
 #include "were_capability_rc.h"
 
-class were_capability_rc_simple : public were_capability_rc
+class were_capability_rc_simple : virtual public were_capability_rc
 {
 public:
     virtual ~were_capability_rc_simple() {}

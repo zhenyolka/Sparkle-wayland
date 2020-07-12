@@ -9,7 +9,7 @@ were_unix_socket::~were_unix_socket()
 {
     disconnect();
 
-    fd_->collapse();
+    fd_.collapse();
 }
 
 were_unix_socket::were_unix_socket(int fd) :

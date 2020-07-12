@@ -9,7 +9,7 @@ were_unix_server::~were_unix_server()
 {
     were1_unix_server_shutdown(path_.c_str(), fd_->fd());
 
-    fd_->collapse();
+    fd_.collapse();
 }
 
 were_unix_server::were_unix_server(const std::string &path) :

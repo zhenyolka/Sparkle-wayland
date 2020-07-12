@@ -7,7 +7,7 @@
 
 were_timer::~were_timer()
 {
-    fd_->collapse();
+    fd_.collapse();
 }
 
 were_timer::were_timer(int interval, bool single_shot) :

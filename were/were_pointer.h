@@ -101,6 +101,14 @@ public:
     void decrement_reference_count() const { capability<were_capability_rc>()->unreference(); }
     bool operator<(const were_pointer &other) const { return object_ < other.object_; }
 
+    void collapse() const
+    {
+        if constexpr (std::is_base_of<were_capability_integrator, T>::value)
+        {
+            capability<were_capability_integrator>()->disintegrate();
+        }
+    }
+
 private:
 
     void reset()

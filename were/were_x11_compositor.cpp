@@ -7,7 +7,7 @@
 
 were_x11_compositor::~were_x11_compositor()
 {
-    display_->collapse();
+    display_.collapse();
 }
 
 were_x11_compositor::were_x11_compositor() :

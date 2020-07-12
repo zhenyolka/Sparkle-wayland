@@ -8,7 +8,7 @@
 
 were_handler::~were_handler()
 {
-    fd_->collapse();
+    fd_.collapse();
 }
 
 were_handler::were_handler() :

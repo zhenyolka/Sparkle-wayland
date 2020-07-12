@@ -26,26 +26,29 @@ sparkle_resource::sparkle_resource(struct wl_client *client, const struct wl_int
 
     wl_resource_set_implementation(resource_, implementation, this, nullptr);
 
-    auto this_wop = were_pointer(this);
-    this_wop.increment_reference_count();
+    add_integrator([this]()
+    {
+        auto this_wop = were_pointer(this);
 
-    listener_.notify = sparkle_resource::destroy_;
-    wl_resource_add_destroy_listener(resource_, &listener_);
+        listener_.notify = sparkle_resource::destroy_;
+
+        this_wop.increment_reference_count();
+        wl_resource_add_destroy_listener(resource_, &listener_);
+    });
 }
 
 sparkle_resource::sparkle_resource(struct wl_resource *resource)
 {
     resource_ = resource;
 
-    auto this_wop = were_pointer(this);
-    this_wop.increment_reference_count();
-
-    listener_.notify = sparkle_resource::destroy_;
-    wl_resource_add_destroy_listener(resource_, &listener_);
-
     add_integrator([this]()
     {
         auto this_wop = were_pointer(this);
+
+        listener_.notify = sparkle_resource::destroy_;
+
+        this_wop.increment_reference_count();
+        wl_resource_add_destroy_listener(resource_, &listener_);
 
         were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
         {
@@ -65,8 +68,8 @@ void sparkle_resource::destroy_(struct wl_listener *listener, void *data)
     instance->resource_ = nullptr;
 
     were_pointer<sparkle_resource> instance__(instance);
-    instance__->collapse();
     instance__.decrement_reference_count();
+    instance__.collapse();
 }
 
 struct wl_resource *sparkle_resource::resource() const
