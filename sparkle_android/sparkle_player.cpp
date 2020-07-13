@@ -14,7 +14,7 @@ sparkle_player::~sparkle_player()
 
 sparkle_player::sparkle_player() :
     buffer_(nullptr),
-    check_timer_(new were_timer(1000))
+    check_timer_(were_new<were_timer>(1000))
 {
     SLresult result;
 

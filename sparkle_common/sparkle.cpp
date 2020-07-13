@@ -165,10 +165,11 @@ sparkle::sparkle(const std::string &home_dir) :
             });
         });
 
-    #if 0
+#if 0
         were_pointer<were_timer> timer = were_new<were_timer>(1000, false);
-        timer->link(this_wop);
+        were::link(timer, this_wop);
         timer->start();
+
         were::connect(timer, &were_timer::timeout, this_wop, [this_wop]()
         {
             int clients = 0;
@@ -193,7 +194,7 @@ sparkle::sparkle(const std::string &home_dir) :
 
             fprintf(stdout, "clients %d, resources %d.\n", clients, resources);
         });
-    #endif
+#endif
     });
 
 }

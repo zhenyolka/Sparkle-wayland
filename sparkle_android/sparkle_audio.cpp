@@ -16,8 +16,8 @@ sparkle_audio::~sparkle_audio()
 }
 
 sparkle_audio::sparkle_audio(const std::string &path) :
-    player_(new sparkle_player()),
-    server_(new were_unix_server(path)),
+    player_(were_new<sparkle_player>()),
+    server_(were_new<were_unix_server>(path)),
     buffer_fd_(-1), buffer_(nullptr), connected_(false)
 {
     add_integrator([this, path]()

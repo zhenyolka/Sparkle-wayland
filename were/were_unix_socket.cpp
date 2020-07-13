@@ -13,7 +13,7 @@ were_unix_socket::~were_unix_socket()
 }
 
 were_unix_socket::were_unix_socket(int fd) :
-    fd_(new were_fd(fd, EPOLLIN | EPOLLET))
+    fd_(were_new<were_fd>(fd, EPOLLIN | EPOLLET))
 {
     add_integrator([this]()
     {

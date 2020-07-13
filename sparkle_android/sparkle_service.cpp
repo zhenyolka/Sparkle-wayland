@@ -16,7 +16,7 @@ sparkle_service::~sparkle_service()
 
 sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
     sparkle_java_object(env, instance),
-    sparkle_(new sparkle(global<were_android_application>()->files_dir()))
+    sparkle_(were_new<sparkle>(global<were_android_application>()->files_dir()))
 {
     fprintf(stdout, "sparkle_service\n");
 

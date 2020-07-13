@@ -34,6 +34,15 @@ sparkle_resource::sparkle_resource(struct wl_client *client, const struct wl_int
 
         this_wop.increment_reference_count();
         wl_resource_add_destroy_listener(resource_, &listener_);
+
+        were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
+        {
+            if (this_wop->resource_ != nullptr)
+            {
+                wl_list_remove(&this_wop->listener_.link);
+                this_wop.decrement_reference_count();
+            }
+        });
     });
 }
 

@@ -12,7 +12,7 @@ were_timer::~were_timer()
 
 were_timer::were_timer(int interval, bool single_shot) :
     interval_(interval), single_shot_(single_shot),
-    fd_(new were_fd(timerfd_create(CLOCK_MONOTONIC, 0), EPOLLIN | EPOLLET))
+    fd_(were_new<were_fd>(timerfd_create(CLOCK_MONOTONIC, 0), EPOLLIN | EPOLLET))
 {
     add_integrator([this]()
     {
