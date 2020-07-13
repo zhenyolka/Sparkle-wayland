@@ -17,11 +17,11 @@ public:
     ~sparkle_surface();
     sparkle_surface(struct wl_client *client, int version, uint32_t id);
 
-    void *data(); // XXX2 Currently also used to check if data exists
-    int width();
-    int height();
-    int stride();
-    were_surface::buffer_format format();
+    void *data() override; // XXX2 Currently also used to check if data exists
+    int width() override;
+    int height() override;
+    int stride() override;
+    were_surface::buffer_format format() override;
 
     void register_keyboard(were_pointer<sparkle_keyboard> keyboard);
     void register_pointer(were_pointer<sparkle_pointer> pointer);

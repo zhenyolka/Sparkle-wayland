@@ -24,7 +24,7 @@ target_include_directories(sparkle PUBLIC
 )
 
 set_target_properties(sparkle PROPERTIES COMPILE_FLAGS "-Wall -Wextra -Wno-unused-parameter -O2")
-target_compile_options(sparkle PUBLIC $<$<COMPILE_LANGUAGE:CXX>:-std=c++17>)
+target_compile_options(sparkle PUBLIC $<$<COMPILE_LANGUAGE:CXX>:-std=c++17 -Wsuggest-override>)
 
 target_link_libraries(sparkle LINK_PUBLIC
     were

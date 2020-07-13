@@ -13,7 +13,7 @@ public:
     were_exception();
     were_exception(const char *format, ...);
 
-    virtual const char *what() const noexcept
+    virtual const char *what() const noexcept override
     {
         return what_;
     }

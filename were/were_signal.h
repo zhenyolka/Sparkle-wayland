@@ -57,7 +57,7 @@ public:
         mutex_.unlock();
     }
 
-    void remove_connection(uint64_t id)
+    void remove_connection(uint64_t id) override
     {
         mutex_.lock();
         were_pointer<const wrapped_connection_list_type> connections = connections_;
