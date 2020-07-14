@@ -16,7 +16,7 @@ sparkle_view::~sparkle_view()
 }
 
 sparkle_view::sparkle_view(JNIEnv *env, were_pointer<sparkle_service> service, were_pointer<were_surface> surface) :
-    sparkle_java_object(env, "com/sion/sparkle/SparkleView", "(Lcom/sion/sparkle/SparkleService;J)V", service->object1(), jlong(this)),
+    sparkle_java_object(env, "com/sion/sparkle/SparkleView", "(Lcom/sion/sparkle/SparkleService;)V", service->object1()),
     surface_(surface),
     window_(nullptr)
 {
@@ -34,11 +34,15 @@ sparkle_view::sparkle_view(JNIEnv *env, were_pointer<sparkle_service> service, w
     add_integrator([this]()
     {
         auto this_wop = were_pointer(this);
+
         this_wop.increment_reference_count();
+        call_void_method("set_native", "(J)V", jlong(this));
 
         were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
         {
             this_wop->call_void_method("collapse", "()V");
+
+            this_wop->call_void_method("set_native", "(J)V", jlong(nullptr));
             this_wop.decrement_reference_count();
         });
 

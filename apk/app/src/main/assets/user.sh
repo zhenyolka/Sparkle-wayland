@@ -3,10 +3,10 @@ source /data/data/com.sion.sparkle/files/sparkle.sh
 
 function user_start()
 {
-    #check_generic_container source="/dev/block/mmcblk0p36" point="/data/local/tmp/fedora"
-    #check_service user="root" process_name="sshd" command="/sbin/sshd"
-    #check_service user="sion" process_name="Xwayland" command="${xwayland_command?}"
-    #check_rndis
+    check_generic_container source="/dev/block/mmcblk0p36" point="/data/local/tmp/fedora"
+    check_service user="root" process_name="sshd" command="/sbin/sshd"
+    check_service user="sion" process_name="Xwayland" command="${xwayland_command?}"
+    check_rndis
 }
 
 function check_generic_container()
