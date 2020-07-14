@@ -2,7 +2,7 @@
 #define WERE_CLASS_WRAPPER_H
 
 #include "were_capability_rc_simple.h"
-
+#include <utility>
 
 template <typename T>
 class were_class_wrapper : public were_capability_rc_simple, public T
@@ -10,11 +10,7 @@ class were_class_wrapper : public were_capability_rc_simple, public T
 public:
 
     template <typename ...Args>
-    were_class_wrapper(Args... args) : T(args...)
-    {
-    }
-
-    were_class_wrapper()
+    were_class_wrapper(Args &&...args) : T(std::forward<Args>(args)...)
     {
     }
 

@@ -122,7 +122,7 @@ private:
 };
 
 
-template <typename T, typename... Args>
+template <typename T, typename ...Args>
 were_pointer<T> were_new(Args &&...args)
 {
     T *object__ = new T(std::forward<Args>(args)...);

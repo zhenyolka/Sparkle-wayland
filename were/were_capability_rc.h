@@ -4,7 +4,7 @@
 template <typename T>
 class were_pointer;
 
-template <typename T, typename... Args>
+template <typename T, typename ...Args>
 were_pointer<T> were_new(Args &&...args);
 
 class were_capability_rc
@@ -13,7 +13,7 @@ class were_capability_rc
     template <typename T>
     friend class were_pointer;
 
-    template <typename T, typename... Args>
+    template <typename T, typename ...Args>
     friend were_pointer<T> were_new(Args &&...args);
 
 public:
