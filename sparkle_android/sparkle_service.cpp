@@ -26,6 +26,17 @@ sparkle_service::sparkle_service(JNIEnv *env, jobject instance) :
     {
         auto this_wop = were_pointer(this);
 
+        this_wop.increment_reference_count();
+        call_void_method("set_native", "(J)V", jlong(this));
+
+        were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
+        {
+            //this_wop->call_void_method("collapse", "()V");
+
+            this_wop->call_void_method("set_native", "(J)V", jlong(nullptr));
+            this_wop.decrement_reference_count();
+        });
+
         were::link(sparkle_, this_wop);
 
         were_pointer<sparkle_audio> sparkle_audio__ = were_new<sparkle_audio>(global<were_android_application>()->files_dir() + "/audio-0");
@@ -59,18 +70,17 @@ void sparkle_service::register_producer(were_pointer<were_surface_producer> prod
     });
 }
 
-extern "C" JNIEXPORT jlong JNICALL
+extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleService_native_1create(JNIEnv *env, jobject instance)
 {
     were_pointer<sparkle_service> native__ = were_new<sparkle_service>(env, instance);
-    native__.increment_reference_count();
-    return jlong(native__.access());
+    //native__.increment_reference_count();
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_SparkleService_native_1destroy(JNIEnv *env, jobject instance, jlong native)
 {
     were_pointer<sparkle_service> native__(reinterpret_cast<sparkle_service *>(native));
-    native__.decrement_reference_count();
+    //native__.decrement_reference_count();
     native__.collapse();
 }

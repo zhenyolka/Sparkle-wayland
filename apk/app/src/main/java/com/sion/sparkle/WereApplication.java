@@ -36,7 +36,13 @@ public class WereApplication
         fd_listener_ = new MyOnFileDescriptorEventListener();
         idle_handler_ = new MyIdleHandler();
 
-        native_ = native_create();
+        native_create();
+    }
+
+    @Keep
+    public void set_native(long native__)
+    {
+        native_ = native__;
     }
 
     @Keep
@@ -74,17 +80,17 @@ public class WereApplication
         return context_.getApplicationInfo().dataDir;
     }
 
-    private native long native_create();
+    private native void native_create();
     private native void native_destroy(long native__);
     public native void native_loop_fd_event();
     public native void native_loop_idle_event();
 
-    Context context_;
-    long native_ = 0;
-    MessageQueue queue_;
-    MyOnFileDescriptorEventListener fd_listener_ = null;
-    FileDescriptor fd_listener_fd_ = null;
-    MyIdleHandler idle_handler_ = null;
+    private Context context_;
+    private long native_ = 0;
+    private MessageQueue queue_;
+    private MyOnFileDescriptorEventListener fd_listener_ = null;
+    private FileDescriptor fd_listener_fd_ = null;
+    private MyIdleHandler idle_handler_ = null;
 
     public class MyOnFileDescriptorEventListener implements MessageQueue.OnFileDescriptorEventListener
     {

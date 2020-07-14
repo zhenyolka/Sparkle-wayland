@@ -28,6 +28,17 @@ were_android_application::were_android_application(JNIEnv *env, jobject instance
     {
         auto this_wop = were_pointer(this);
 
+        this_wop.increment_reference_count();
+        call_void_method("set_native", "(J)V", jlong(this));
+
+        were::connect(this_wop, &were_object::destroyed, this_wop, [this_wop]()
+        {
+            //this_wop->call_void_method("collapse", "()V");
+
+            this_wop->call_void_method("set_native", "(J)V", jlong(nullptr));
+            this_wop.decrement_reference_count();
+        });
+
         were_pointer<were_log> logger = were_new<were_log>();
         were::link(logger, this_wop);
         logger->capture_stdout();
@@ -103,7 +114,7 @@ void were_android_application::setup()
     env()->DeleteLocalRef(java_assets);
 }
 
-extern "C" JNIEXPORT jlong JNICALL
+extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_WereApplication_native_1create(JNIEnv *env, jobject instance)
 {
     if (created)
@@ -125,21 +136,19 @@ Java_com_sion_sparkle_WereApplication_native_1create(JNIEnv *env, jobject instan
     thread->set_handler(handler);
 
     were_pointer<were_android_application> native__ = were_new<were_android_application>(env, instance);
-    native__.increment_reference_count();
+    //native__.increment_reference_count();
 
     native__->enable_native_loop(dup(thread->fd()));
     thread->handler()->process_queue();
 
     global_set<were_android_application>(native__);
-
-    return jlong(native__.access());
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_WereApplication_native_1destroy(JNIEnv *env, jobject instance, jlong native)
 {
     were_pointer<were_android_application> native__(reinterpret_cast<were_android_application *>(native));
-    native__.decrement_reference_count();
+    //native__.decrement_reference_count();
 
     native__->disable_native_loop();
     //t_l_global<were_thread>()->run_for(1000);

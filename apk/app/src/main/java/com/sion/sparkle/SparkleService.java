@@ -73,7 +73,7 @@ public class SparkleService extends Service
         filter.addAction(ACTION_STOP);
         registerReceiver(receiver_, filter);
 
-        native_ = native_create();
+        native_create();
     }
 
     @Override
@@ -126,6 +126,12 @@ public class SparkleService extends Service
         return null;
     }
 
+    @Keep
+    public void set_native(long native__)
+    {
+        native_ = native__;
+    }
+
     private void createNotificationChannel()
     {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
@@ -165,12 +171,12 @@ public class SparkleService extends Service
         return display_metrics.heightPixels - status_bar_height;
     }
 
-    private native long native_create();
+    private native void native_create();
     private native void native_destroy(long native__);
 
-    long native_;
+    private long native_ = 0;
     WindowManager window_manager_;
-    BroadcastReceiver receiver_;
+    private BroadcastReceiver receiver_;
 
     static
     {
