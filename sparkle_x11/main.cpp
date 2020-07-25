@@ -9,7 +9,7 @@
 #include "sparkle_shell.h"
 #include <csignal>
 #include <cstdio>
-#include "were_registry.h"
+#include "were_slot.h"
 #include "sparkle_settings.h"
 #include "were_log.h"
 #include "were_fd.h"
@@ -25,6 +25,8 @@ public:
 
     ~sparkle_x11()
     {
+        slot<sparkle_settings>().collapse();
+        slot_clear<sparkle_settings>();
     }
 
     sparkle_x11()
@@ -34,9 +36,9 @@ public:
             auto this_wop = were_pointer(this);
 
             were_pointer<sparkle_settings> settings = were_new<sparkle_settings>("./sparkle.config");
-            were::link(settings, this_wop);
+            //were::link(settings, this_wop);
             settings->load();
-            global_set<sparkle_settings>(settings);
+            slot_set<sparkle_settings>(settings);
 
 
             were_pointer<sparkle> sparkle__ = were_new<sparkle>();
@@ -57,7 +59,7 @@ public:
                 if (number == SIGINT)
                 {
                     //this_wop.collapse();
-                    t_l_global<were_thread>()->exit();
+                    t_l_slot<were_thread>()->exit();
                 }
             });
         });
@@ -74,12 +76,12 @@ int main(int argc, char *argv[])
     backtrace.enable();
 
     were_debug *debug = new were_debug();
-    were_registry<were_debug *>::set(debug);
+    were_slot<were_debug *>::set(debug);
 
 
     {
         were_pointer<were_thread> thread = were_new<were_thread>();
-        t_l_global_set<were_thread>(thread);
+        t_l_slot_set<were_thread>(thread);
 
         were_pointer<were_handler> handler = were_new<were_handler>();
         thread->set_handler(handler);
@@ -118,11 +120,11 @@ int main(int argc, char *argv[])
 
         thread->run_for(1000);
 
-        t_l_global_clear<were_thread>();
+        t_l_slot_clear<were_thread>();
     }
 
     debug->stop();
-    were_registry<were_debug *>::clear();
+    were_slot<were_debug *>::clear();
     delete debug;
 
 

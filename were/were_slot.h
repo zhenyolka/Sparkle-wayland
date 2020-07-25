@@ -1,11 +1,11 @@
-#ifndef WERE_REGISTRY_H
-#define WERE_REGISTRY_H
+#ifndef WERE_SLOT_H
+#define WERE_SLOT_H
 
 #include <optional>
 #include <mutex>
 
 template <typename T>
-class were_registry
+class were_slot
 {
 public:
 
@@ -52,13 +52,13 @@ private:
 };
 
 template <typename T>
-std::optional<T> were_registry<T>::value_;
+std::optional<T> were_slot<T>::value_;
 
 template <typename T>
-std::mutex were_registry<T>::mutex_;
+std::mutex were_slot<T>::mutex_;
 
 template <typename T>
-class were_t_l_registry
+class were_t_l_slot
 {
 public:
 
@@ -82,6 +82,6 @@ private:
 };
 
 template <typename T>
-thread_local std::optional<T> were_t_l_registry<T>::value_;
+thread_local std::optional<T> were_t_l_slot<T>::value_;
 
-#endif // WERE_REGISTRY_H
+#endif // WERE_SLOT_H

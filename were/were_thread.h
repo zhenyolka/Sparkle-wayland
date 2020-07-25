@@ -4,7 +4,7 @@
 #include "were_pointer.h"
 #include "were_capability_rc_simple.h"
 #include "were_capability_thread.h"
-#include "were_registry.h"
+#include "were_slot.h"
 #include "were_handler.h"
 #include "were_connect.h"
 #include <cstdint>

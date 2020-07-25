@@ -6,7 +6,7 @@
 #include "sparkle_compositor.h"
 #include "sparkle_seat.h"
 #include "sparkle_shell.h"
-#include "were_registry.h"
+#include "were_slot.h"
 #include "sparkle_settings.h"
 #include "were_timer.h"
 
@@ -92,7 +92,7 @@ sparkle::sparkle(const std::string &home_dir) :
         {
             int width = this_wop->width_;
             int height = this_wop->height_;
-            int dpi = global<sparkle_settings>()->get<int>("DPI", 96);
+            int dpi = slot<sparkle_settings>()->get<int>("DPI", 96);
             int mm_width = width * 254 / (dpi * 10);
             int mm_height = height * 254 / (dpi * 10);
 
