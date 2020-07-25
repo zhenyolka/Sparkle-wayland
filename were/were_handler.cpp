@@ -18,18 +18,13 @@ were_handler::were_handler() :
     {
         auto this_wop = were_pointer(this);
 
-        were::connect(fd_, &were_fd::event, this_wop, [this_wop](uint32_t events)
+        were::connect(fd_, &were_fd::data_in, this_wop, [this_wop]()
         {
-            if (events == EPOLLIN)
-            {
-                uint64_t counter = 0;
-                if (this_wop->fd_->read(&counter, sizeof(uint64_t)) != sizeof(uint64_t))
-                    throw were_exception(WE_SIMPLE);
-
-                this_wop->process_queue();
-            }
-            else
+            uint64_t counter = 0;
+            if (this_wop->fd_->read(&counter, sizeof(uint64_t)) != sizeof(uint64_t))
                 throw were_exception(WE_SIMPLE);
+
+            this_wop->process_queue();
         });
     });
 }

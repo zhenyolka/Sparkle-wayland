@@ -3,6 +3,7 @@
 #include "were_backtrace.h"
 #include "were_debug.h"
 #include "sparkle_settings.h"
+#include "were_fd.h"
 #include <unistd.h> // dup()
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
@@ -39,11 +40,21 @@ were_android_application::were_android_application(JNIEnv *env, jobject instance
             this_wop.decrement_reference_count();
         });
 
-        were_pointer<were_log> logger = were_new<were_log>();
-        were::link(logger, this_wop);
-        logger->capture_stdout();
-        logger->enable_file(files_dir_ + "/log.txt");
-        global_set<were_log>(logger);
+        were_log::enable_file(files_dir_ + "/log.txt");
+
+#if 1
+        were_pointer<were_fd> log_redirect = were_new<were_fd>(stdout_capture(), EPOLLIN);
+        were::connect(log_redirect, &were_fd::destroyed, log_redirect, [log_redirect]()
+        {
+            stdout_restore();
+        });
+        were::link(log_redirect, this_wop);
+        were::connect(log_redirect, &were_fd::data_in, log_redirect, [log_redirect]()
+        {
+            std::vector<char> buffer = log_redirect->read(512);
+            were_log::message(buffer);
+        });
+#endif
 
         were_pointer<sparkle_settings> settings = were_new<sparkle_settings>(files_dir_ + "/sparkle.config");
         were::link(settings, this_wop);

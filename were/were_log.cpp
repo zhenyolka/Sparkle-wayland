@@ -1,63 +1,28 @@
 #include "were_log.h"
-#include "were_fd.h"
+#include "were_exception.h"
 #include <unistd.h>
 #include <cstdio>
-#include <cstdarg>
 #include <fcntl.h>
 #include <sys/stat.h>
 
 
+static int original_stdout_ = -1;
+static int original_stderr_ = -1;
+static bool captured_ = false;
 
-were_log::~were_log()
+
+std::vector<std::function<void (std::vector<char> data)>> were_log::loggers_;
+
+void were_log::enable_fd(int fd)
 {
-    close(original_stdout_);
-    close(original_stderr_);
-}
-
-were_log::were_log()
-{
-    original_stdout_ = dup(fileno(stdout));
-    original_stderr_ = dup(fileno(stderr));
-}
-
-void were_log::capture_stdout()
-{
-    auto this_wop = were_pointer(this);
-
-    int pipe_fd[2];
-
-    if (pipe(pipe_fd) == -1)
-        return;
-
-    dup2(pipe_fd[1], fileno(stdout));
-    dup2(pipe_fd[1], fileno(stderr));
-
-    close(pipe_fd[1]);
-
-    int fd__ = pipe_fd[0];
-
-    setvbuf(stdout, NULL, _IOLBF, 0);
-    setvbuf(stderr, NULL, _IOLBF, 0);
-
-    were_pointer<were_fd> fd = were_new<were_fd>(fd__, EPOLLIN);
-    were::connect(fd, &were_fd::event, this_wop, [this_wop, fd](uint32_t events){ this_wop->event(fd, events); });
-    were::link(fd, this_wop);
-}
-
-void were_log::enable_stdout()
-{
-    auto this_wop = were_pointer(this);
-
-    were::connect(this_wop, &were_log::text, this_wop, [this_wop](std::vector<char> text)
+    add_logger([fd](std::vector<char> data)
     {
-        write(this_wop->original_stdout_, text.data(), text.size());
+        write(fd, data.data(), data.size());
     });
 }
 
 void were_log::enable_file(const std::string &path)
 {
-    auto this_wop = were_pointer(this);
-
     rename(path.c_str(), std::string(path + ".old").c_str());
 
     int fd = open(path.c_str(), O_WRONLY | O_CREAT, 0644);
@@ -67,35 +32,19 @@ void were_log::enable_file(const std::string &path)
 
     fchmod(fd, 0644);
 
-    were::connect(this_wop, &were_log::text, this_wop, [this_wop, fd](std::vector<char> text)
-    {
-        write(fd, text.data(), text.size());
-    });
+    enable_fd(fd);
 }
 
-void were_log::event(were_pointer<were_fd> fd, uint32_t events)
+void were_log::message(const std::vector<char> &data)
 {
-    auto this_wop = were_pointer(this);
-
-    if (events == EPOLLIN)
+    for (auto &logger : loggers_)
     {
-        std::vector<char> buffer;
-        buffer.resize(512);
-        int n = fd->read(buffer.data(), buffer.size());
-        if (n > 0)
-        {
-            buffer.resize(n);
-            were::emit(this_wop, &were_log::text, buffer);
-        }
+        logger(data);
     }
-    else
-        throw were_exception(WE_SIMPLE);
 }
 
 void were_log::message(const char *format, va_list ap)
 {
-    auto this_wop = were_pointer(this);
-
     std::vector<char> buffer;
     buffer.resize(1024);
 
@@ -106,7 +55,7 @@ void were_log::message(const char *format, va_list ap)
 
     buffer.resize(n);
 
-    were::emit(this_wop, &were_log::text, buffer);
+    message(buffer);
 }
 
 void were_log::message(const char *format, ...)
@@ -117,10 +66,47 @@ void were_log::message(const char *format, ...)
     va_end(ap);
 }
 
-void log(const char *format, ...)
+int stdout_capture()
 {
-    va_list ap;
-    va_start(ap, format);
-    global<were_log>()->message(format, ap);
-    va_end(ap);
+    if (captured_)
+        throw were_exception(WE_SIMPLE);
+
+    captured_ = true;
+
+    original_stdout_ = dup(fileno(stdout));
+    original_stderr_ = dup(fileno(stderr));
+
+    int pipe_fd[2];
+
+    if (pipe(pipe_fd) == -1)
+        throw were_exception(WE_SIMPLE);
+
+    dup2(pipe_fd[1], fileno(stdout));
+    dup2(pipe_fd[1], fileno(stderr));
+
+    setvbuf(stdout, NULL, _IOLBF, 0);
+    setvbuf(stderr, NULL, _IOLBF, 0);
+
+    close(pipe_fd[1]);
+
+    return pipe_fd[0];
+}
+
+void stdout_restore()
+{
+    if (!captured_)
+        throw were_exception(WE_SIMPLE);
+
+    captured_ = false;
+
+    dup2(original_stdout_, fileno(stdout));
+    dup2(original_stderr_, fileno(stderr));
+
+    close(original_stdout_);
+    close(original_stderr_);
+}
+
+int original_stdout()
+{
+    return original_stdout_;
 }

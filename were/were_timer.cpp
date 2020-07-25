@@ -18,19 +18,14 @@ were_timer::were_timer(int interval, bool single_shot) :
     {
         auto this_wop = were_pointer(this);
 
-        were::connect(fd_, &were_fd::event, this_wop, [this_wop](uint32_t events)
+        were::connect(fd_, &were_fd::data_in, this_wop, [this_wop]()
         {
-            if (events == EPOLLIN)
-            {
-                uint64_t expirations;
+            uint64_t expirations;
 
-                if (this_wop->fd_->read(&expirations, sizeof(uint64_t)) != sizeof(uint64_t))
-                    throw were_exception(WE_SIMPLE);
-
-                were::emit(this_wop, &were_timer::timeout);
-            }
-            else
+            if (this_wop->fd_->read(&expirations, sizeof(uint64_t)) != sizeof(uint64_t))
                 throw were_exception(WE_SIMPLE);
+
+            were::emit(this_wop, &were_timer::timeout);
         });
     });
 }

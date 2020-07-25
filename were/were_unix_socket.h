@@ -2,11 +2,10 @@
 #define WERE_UNIX_SOCKET_H
 
 #include "were.h"
-#include <string>
+#include "were_fd.h"
 
-class were_fd;
 
-class were_unix_socket : virtual public were_object
+class were_unix_socket : public were_fd
 {
 public:
     ~were_unix_socket();
@@ -14,7 +13,7 @@ public:
 
     void disconnect();
 
-    bool send_all(const char *data, int size);
+    bool send_all(const char *data, int size); // XXX2 move to fd
     bool receive_all(char *data, int size);
     bool send_fds(const int *fds, int n);
     bool receive_fds(int *fds, int n);
@@ -23,11 +22,10 @@ public:
     bool connected() const;
 
 signals:
-    were_signal<void ()> ready_read;
     were_signal<void ()> disconnected;
 
 private:
-    were_pointer<were_fd> fd_;
+    void event_(uint32_t events) override;
 };
 
 #endif // WERE_UNIX_SOCKET_H

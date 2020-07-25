@@ -19,12 +19,14 @@ public:
     void close();
     ssize_t read(void *buffer, size_t count);
     ssize_t write(const void *buffer, size_t count);
+    std::vector<char> read(size_t count);
 
 signals:
-    were_signal<void (uint32_t events)> event;
+    were_signal<void ()> data_in;
+    were_signal<void ()> data_out;
 
 private:
-    void event_(uint32_t events);
+    virtual void event_(uint32_t events);
 
 private:
     int fd_;

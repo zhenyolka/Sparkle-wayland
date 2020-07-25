@@ -53,9 +53,29 @@ ssize_t were_fd::write(const void *buffer, size_t count)
     return ::write(fd_, buffer, count);
 }
 
+std::vector<char> were_fd::read(size_t count)
+{
+    std::vector<char> buffer;
+
+    buffer.resize(count);
+
+    int n = read(buffer.data(), buffer.size());
+    if (n > 0)
+        buffer.resize(n);
+    else
+        buffer.resize(0);
+
+    return buffer;
+}
+
 void were_fd::event_(uint32_t events)
 {
     auto this_wop = were_pointer(this);
 
-    were::emit(this_wop, &were_fd::event, events);
+    if (events == EPOLLIN)
+        were::emit(this_wop, &were_fd::data_in);
+    else if (events == EPOLLOUT)
+        were::emit(this_wop, &were_fd::data_out);
+    else
+        throw were_exception(WE_SIMPLE);
 }

@@ -47,7 +47,7 @@ void sparkle_audio::connect_client()
 
     were_pointer<were_unix_socket> client = server_->accept();
 
-    were::connect(client, &were_unix_socket::ready_read, this_wop, [this_wop, client]()
+    were::connect(client, &were_unix_socket::data_in, this_wop, [this_wop, client]()
     {
         this_wop->read(client);
     });

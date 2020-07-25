@@ -20,12 +20,9 @@ were_unix_server::were_unix_server(const std::string &path) :
     {
         auto this_wop = were_pointer(this);
 
-        were::connect(fd_, &were_fd::event, this_wop, [this_wop](uint32_t events)
+        were::connect(fd_, &were_fd::data_in, this_wop, [this_wop]()
         {
-            if (events == EPOLLIN)
-                were::emit(this_wop, &were_unix_server::new_connection);
-            else
-                throw were_exception(WE_SIMPLE);
+            were::emit(this_wop, &were_unix_server::new_connection);
         });
     });
 }

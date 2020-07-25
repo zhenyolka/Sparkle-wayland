@@ -71,7 +71,7 @@ sparkle::sparkle(const std::string &home_dir) :
         were_pointer<were_fd> fd = were_new<were_fd>(fd__, EPOLLIN | EPOLLET);
         were::link(fd, this_wop);
 
-        were::connect(fd, &were_fd::event, this_wop, [this_wop](uint32_t events)
+        were::connect(fd, &were_fd::data_in, this_wop, [this_wop]()
         {
             struct wl_event_loop *loop = wl_display_get_event_loop(this_wop->display_->get());
             wl_display_flush_clients(this_wop->display_->get());

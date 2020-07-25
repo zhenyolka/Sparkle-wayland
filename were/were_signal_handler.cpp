@@ -40,19 +40,14 @@ were_signal_handler::were_signal_handler() :
     {
         auto this_wop = were_pointer(this);
 
-        were::connect(fd_, &were_fd::event, this_wop, [this_wop](uint32_t events)
+        were::connect(fd_, &were_fd::data_in, this_wop, [this_wop]()
         {
-            if (events == EPOLLIN)
-            {
-                struct signalfd_siginfo si;
+            struct signalfd_siginfo si;
 
-                if (this_wop->fd_->read(&si, sizeof(struct signalfd_siginfo)) != sizeof(struct signalfd_siginfo))
-                    throw were_exception(WE_SIMPLE);
-
-                were::emit(this_wop, &were_signal_handler::signal, si.ssi_signo);
-            }
-            else
+            if (this_wop->fd_->read(&si, sizeof(struct signalfd_siginfo)) != sizeof(struct signalfd_siginfo))
                 throw were_exception(WE_SIMPLE);
+
+            were::emit(this_wop, &were_signal_handler::signal, si.ssi_signo);
         });
     });
 }

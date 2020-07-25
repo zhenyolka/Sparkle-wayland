@@ -27,7 +27,7 @@ were_x11_compositor::were_x11_compositor() :
         were_pointer<were_fd> fd = were_new<were_fd>(fd__, EPOLLIN | EPOLLET);
         were::link(fd, this_wop);
 
-        were::connect(fd, &were_fd::event, this_wop, [this_wop](uint32_t events)
+        were::connect(fd, &were_fd::data_in, this_wop, [this_wop]()
         {
             were1_xcb_display_get_events(this_wop->display_->get(), &were_x11_compositor::handler, this_wop.access());
         });

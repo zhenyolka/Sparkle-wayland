@@ -12,7 +12,11 @@
 #include "were_registry.h"
 #include "sparkle_settings.h"
 #include "were_log.h"
+#include "were_fd.h"
+#include <unistd.h>
 
+
+#define STDOUT_CAP
 
 
 class sparkle_x11 : virtual public were_object
@@ -63,6 +67,9 @@ public:
 
 int main(int argc, char *argv[])
 {
+    were_log::enable_fd(dup(fileno(stdout)));
+    were_log::enable_file("sparkle.log");
+
     were_backtrace backtrace;
     backtrace.enable();
 
@@ -77,6 +84,18 @@ int main(int argc, char *argv[])
         were_pointer<were_handler> handler = were_new<were_handler>();
         thread->set_handler(handler);
 
+#ifdef STDOUT_CAP
+        were_pointer<were_fd> log_redirect = were_new<were_fd>(stdout_capture(), EPOLLIN);
+        were::connect(log_redirect, &were_fd::destroyed, log_redirect, [log_redirect]()
+        {
+            stdout_restore();
+        });
+        were::connect(log_redirect, &were_fd::data_in, log_redirect, [log_redirect]()
+        {
+            std::vector<char> buffer = log_redirect->read(512);
+            were_log::message(buffer);
+        });
+#endif
 
         were_pointer<sparkle_x11> sparkle__ = were_new<sparkle_x11>();
 
@@ -86,6 +105,10 @@ int main(int argc, char *argv[])
         thread->run();
 
         sparkle__.collapse();
+
+#ifdef STDOUT_CAP
+        log_redirect.collapse();
+#endif
 
         thread->run_for(1000);
 
