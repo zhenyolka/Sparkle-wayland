@@ -25,8 +25,8 @@ public:
 
     ~sparkle_x11()
     {
-        slot<sparkle_settings>().collapse();
-        slot_clear<sparkle_settings>();
+        were_slot<were_pointer<sparkle_settings>>::get().collapse();
+        were_slot<were_pointer<sparkle_settings>>::clear();
     }
 
     sparkle_x11()
@@ -38,7 +38,7 @@ public:
             were_pointer<sparkle_settings> settings = were_new<sparkle_settings>("./sparkle.config");
             //were::link(settings, this_wop);
             settings->load();
-            slot_set<sparkle_settings>(settings);
+            were_slot<were_pointer<sparkle_settings>>::set(settings);
 
 
             were_pointer<sparkle> sparkle__ = were_new<sparkle>();
@@ -59,7 +59,7 @@ public:
                 if (number == SIGINT)
                 {
                     //this_wop.collapse();
-                    t_l_slot<were_thread>()->exit();
+                    were_t_l_slot<were_pointer<were_thread>>::get()->exit();
                 }
             });
         });
@@ -70,7 +70,7 @@ public:
 int main(int argc, char *argv[])
 {
     were_log::enable_fd(dup(fileno(stdout)));
-    were_log::enable_file("sparkle.log");
+    //were_log::enable_file("sparkle.log");
 
     were_backtrace backtrace;
     backtrace.enable();
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 
     {
         were_pointer<were_thread> thread = were_new<were_thread>();
-        t_l_slot_set<were_thread>(thread);
+        were_t_l_slot<were_pointer<were_thread>>::set(thread);
 
         were_pointer<were_handler> handler = were_new<were_handler>();
         thread->set_handler(handler);
@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
 
         thread->run_for(1000);
 
-        t_l_slot_clear<were_thread>();
+        were_t_l_slot<were_pointer<were_thread>>::clear();
     }
 
     debug->stop();

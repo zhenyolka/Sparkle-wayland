@@ -1,6 +1,5 @@
 #include "were_fd.h"
 #include "were_thread.h"
-#include "were_global.h"
 #include <unistd.h>
 
 

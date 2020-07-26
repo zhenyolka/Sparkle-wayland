@@ -1,5 +1,4 @@
 #include "were_capability_thread_simple.h"
-#include "were_global.h"
 #include "were_thread.h"
 
 were_capability_thread_simple::~were_capability_thread_simple()
@@ -7,7 +6,7 @@ were_capability_thread_simple::~were_capability_thread_simple()
 }
 
 were_capability_thread_simple::were_capability_thread_simple() :
-    thread_(t_l_slot<were_thread>())
+    thread_(were_t_l_slot<were_pointer<were_thread>>::get())
 {
 }
 
