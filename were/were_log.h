@@ -1,6 +1,7 @@
 #ifndef WERE_LOG_H
 #define WERE_LOG_H
 
+#include "were_slot.h"
 #include <cstdarg>
 #include <functional>
 #include <vector>
@@ -10,18 +11,23 @@ class were_log
 {
 public:
 
-    static void add_logger(const std::function<void (std::vector<char> data)> &f) { loggers_.push_back(f); }
-    static void enable_fd(int fd);
-    static void enable_file(const std::string &path);
+    ~were_log();
+    were_log();
 
-    static void message(const std::vector<char> &data);
-    static void message(const char *format, va_list ap);
-    static void message(const char *format, ...);
+    void add_logger(const std::function<void (std::vector<char> data)> &f) { loggers_.push_back(f); }
+    void enable_fd(int fd);
+    void enable_file(const std::string &path);
+
+    void message(const std::vector<char> &data);
+    void message(const char *format, va_list ap);
+    void message(const char *format, ...);
 
 private:
-    static std::vector<std::function<void (std::vector<char> data)>> loggers_;
+    std::vector<std::function<void (std::vector<char> data)>> loggers_;
 };
 
+void log(const std::vector<char> &data);
+void log(const char *format, ...);
 
 int stdout_capture();
 void stdout_restore();

@@ -40,7 +40,8 @@ were_android_application::were_android_application(JNIEnv *env, jobject instance
             this_wop.decrement_reference_count();
         });
 
-        were_log::enable_file(files_dir_ + "/log.txt");
+
+        were_slot<were_log *>::get()->enable_file(files_dir_ + "/log.txt");
 
 #if 1
         were_pointer<were_fd> log_redirect = were_new<were_fd>(stdout_capture(), EPOLLIN);
@@ -52,14 +53,14 @@ were_android_application::were_android_application(JNIEnv *env, jobject instance
         were::connect(log_redirect, &were_fd::data_in, log_redirect, [log_redirect]()
         {
             std::vector<char> buffer = log_redirect->read(512);
-            were_log::message(buffer);
+            log(buffer);
         });
 #endif
 
         were_pointer<sparkle_settings> settings = were_new<sparkle_settings>(files_dir_ + "/sparkle.config");
         were::link(settings, this_wop);
         settings->load();
-        global_set<sparkle_settings>(settings);
+        were_slot<were_pointer<sparkle_settings>>::set(settings);
     });
 
     setup();
@@ -132,16 +133,18 @@ Java_com_sion_sparkle_WereApplication_native_1create(JNIEnv *env, jobject instan
         throw were_exception(WE_SIMPLE);
     created = true;
 
+    were_log *logger = new were_log();
+    were_slot<were_log *>::set(logger);
 
     were_backtrace *backtrace = new were_backtrace();
     backtrace->enable();
 
     were_debug *debug = new were_debug();
-    were_registry<were_debug *>::set(debug);
+    were_slot<were_debug *>::set(debug);
     debug->start();
 
     were_pointer<were_thread> thread = were_new<were_thread>();
-    t_l_global_set<were_thread>(thread);
+    were_t_l_slot<were_pointer<were_thread>>::set(thread);
 
     were_pointer<were_handler> handler = were_new<were_handler>();
     thread->set_handler(handler);
@@ -152,7 +155,7 @@ Java_com_sion_sparkle_WereApplication_native_1create(JNIEnv *env, jobject instan
     native__->enable_native_loop(dup(thread->fd()));
     thread->handler()->process_queue();
 
-    global_set<were_android_application>(native__);
+    were_slot<were_pointer<were_android_application>>::set(native__);
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -173,11 +176,11 @@ Java_com_sion_sparkle_WereApplication_native_1destroy(JNIEnv *env, jobject insta
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_WereApplication_native_1loop_1fd_1event(JNIEnv *env, jobject instance, jlong user)
 {
-    t_l_global<were_thread>()->run_once();
+    were_t_l_slot<were_pointer<were_thread>>::get()->run_once();
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_sion_sparkle_WereApplication_native_1loop_1idle_1event(JNIEnv *env, jobject instance, jlong user)
 {
-    were::emit(t_l_global<were_thread>(), &were_thread::idle);
+    were::emit(were_t_l_slot<were_pointer<were_thread>>::get(), &were_thread::idle);
 }

@@ -69,8 +69,9 @@ public:
 
 int main(int argc, char *argv[])
 {
-    were_log::enable_fd(dup(fileno(stdout)));
-    //were_log::enable_file("sparkle.log");
+    were_log *logger = new were_log();
+    logger->enable_fd(dup(fileno(stdout)));
+    were_slot<were_log *>::set(logger);
 
     were_backtrace backtrace;
     backtrace.enable();
@@ -95,7 +96,7 @@ int main(int argc, char *argv[])
         were::connect(log_redirect, &were_fd::data_in, log_redirect, [log_redirect]()
         {
             std::vector<char> buffer = log_redirect->read(512);
-            were_log::message(buffer);
+            log(buffer);
         });
 #endif
 
@@ -126,6 +127,9 @@ int main(int argc, char *argv[])
     debug->stop();
     were_slot<were_debug *>::clear();
     delete debug;
+
+    were_slot<were_log *>::clear();
+    delete logger;
 
 
     fprintf(stdout, "Done.\n");

@@ -1,6 +1,7 @@
 #ifndef WERE_SLOT_H
 #define WERE_SLOT_H
 
+#include "were_exception.h"
 #include <optional>
 #include <mutex>
 
@@ -25,6 +26,9 @@ public:
 
     static T &get()
     {
+        if (!value_.has_value())
+            throw were_exception(WE_SIMPLE);
+
         return value_.value();
     }
 

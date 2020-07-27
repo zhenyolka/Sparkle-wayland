@@ -11,7 +11,13 @@ static int original_stderr_ = -1;
 static bool captured_ = false;
 
 
-std::vector<std::function<void (std::vector<char> data)>> were_log::loggers_;
+were_log::~were_log()
+{
+}
+
+were_log::were_log()
+{
+}
 
 void were_log::enable_fd(int fd)
 {
@@ -63,6 +69,19 @@ void were_log::message(const char *format, ...)
     va_list ap;
     va_start(ap, format);
     message(format, ap);
+    va_end(ap);
+}
+
+void log(const std::vector<char> &data)
+{
+    were_slot<were_log *>::get()->message(data);
+}
+
+void log(const char *format, ...)
+{
+    va_list ap;
+    va_start(ap, format);
+    were_slot<were_log *>::get()->message(format, ap);
     va_end(ap);
 }
 
