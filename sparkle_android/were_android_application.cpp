@@ -2,7 +2,7 @@
 #include "were_exception.h"
 #include "were_backtrace.h"
 #include "were_debug.h"
-#include "sparkle_settings.h"
+#include "were_settings.h"
 #include "were_fd.h"
 #include <unistd.h> // dup()
 #include <android/asset_manager.h>
@@ -57,10 +57,10 @@ were_android_application::were_android_application(JNIEnv *env, jobject instance
         });
 #endif
 
-        were_pointer<sparkle_settings> settings = were_new<sparkle_settings>(files_dir_ + "/sparkle.config");
+        were_pointer<were_settings> settings = were_new<were_settings>(files_dir_ + "/sparkle.config");
         were::link(settings, this_wop);
         settings->load();
-        were_slot<were_pointer<sparkle_settings>>::set(settings);
+        were_slot<were_pointer<were_settings>>::set(settings);
     });
 
     setup();

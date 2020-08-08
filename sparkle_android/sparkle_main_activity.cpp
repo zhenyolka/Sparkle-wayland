@@ -1,6 +1,6 @@
 #include "sparkle_main_activity.h"
 #include "were_android_application.h"
-#include "sparkle_settings.h"
+#include "were_settings.h"
 #include <jni.h>
 #include <thread>
 //#include <sys/stat.h> // chmod()
@@ -27,7 +27,7 @@ void sparkle_main_activity::user()
 {
     chdir(were_slot<were_pointer<were_android_application>>::get()->files_dir().c_str());
 
-    std::string command = were_slot<were_pointer<sparkle_settings>>::get()->get<std::string>("on_start", "");
+    std::string command = were_slot<were_pointer<were_settings>>::get()->get<std::string>("on_start", "");
 
     std::system(command.c_str());
 
@@ -36,7 +36,7 @@ void sparkle_main_activity::user()
 
 void sparkle_main_activity::start()
 {
-    were_slot<were_pointer<sparkle_settings>>::get()->load(); // XXX2 Auto reload based on timestamp?
+    were_slot<were_pointer<were_settings>>::get()->load(); // XXX2 Auto reload based on timestamp?
 
     if (!user_busy_)
     {

@@ -10,7 +10,7 @@
 #include <csignal>
 #include <cstdio>
 #include "were_slot.h"
-#include "sparkle_settings.h"
+#include "were_settings.h"
 #include "were_log.h"
 #include "were_fd.h"
 #include <unistd.h>
@@ -25,8 +25,8 @@ public:
 
     ~sparkle_x11() override
     {
-        were_slot<were_pointer<sparkle_settings>>::get().collapse();
-        were_slot<were_pointer<sparkle_settings>>::clear();
+        were_slot<were_pointer<were_settings>>::get().collapse();
+        were_slot<were_pointer<were_settings>>::clear();
     }
 
     sparkle_x11()
@@ -35,10 +35,10 @@ public:
         {
             auto this_wop = were_pointer(this);
 
-            were_pointer<sparkle_settings> settings = were_new<sparkle_settings>("./sparkle.config");
+            were_pointer<were_settings> settings = were_new<were_settings>("./sparkle.config");
             //were::link(settings, this_wop);
             settings->load();
-            were_slot<were_pointer<sparkle_settings>>::set(settings);
+            were_slot<were_pointer<were_settings>>::set(settings);
 
 
             were_pointer<sparkle> sparkle__ = were_new<sparkle>();

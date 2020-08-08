@@ -1,5 +1,5 @@
-#ifndef SPARKLE_SETTINGS_H
-#define SPARKLE_SETTINGS_H
+#ifndef WERE_SETTINGS_H
+#define WERE_SETTINGS_H
 
 #include "were_object.h"
 #include <string>
@@ -9,17 +9,17 @@
 #include <mutex>
 
 
-struct sparkle_settings_handler
+struct were_settings_handler
 {
     std::regex re;
     std::function<void (const std::smatch &match)> f;
 };
 
-class sparkle_settings : virtual public were_object
+class were_settings : virtual public were_object
 {
 public:
-    ~sparkle_settings() override;
-    explicit sparkle_settings(const std::string &path);
+    ~were_settings() override;
+    explicit were_settings(const std::string &path);
 
     void load();
 
@@ -51,8 +51,8 @@ private:
 private:
     std::string path_;
     std::map<std::string, std::variant<std::string, bool, int, double>> settings_;
-    std::vector<sparkle_settings_handler> handlers_;
+    std::vector<were_settings_handler> handlers_;
     std::mutex mutex_;
 };
 
-#endif // SPARKLE_SETTINGS_H
+#endif // WERE_SETTINGS_H

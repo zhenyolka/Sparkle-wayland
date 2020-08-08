@@ -43,7 +43,7 @@ class were_timer;
 class sparkle_player : virtual public were_object
 {
 public:
-    ~sparkle_player();
+    ~sparkle_player() override;
     sparkle_player();
 
     void set_buffer(struct sparkle_audio_buffer *buffer) { buffer_ = buffer; }

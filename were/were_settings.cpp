@@ -1,15 +1,15 @@
-#include "sparkle_settings.h"
+#include "were_settings.h"
 #include "were_exception.h"
 #include <fstream>
 #include <regex>
 #include <cstdio>
 
 
-sparkle_settings::~sparkle_settings()
+were_settings::~were_settings()
 {
 }
 
-sparkle_settings::sparkle_settings(const std::string &path) :
+were_settings::were_settings(const std::string &path) :
     path_(path)
 {
     register_handler("#.*", [](const std::smatch &match)
@@ -37,13 +37,13 @@ sparkle_settings::sparkle_settings(const std::string &path) :
     });
 }
 
-void sparkle_settings::register_handler(const std::string &pattern,
+void were_settings::register_handler(const std::string &pattern,
     const std::function<void (const std::smatch &match)> &handler)
 {
     handlers_.push_back({std::regex(pattern), handler});
 }
 
-void sparkle_settings::process_line(const std::string &line)
+void were_settings::process_line(const std::string &line)
 {
     bool ok = false;
 
@@ -62,7 +62,7 @@ void sparkle_settings::process_line(const std::string &line)
         throw were_exception(WE_SIMPLE);
 }
 
-void sparkle_settings::load()
+void were_settings::load()
 {
     mutex_.lock();
 

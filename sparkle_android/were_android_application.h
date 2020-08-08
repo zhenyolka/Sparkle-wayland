@@ -9,7 +9,7 @@ class AAssetManager;
 class were_android_application : virtual public were_object, public sparkle_java_object
 {
 public:
-    ~were_android_application();
+    ~were_android_application() override;
     were_android_application(JNIEnv *env, jobject instance);
 
     std::string files_dir() const { return files_dir_; }

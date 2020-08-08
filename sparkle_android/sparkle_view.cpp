@@ -2,7 +2,7 @@
 #include "sparkle_keymap.h"
 #include "were_surface.h"
 #include "were_upload.h"
-#include "sparkle_settings.h"
+#include "were_settings.h"
 #include <android/native_window_jni.h>
 #include <linux/input-event-codes.h>
 
@@ -23,13 +23,13 @@ sparkle_view::sparkle_view(JNIEnv *env, were_pointer<sparkle_service> service, w
     width_ = 100;
     height_ = 100;
 
-    bool fast = were_slot<were_pointer<sparkle_settings>>::get()->get<bool>("fast", false);
+    bool fast = were_slot<were_pointer<were_settings>>::get()->get<bool>("fast", false);
     if (fast)
         format_ = 5;
     else
         format_ = WINDOW_FORMAT_RGBX_8888;
 
-    no_damage_ = were_slot<were_pointer<sparkle_settings>>::get()->get<bool>("no_damage", false);
+    no_damage_ = were_slot<were_pointer<were_settings>>::get()->get<bool>("no_damage", false);
 
     add_integrator([this]()
     {

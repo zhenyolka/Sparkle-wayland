@@ -13,8 +13,8 @@ class were_unix_socket;
 class sparkle_audio : virtual public were_object
 {
 public:
-    ~sparkle_audio();
-    sparkle_audio(const std::string &path);
+    ~sparkle_audio() override;
+    explicit sparkle_audio(const std::string &path);
 
 private:
     void connect_client();

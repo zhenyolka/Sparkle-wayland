@@ -10,7 +10,7 @@ class sparkle;
 class sparkle_service : virtual public were_object, public sparkle_java_object
 {
 public:
-    ~sparkle_service();
+    ~sparkle_service() override;
     sparkle_service(JNIEnv *env, jobject instance);
 
     int display_width() const;

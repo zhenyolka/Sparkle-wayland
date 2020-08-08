@@ -8,7 +8,7 @@
 class sparkle_main_activity : virtual public were_object, public sparkle_java_object
 {
 public:
-    ~sparkle_main_activity();
+    ~sparkle_main_activity() override;
     sparkle_main_activity(JNIEnv *env, jobject instance);
 
     void start();

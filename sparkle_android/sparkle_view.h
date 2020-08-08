@@ -20,7 +20,7 @@ class sparkle_view : virtual public were_object, public sparkle_java_object
     Java_com_sion_sparkle_SparkleView_surface_1changed(JNIEnv *env, jobject instance, jlong user, jobject surface);
 
 public:
-    ~sparkle_view();
+    ~sparkle_view() override;
     sparkle_view(JNIEnv *env, were_pointer<sparkle_service> service, were_pointer<were_surface> surface);
 
     were_pointer<were_surface> surface() const { return surface_; }

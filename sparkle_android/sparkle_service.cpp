@@ -4,7 +4,6 @@
 #include "sparkle_audio.h"
 #include "sparkle_global.h"
 #include "sparkle_shell.h"
-#include "sparkle_settings.h"
 #include "were_android_application.h"
 
 
