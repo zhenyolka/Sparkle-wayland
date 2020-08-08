@@ -117,5 +117,5 @@ static void uploader_2(void *destination, const void *source,
 
 namespace were_upload
 {
-    uploader_type uploader[3] = {uploader_0, uploader_1, uploader_2};
+    uploader_type uploader[3] = {uploader_0, uploader_1, uploader_2}; // NOLINT
 } // namespace were_upload

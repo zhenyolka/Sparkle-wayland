@@ -14,7 +14,7 @@ static const char *power_source = "/sys/class/power_supply/battery/current_now";
 static int cpu_state_read(cpu_state *state)
 {
     FILE *file = NULL;
-    char cpu[16];
+    char cpu[16]; // NOLINT
     int n = 0;
 
     file = fopen("/proc/stat", "re");
@@ -41,7 +41,7 @@ error:
 static int get_power()
 {
     int fd = 0;
-    char buffer[32];
+    char buffer[32]; // NOLINT
     int n = 0;
     int current = 0;
 

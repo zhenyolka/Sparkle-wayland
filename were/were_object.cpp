@@ -16,7 +16,7 @@ std::string were_object::dump() const
     else if (state() == integration_state::disintegrated)
         state__ = state_disintegrated;
 
-    char buffer[1024];
+    char buffer[1024]; // NOLINT
     snprintf(buffer, 1024, "%-20p%-45.44s%-5d%-10s", this, typeid(*this).name(), reference_count(), state__);
 
     return std::string(buffer);

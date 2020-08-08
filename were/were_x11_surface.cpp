@@ -7,7 +7,7 @@
 
 
 
-static const int button_map[6] = {0, BTN_LEFT, BTN_MIDDLE, BTN_RIGHT, BTN_GEAR_UP, BTN_GEAR_DOWN};
+static const std::array<int, 6> button_map = {0, BTN_LEFT, BTN_MIDDLE, BTN_RIGHT, BTN_GEAR_UP, BTN_GEAR_DOWN};
 
 
 were_x11_surface::~were_x11_surface()

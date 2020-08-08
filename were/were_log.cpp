@@ -95,7 +95,7 @@ int stdout_capture()
     original_stdout_ = dup(fileno(stdout));
     original_stderr_ = dup(fileno(stderr));
 
-    int pipe_fd[2];
+    int pipe_fd[2]; // NOLINT
 
     if (pipe(pipe_fd) == -1)
         throw were_exception(WE_SIMPLE);

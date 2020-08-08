@@ -67,45 +67,41 @@ void were_backtrace::handler(int n)
     std::_Exit(-1);
 }
 
-struct backtrace_state
+class backtrace_state
 {
-    void **current;
-    void **end;
+public:
+    std::vector<_Unwind_Ptr> list_;
 };
 
 _Unwind_Reason_Code unwind_callback(struct _Unwind_Context *context, void *arg)
 {
-    struct backtrace_state *state = static_cast<struct backtrace_state *>(arg);
+    backtrace_state *state = static_cast<backtrace_state *>(arg);
 
     _Unwind_Ptr pc = _Unwind_GetIP(context);
 
     if (pc)
     {
-        if (state->current == state->end)
-            return _URC_END_OF_STACK;
+        if (state->list_.size() < 100)
+        {
+            state->list_.push_back(pc);
+        }
         else
-            *state->current++ = (void *)(pc); // NOLINT
+        {
+            return _URC_END_OF_STACK;
+        }
     }
 
     return _URC_NO_REASON;
 }
 
-void were1_backtrace_print()
+void were_backtrace::print_backtrace()
 {
-    const int max = 100;
-    void *buffer[max];
-
-    struct backtrace_state state = {};
-    state.current = buffer;
-    state.end = buffer + max;
-
+    backtrace_state state;
     _Unwind_Backtrace(unwind_callback, &state);
 
-    int count = (int)(state.current - buffer);
-
-    for (int i = 0; i < count; ++i)
+    for (unsigned int i = 0; i < state.list_.size(); ++i)
     {
-        const void *addr = buffer[i];
+        const void *addr = reinterpret_cast<void *>(state.list_[i]);
         const char *symbol = "";
 
         Dl_info info;
@@ -115,15 +111,9 @@ void were1_backtrace_print()
         int status = 0;
         char *demangled = __cxxabiv1::__cxa_demangle(symbol, nullptr, nullptr, &status);
 
-        log("%03d: 0x%p %s\n", i, addr,
-            (demangled != NULL && status == 0) ? demangled : symbol);
+        log("%03d: 0x%p %s\n", i, addr, (demangled != nullptr && status == 0) ? demangled : symbol);
 
-        if (demangled != NULL)
-            free(demangled);
+        if (demangled != nullptr)
+            free(demangled); // NOLINT
     }
-}
-
-void were_backtrace::print_backtrace()
-{
-    were1_backtrace_print();
 }

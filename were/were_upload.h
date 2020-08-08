@@ -8,7 +8,7 @@ typedef void (*uploader_type)(void *destination, const void *source,
 
 namespace were_upload
 {
-    extern uploader_type uploader[3];
+    extern uploader_type uploader[3]; // NOLINT
 } // namespace were_upload
 
 #endif // WERE_UPLOAD_H

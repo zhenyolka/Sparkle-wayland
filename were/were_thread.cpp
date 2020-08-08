@@ -45,9 +45,9 @@ void were_thread::unregister_fd(were_pointer<were_fd> fd)
 
 void were_thread::process_events(int timeout)
 {
-    struct epoll_event events[MAX_EVENTS];
+    std::array<struct epoll_event, MAX_EVENTS> events = {};
 
-    int n = epoll_wait(epoll_fd_, events, MAX_EVENTS, timeout);
+    int n = epoll_wait(epoll_fd_, events.data(), MAX_EVENTS, timeout);
     if (n == -1 && errno != EINTR)
         throw were_exception(WE_SIMPLE_ERRNO);
 
@@ -106,7 +106,7 @@ were_pointer<were_thread> were_thread::thread() const
 
 std::string were_thread::dump() const
 {
-    char buffer[1024];
+    char buffer[1024]; // NOLINT
     snprintf(buffer, 1024, "%-20p%-45.44s%-5d%-10s", this, typeid(*this).name(), reference_count(), "?");
 
     return std::string(buffer);
