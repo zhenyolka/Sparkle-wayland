@@ -27,8 +27,7 @@ public:
 
     void button_up(int button)
     {
-        if (button == BTN_GEAR_UP) {}
-        else if (button == BTN_GEAR_DOWN) {}
+        if (button == BTN_GEAR_UP || button == BTN_GEAR_DOWN) {}
         else
             send_button(sparkle::next_serial(display_), sparkle::current_msecs(), button, WL_POINTER_BUTTON_STATE_RELEASED);
     }

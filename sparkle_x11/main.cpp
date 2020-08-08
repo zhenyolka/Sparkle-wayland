@@ -23,7 +23,7 @@ class sparkle_x11 : virtual public were_object
 {
 public:
 
-    ~sparkle_x11()
+    ~sparkle_x11() override
     {
         were_slot<were_pointer<sparkle_settings>>::get().collapse();
         were_slot<were_pointer<sparkle_settings>>::clear();

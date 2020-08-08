@@ -27,7 +27,7 @@ public:
 
     void operator()() const
     {
-        for (auto &item : items_)
+        for (const auto &item : items_)
         {
             item.signal->remove_connection(item.id);
         }

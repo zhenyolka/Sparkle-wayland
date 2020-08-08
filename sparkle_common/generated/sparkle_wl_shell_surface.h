@@ -6,9 +6,9 @@
 class sparkle_wl_shell_surface : public sparkle_resource
 {
 public:
-    ~sparkle_wl_shell_surface();
+    ~sparkle_wl_shell_surface() override;
     sparkle_wl_shell_surface(struct wl_client *client, int version, uint32_t id);
-    sparkle_wl_shell_surface(struct wl_resource *resource);
+    explicit sparkle_wl_shell_surface(struct wl_resource *resource);
 
     void send_ping(uint32_t serial);
     void send_configure(uint32_t edges, int32_t width, int32_t height);

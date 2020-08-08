@@ -6,9 +6,9 @@
 class sparkle_wl_seat : public sparkle_resource
 {
 public:
-    ~sparkle_wl_seat();
+    ~sparkle_wl_seat() override;
     sparkle_wl_seat(struct wl_client *client, int version, uint32_t id);
-    sparkle_wl_seat(struct wl_resource *resource);
+    explicit sparkle_wl_seat(struct wl_resource *resource);
 
     void send_capabilities(uint32_t capabilities);
     void send_name(const char *name);

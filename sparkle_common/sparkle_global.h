@@ -11,7 +11,7 @@ class sparkle_global : virtual public were_object
 {
 public:
 
-    ~sparkle_global()
+    ~sparkle_global() override
     {
         wl_global_destroy(global_);
     }

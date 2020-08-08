@@ -14,7 +14,7 @@ class sparkle_wl_callback;
 class sparkle_surface : public sparkle_wl_surface, public were_surface
 {
 public:
-    ~sparkle_surface();
+    ~sparkle_surface() override;
     sparkle_surface(struct wl_client *client, int version, uint32_t id);
 
     void *data() override; // XXX2 Currently also used to check if data exists

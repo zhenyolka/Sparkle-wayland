@@ -21,7 +21,7 @@ class were_thread : virtual public were_capability_rc_simple,
                     virtual public were_capability_debug
 {
 public:
-    virtual ~were_thread();
+    ~were_thread() override;
     were_thread();
 
     int fd() const { return epoll_fd_; }

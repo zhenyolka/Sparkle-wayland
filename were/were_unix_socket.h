@@ -8,8 +8,8 @@
 class were_unix_socket : public were_fd
 {
 public:
-    ~were_unix_socket();
-    were_unix_socket(int fd);
+    ~were_unix_socket() override;
+    explicit were_unix_socket(int fd);
 
     void disconnect();
 

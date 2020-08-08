@@ -8,7 +8,7 @@ class were_surface;
 class were_surface_producer : virtual public were_object
 {
 public:
-    ~were_surface_producer();
+    ~were_surface_producer() override;
     were_surface_producer();
 
 signals:

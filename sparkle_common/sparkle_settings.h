@@ -18,8 +18,8 @@ struct sparkle_settings_handler
 class sparkle_settings : virtual public were_object
 {
 public:
-    ~sparkle_settings();
-    sparkle_settings(const std::string &path);
+    ~sparkle_settings() override;
+    explicit sparkle_settings(const std::string &path);
 
     void load();
 

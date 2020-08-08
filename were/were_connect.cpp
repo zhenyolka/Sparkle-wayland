@@ -9,4 +9,4 @@ namespace were
     {
         return next_id_++;
     }
-}
+} // namespace were

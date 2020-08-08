@@ -10,7 +10,7 @@ class were_fd;
 class were_handler : public were_object
 {
 public:
-    ~were_handler();
+    ~were_handler() override;
     were_handler();
 
     void process_queue();

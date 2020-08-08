@@ -10,13 +10,13 @@ class sparkle_keyboard : public sparkle_wl_keyboard
 {
 public:
 
-    ~sparkle_keyboard()
+    ~sparkle_keyboard() override
     {
         wl_array_release(&keys_);
     }
 
     sparkle_keyboard(struct wl_client *client, int version, uint32_t id, were_pointer<sparkle_display> display) :
-        sparkle_wl_keyboard(client, version, id), display_(display)
+        sparkle_wl_keyboard(client, version, id), display_(display), keys_({})
     {
         wl_array_init(&keys_);
     }

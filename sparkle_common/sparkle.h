@@ -26,8 +26,8 @@ class sparkle_touch;
 class sparkle : virtual public were_object
 {
 public:
-    ~sparkle();
-    sparkle(const std::string &home_dir = std::string());
+    ~sparkle() override;
+    explicit sparkle(const std::string &home_dir = std::string());
 
     were_pointer<sparkle_global<sparkle_output>> output() const;
     were_pointer<sparkle_global<sparkle_compositor>> compositor() const;
@@ -41,7 +41,7 @@ public:
 
     static uint32_t current_msecs()
     {
-        struct timespec ts;
+        struct timespec ts = {};
         clock_gettime(CLOCK_MONOTONIC, &ts);
 
         return (int64_t)ts.tv_sec * 1000 + ts.tv_nsec / 1000000;

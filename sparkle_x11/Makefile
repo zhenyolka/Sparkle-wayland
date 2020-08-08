@@ -15,5 +15,5 @@ check:
 	stat build/sparkle | grep Size:
 
 clean:
-	rm -rf build
+	rm -rf build/*
 

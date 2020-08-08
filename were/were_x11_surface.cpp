@@ -50,11 +50,11 @@ void were_x11_surface::process(xcb_generic_event_t *event)
 {
     auto this_wop = were_pointer(this);
 
-    switch (event->response_type & ~0x80)
+    switch (event->response_type & ~0x80UL)
     {
         case XCB_EXPOSE:
         {
-            xcb_expose_event_t *ev = (xcb_expose_event_t *)event;
+            xcb_expose_event_t *ev = reinterpret_cast<xcb_expose_event_t *>(event);
             if (ev->window == window_->window)
             {
                 update(true);
@@ -63,7 +63,7 @@ void were_x11_surface::process(xcb_generic_event_t *event)
         }
         case XCB_BUTTON_PRESS:
         {
-            xcb_button_press_event_t *ev = (xcb_button_press_event_t *)event;
+            xcb_button_press_event_t *ev = reinterpret_cast<xcb_button_press_event_t *>(event);
             if (ev->event == window_->window)
             {
 #if TOUCH_MODE
@@ -77,7 +77,7 @@ void were_x11_surface::process(xcb_generic_event_t *event)
         }
         case XCB_BUTTON_RELEASE:
         {
-            xcb_button_release_event_t *ev = (xcb_button_release_event_t *)event;
+            xcb_button_release_event_t *ev = reinterpret_cast<xcb_button_release_event_t *>(event);
             if (ev->event == window_->window)
             {
 #if TOUCH_MODE
@@ -91,7 +91,7 @@ void were_x11_surface::process(xcb_generic_event_t *event)
         }
         case XCB_MOTION_NOTIFY:
         {
-            xcb_motion_notify_event_t *ev = (xcb_motion_notify_event_t *)event;
+            xcb_motion_notify_event_t *ev = reinterpret_cast<xcb_motion_notify_event_t *>(event);
             if (ev->event == window_->window)
             {
 #if TOUCH_MODE
@@ -105,7 +105,7 @@ void were_x11_surface::process(xcb_generic_event_t *event)
         }
         case XCB_ENTER_NOTIFY:
         {
-            xcb_enter_notify_event_t *ev = (xcb_enter_notify_event_t *)event;
+            xcb_enter_notify_event_t *ev = reinterpret_cast<xcb_enter_notify_event_t *>(event);
             if (ev->event == window_->window)
             {
 #if TOUCH_MODE
@@ -118,7 +118,7 @@ void were_x11_surface::process(xcb_generic_event_t *event)
         }
         case XCB_LEAVE_NOTIFY:
         {
-            xcb_leave_notify_event_t *ev = (xcb_leave_notify_event_t *)event;
+            xcb_leave_notify_event_t *ev = reinterpret_cast<xcb_leave_notify_event_t *>(event);
             if (ev->event == window_->window)
             {
 #if TOUCH_MODE
@@ -130,7 +130,7 @@ void were_x11_surface::process(xcb_generic_event_t *event)
         }
         case XCB_KEY_PRESS:
         {
-            xcb_key_press_event_t *ev = (xcb_key_press_event_t *)event;
+            xcb_key_press_event_t *ev = reinterpret_cast<xcb_key_press_event_t *>(event);
             if (ev->event == window_->window)
             {
                 were::emit(surface_, &were_surface::key_down, ev->detail);
@@ -139,7 +139,7 @@ void were_x11_surface::process(xcb_generic_event_t *event)
         }
         case XCB_KEY_RELEASE:
         {
-            xcb_key_release_event_t *ev = (xcb_key_release_event_t *)event;
+            xcb_key_release_event_t *ev = reinterpret_cast<xcb_key_release_event_t *>(event);
             if (ev->event == window_->window)
             {
                 were::emit(surface_, &were_surface::key_up, ev->detail);

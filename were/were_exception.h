@@ -9,11 +9,11 @@
 class were_exception : public std::exception
 {
 public:
-    ~were_exception();
+    ~were_exception() override;
     were_exception();
-    were_exception(const char *format, ...);
+    explicit were_exception(const char *format, ...);
 
-    virtual const char *what() const noexcept override
+    const char *what() const noexcept override
     {
         return what_;
     }

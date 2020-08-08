@@ -17,7 +17,7 @@ typedef were_object_wrapper<were_object_wrapper_primitive<struct were1_xcb_displ
 class were_x11_surface : virtual public were_object
 {
 public:
-    ~were_x11_surface();
+    ~were_x11_surface() override;
     were_x11_surface(were_pointer<were_x11_compositor> compositor, were_pointer<were_surface> surface);
 
 private:

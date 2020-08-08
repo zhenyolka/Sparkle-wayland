@@ -6,9 +6,9 @@
 class sparkle_wl_surface : public sparkle_resource
 {
 public:
-    ~sparkle_wl_surface();
+    ~sparkle_wl_surface() override;
     sparkle_wl_surface(struct wl_client *client, int version, uint32_t id);
-    sparkle_wl_surface(struct wl_resource *resource);
+    explicit sparkle_wl_surface(struct wl_resource *resource);
 
     void send_enter(struct wl_resource *output);
     void send_leave(struct wl_resource *output);

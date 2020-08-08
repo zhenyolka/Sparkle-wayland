@@ -9,8 +9,10 @@
 #include <mutex>
 #endif
 
-struct cpu_state
+class cpu_state
 {
+public:
+    cpu_state() : user(0), nice(0), system(0), idle(0) {}
     uint64_t user;
     uint64_t nice;
     uint64_t system;
@@ -42,7 +44,7 @@ private:
 private:
     were_elapsed_timer real_;
     were_elapsed_timer cpu_;
-    struct cpu_state state1_, state2_;
+    cpu_state state1_, state2_;
     std::thread thread_;
     bool run_;
     int object_count_;

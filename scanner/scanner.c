@@ -89,9 +89,9 @@ void scanner_write_header(struct interface *i)
 
     fprintf(output, "public:\n");
 
-    fprintf(output, "    ~sparkle_%s();\n", i->name);
+    fprintf(output, "    ~sparkle_%s() override;\n", i->name);
     fprintf(output, "    sparkle_%s(struct wl_client *client, int version, uint32_t id);\n", i->name);
-    fprintf(output, "    sparkle_%s(struct wl_resource *resource);\n\n", i->name);
+    fprintf(output, "    explicit sparkle_%s(struct wl_resource *resource);\n\n", i->name);
 
     wl_list_for_each(message, &i->event_list, link)
         scanner_write_method(output, message);

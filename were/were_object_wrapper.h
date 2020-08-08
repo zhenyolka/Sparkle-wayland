@@ -17,7 +17,7 @@ public:
             destructor_(primitive_);
     }
 
-    were_object_wrapper_primitive(T primitive) :
+    explicit were_object_wrapper_primitive(T primitive) :
         primitive_(primitive), destructor_(nullptr)
     {
     }

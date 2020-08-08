@@ -9,8 +9,8 @@ class were_fd : public were_object
     friend class were_thread;
 public:
 
-    ~were_fd();
-    were_fd(int fd, uint32_t events = 0);
+    ~were_fd() override;
+    explicit were_fd(int fd, uint32_t events = 0);
 
     int fd() const { return fd_; }
     uint32_t events() const { return events_; }

@@ -10,7 +10,7 @@ class were_class_wrapper : public were_capability_rc_simple, public T
 public:
 
     template <typename ...Args>
-    were_class_wrapper(Args &&...args) : T(std::forward<Args>(args)...)
+    explicit were_class_wrapper(Args &&...args) : T(std::forward<Args>(args)...)
     {
     }
 

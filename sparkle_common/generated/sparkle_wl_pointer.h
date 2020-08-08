@@ -6,9 +6,9 @@
 class sparkle_wl_pointer : public sparkle_resource
 {
 public:
-    ~sparkle_wl_pointer();
+    ~sparkle_wl_pointer() override;
     sparkle_wl_pointer(struct wl_client *client, int version, uint32_t id);
-    sparkle_wl_pointer(struct wl_resource *resource);
+    explicit sparkle_wl_pointer(struct wl_resource *resource);
 
     void send_enter(uint32_t serial, struct wl_resource *surface, wl_fixed_t surface_x, wl_fixed_t surface_y);
     void send_leave(uint32_t serial, struct wl_resource *surface);

@@ -8,7 +8,7 @@ class were_elapsed_timer
 {
 public:
     ~were_elapsed_timer();
-    were_elapsed_timer(clockid_t clk_id = CLOCK_MONOTONIC);
+    explicit were_elapsed_timer(clockid_t clk_id = CLOCK_MONOTONIC);
 
     void start();
     uint64_t elapsed_ns(bool reset = false);

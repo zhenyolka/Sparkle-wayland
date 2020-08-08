@@ -20,7 +20,7 @@ were_timer::were_timer(int interval, bool single_shot) :
 
         were::connect(fd_, &were_fd::data_in, this_wop, [this_wop]()
         {
-            uint64_t expirations;
+            uint64_t expirations = 0;
 
             if (this_wop->fd_->read(&expirations, sizeof(uint64_t)) != sizeof(uint64_t))
                 throw were_exception(WE_SIMPLE);
@@ -32,7 +32,7 @@ were_timer::were_timer(int interval, bool single_shot) :
 
 void were_timer::start()
 {
-    struct itimerspec new_value;
+    struct itimerspec new_value = {};
 
     new_value.it_value.tv_sec = interval_ / 1000;
     new_value.it_value.tv_nsec = (interval_ % 1000) * 1000000;
@@ -54,7 +54,7 @@ void were_timer::start()
 
 void were_timer::stop()
 {
-    struct itimerspec new_value;
+    struct itimerspec new_value = {};
 
     new_value.it_value.tv_sec = 0;
     new_value.it_value.tv_nsec = 0;

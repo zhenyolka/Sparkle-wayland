@@ -44,14 +44,14 @@ public:
     }
 
     template <typename T2>
-    were_pointer(const were_pointer<T2> &other)
+    were_pointer(const were_pointer<T2> &other) // NOLINT(hicpp-explicit-conversions)
     {
         object_ = other.object_;
 
         capability<were_capability_rc>()->reference();
     }
 
-    were_pointer &operator=(const were_pointer &other)
+    were_pointer &operator=(const were_pointer &other) // NOLINT(bugprone-unhandled-self-assignment, cert-oop54-cpp)
     {
         reset();
 

@@ -52,10 +52,11 @@ void were_backtrace::enable()
 void were_backtrace::handler(int n)
 {
     const char *name = nullptr;
-    switch(n)
+    switch (n)
     {
         case SIGABRT: name = "SIGABRT";  break;
         case SIGSEGV: name = "SIGSEGV";  break;
+        default: name = "?"; break;
     }
 
     if (name)
@@ -74,7 +75,7 @@ struct backtrace_state
 
 _Unwind_Reason_Code unwind_callback(struct _Unwind_Context *context, void *arg)
 {
-    struct backtrace_state *state = (struct backtrace_state *)arg;
+    struct backtrace_state *state = static_cast<struct backtrace_state *>(arg);
 
     _Unwind_Ptr pc = _Unwind_GetIP(context);
 
@@ -83,7 +84,7 @@ _Unwind_Reason_Code unwind_callback(struct _Unwind_Context *context, void *arg)
         if (state->current == state->end)
             return _URC_END_OF_STACK;
         else
-            *state->current++ = (void *)(pc);
+            *state->current++ = (void *)(pc); // NOLINT
     }
 
     return _URC_NO_REASON;
@@ -94,7 +95,7 @@ void were1_backtrace_print()
     const int max = 100;
     void *buffer[max];
 
-    struct backtrace_state state;
+    struct backtrace_state state = {};
     state.current = buffer;
     state.end = buffer + max;
 
@@ -112,7 +113,7 @@ void were1_backtrace_print()
             symbol = info.dli_sname;
 
         int status = 0;
-        char *demangled = __cxxabiv1::__cxa_demangle(symbol, 0, 0, &status);
+        char *demangled = __cxxabiv1::__cxa_demangle(symbol, nullptr, nullptr, &status);
 
         log("%03d: 0x%p %s\n", i, addr,
             (demangled != NULL && status == 0) ? demangled : symbol);

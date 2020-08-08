@@ -27,7 +27,7 @@ void were_thread::register_fd(were_pointer<were_fd> fd)
 
     fd.increment_reference_count();
 
-    struct epoll_event event;
+    struct epoll_event event = {};
     event.events = fd->events();
     event.data.ptr = fd.access();
 

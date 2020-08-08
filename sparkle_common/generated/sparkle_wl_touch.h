@@ -6,9 +6,9 @@
 class sparkle_wl_touch : public sparkle_resource
 {
 public:
-    ~sparkle_wl_touch();
+    ~sparkle_wl_touch() override;
     sparkle_wl_touch(struct wl_client *client, int version, uint32_t id);
-    sparkle_wl_touch(struct wl_resource *resource);
+    explicit sparkle_wl_touch(struct wl_resource *resource);
 
     void send_down(uint32_t serial, uint32_t time, struct wl_resource *surface, int32_t id, wl_fixed_t x, wl_fixed_t y);
     void send_up(uint32_t serial, uint32_t time, int32_t id);

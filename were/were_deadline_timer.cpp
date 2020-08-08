@@ -16,8 +16,8 @@ uint64_t were_deadline_timer::remaining_time()
 
     if (elapsed >= ms_)
         return 0ULL;
-    else
-        return ms_ - elapsed;
+
+    return ms_ - elapsed;
 }
 
 bool were_deadline_timer::has_expired()

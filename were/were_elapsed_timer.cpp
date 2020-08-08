@@ -5,7 +5,7 @@ were_elapsed_timer::~were_elapsed_timer()
 }
 
 were_elapsed_timer::were_elapsed_timer(clockid_t clk_id) :
-    clk_id_(clk_id)
+    clk_id_(clk_id), ts_({})
 {
 }
 
@@ -16,7 +16,7 @@ void were_elapsed_timer::start()
 
 uint64_t were_elapsed_timer::elapsed_ns(bool reset)
 {
-    struct timespec now;
+    struct timespec now = {};
 
     clock_gettime(clk_id_, &now);
 

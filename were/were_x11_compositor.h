@@ -13,7 +13,7 @@ typedef were_object_wrapper<were_object_wrapper_primitive<struct were1_xcb_displ
 class were_x11_compositor : virtual public were_object
 {
 public:
-    ~were_x11_compositor();
+    ~were_x11_compositor() override;
     were_x11_compositor();
 
     void register_producer(were_pointer<were_surface_producer> producer);

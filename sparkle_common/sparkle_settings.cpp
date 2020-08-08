@@ -12,7 +12,7 @@ sparkle_settings::~sparkle_settings()
 sparkle_settings::sparkle_settings(const std::string &path) :
     path_(path)
 {
-    register_handler("#.*", [this](const std::smatch &match)
+    register_handler("#.*", [](const std::smatch &match)
     {
     });
 

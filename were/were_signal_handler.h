@@ -8,7 +8,7 @@ class were_fd;
 class were_signal_handler : virtual public were_object
 {
 public:
-    ~were_signal_handler();
+    ~were_signal_handler() override;
     were_signal_handler();
 
 signals:

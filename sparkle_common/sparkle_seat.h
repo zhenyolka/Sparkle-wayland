@@ -21,7 +21,7 @@ public:
 
             auto this_wop = were_pointer(this);
 
-            int caps = 0;
+            uint32_t caps = 0;
             caps |= WL_SEAT_CAPABILITY_KEYBOARD;
             caps |= WL_SEAT_CAPABILITY_POINTER;
             caps |= WL_SEAT_CAPABILITY_TOUCH;

@@ -42,7 +42,7 @@ were_signal_handler::were_signal_handler() :
 
         were::connect(fd_, &were_fd::data_in, this_wop, [this_wop]()
         {
-            struct signalfd_siginfo si;
+            struct signalfd_siginfo si = {};
 
             if (this_wop->fd_->read(&si, sizeof(struct signalfd_siginfo)) != sizeof(struct signalfd_siginfo))
                 throw were_exception(WE_SIMPLE);

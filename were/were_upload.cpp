@@ -11,14 +11,14 @@ struct sparkle_pixel
 };
 
 static void uploader_0(void *destination, const void *source,
-    int source_stride_bytes, int destination_stride_bytes, int x1, int y1, int x2, int y2)
+    int source_stride_bytes, int destination_stride_bytes, uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2)
 {
     const char *source_c = reinterpret_cast<const char *>(source);
     char *destination_c = reinterpret_cast<char *>(destination);
-    int offset = x1 * 4;
-    int length = (x2 - x1) * 4;
+    uint32_t offset = x1 * 4;
+    uint32_t length = (x2 - x1) * 4;
 
-    for (int y = y1; y < y2; ++y)
+    for (uint32_t y = y1; y < y2; ++y)
     {
         std::memcpy
         (
@@ -30,7 +30,7 @@ static void uploader_0(void *destination, const void *source,
 }
 
 static void uploader_1(void *destination, const void *source,
-    int source_stride_bytes, int destination_stride_bytes, int x1, int y1, int x2, int y2)
+    int source_stride_bytes, int destination_stride_bytes, uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2)
 {
 #if 0
     const uint32_t *source_i = reinterpret_cast<const uint32_t *>(source);
@@ -48,18 +48,18 @@ static void uploader_1(void *destination, const void *source,
     const uint64_t *source_i = reinterpret_cast<const uint64_t *>(source);
     uint64_t *destination_i = reinterpret_cast<uint64_t *>(destination);
 
-    for (int y = y1; y < y2; ++y)
+    for (uint32_t y = y1; y < y2; ++y)
     {
         const uint64_t *source_i_l = &source_i[source_stride_bytes * y / 8];
         uint64_t *destination_i_l = &destination_i[destination_stride_bytes * y / 8];
-        for (int x = x1 / 2; x < (x2 + 1) / 2; ++x)
+        for (uint32_t x = x1 / 2; x < (x2 + 1) / 2; ++x)
             destination_i_l[x] = source_i_l[x] | 0xFF000000FF000000ULL;
     }
 #endif
 }
 
 static void uploader_2(void *destination, const void *source,
-    int source_stride_bytes, int destination_stride_bytes, int x1, int y1, int x2, int y2)
+    int source_stride_bytes, int destination_stride_bytes, uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2)
 {
 #if 0
     const sparkle_pixel *source_p = reinterpret_cast<const sparkle_pixel *>(source);
@@ -100,16 +100,16 @@ static void uploader_2(void *destination, const void *source,
     const uint64_t *source_i = reinterpret_cast<const uint64_t *>(source);
     uint64_t *destination_i = reinterpret_cast<uint64_t *>(destination);
 
-    for (int y = y1; y < y2; ++y)
+    for (uint32_t y = y1; y < y2; ++y)
     {
         const uint64_t *source_i_l = &source_i[source_stride_bytes * y / 8];
         uint64_t *destination_i_l = &destination_i[destination_stride_bytes * y / 8];
-        for (int x = x1 / 2; x < (x2 + 1) / 2; ++x)
+        for (uint32_t x = x1 / 2; x < (x2 + 1) / 2; ++x)
         {
             destination_i_l[x] =
-            ((source_i_l[x] >> 16) & 0x000000FF000000FFULL) |
-            ((source_i_l[x] << 0)  & 0x0000FF000000FF00ULL) |
-            ((source_i_l[x] << 16) & 0x00FF000000FF0000ULL);
+            ((source_i_l[x] >> 16UL) & 0x000000FF000000FFULL) |
+            ((source_i_l[x] << 0UL)  & 0x0000FF000000FF00ULL) |
+            ((source_i_l[x] << 16UL) & 0x00FF000000FF0000ULL);
         }
     }
 #endif
@@ -118,4 +118,4 @@ static void uploader_2(void *destination, const void *source,
 namespace were_upload
 {
     uploader_type uploader[3] = {uploader_0, uploader_1, uploader_2};
-};
+} // namespace were_upload

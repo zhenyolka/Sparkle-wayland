@@ -31,7 +31,7 @@ void were_log::enable_file(const std::string &path)
 {
     rename(path.c_str(), std::string(path + ".old").c_str());
 
-    int fd = open(path.c_str(), O_WRONLY | O_CREAT, 0644);
+    int fd = open(path.c_str(), O_WRONLY | O_CREAT | O_CLOEXEC, 0644); // NOLINT(hicpp-signed-bitwise)
 
     if (fd == -1)
         return;

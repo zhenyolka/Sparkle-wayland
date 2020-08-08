@@ -7,9 +7,9 @@
 class sparkle_resource : virtual public were_object
 {
 public:
-    ~sparkle_resource();
+    ~sparkle_resource() override;
     sparkle_resource(struct wl_client *client, const struct wl_interface *interface, int version, uint32_t id, const void *implementation);
-    sparkle_resource(struct wl_resource *resource);
+    explicit sparkle_resource(struct wl_resource *resource);
 
     struct wl_resource *resource() const;
     int version() const;

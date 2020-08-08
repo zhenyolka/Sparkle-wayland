@@ -6,9 +6,9 @@
 class sparkle_wl_buffer : public sparkle_resource
 {
 public:
-    ~sparkle_wl_buffer();
+    ~sparkle_wl_buffer() override;
     sparkle_wl_buffer(struct wl_client *client, int version, uint32_t id);
-    sparkle_wl_buffer(struct wl_resource *resource);
+    explicit sparkle_wl_buffer(struct wl_resource *resource);
 
     void send_release();
 

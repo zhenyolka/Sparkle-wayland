@@ -18,7 +18,8 @@ sparkle_resource::~sparkle_resource()
 {
 }
 
-sparkle_resource::sparkle_resource(struct wl_client *client, const struct wl_interface *interface, int version, uint32_t id, const void *implementation)
+sparkle_resource::sparkle_resource(struct wl_client *client, const struct wl_interface *interface, int version, uint32_t id, const void *implementation) :
+    resource_(nullptr), listener_({})
 {
     resource_ = wl_resource_create(client, interface, version, id);
     if (resource_ == nullptr)
@@ -46,7 +47,8 @@ sparkle_resource::sparkle_resource(struct wl_client *client, const struct wl_int
     });
 }
 
-sparkle_resource::sparkle_resource(struct wl_resource *resource)
+sparkle_resource::sparkle_resource(struct wl_resource *resource) :
+    resource_(nullptr), listener_({})
 {
     resource_ = resource;
 

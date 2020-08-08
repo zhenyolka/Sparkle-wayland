@@ -6,9 +6,9 @@
 class sparkle_wl_callback : public sparkle_resource
 {
 public:
-    ~sparkle_wl_callback();
+    ~sparkle_wl_callback() override;
     sparkle_wl_callback(struct wl_client *client, int version, uint32_t id);
-    sparkle_wl_callback(struct wl_resource *resource);
+    explicit sparkle_wl_callback(struct wl_resource *resource);
 
     void send_done(uint32_t callback_data);
 

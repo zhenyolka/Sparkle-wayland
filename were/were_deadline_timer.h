@@ -8,7 +8,7 @@ class were_deadline_timer
 {
 public:
     ~were_deadline_timer();
-    were_deadline_timer(uint64_t ms);
+    explicit were_deadline_timer(uint64_t ms);
 
     uint64_t remaining_time();
     bool has_expired();
