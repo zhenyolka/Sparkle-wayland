@@ -3,6 +3,7 @@
 #include "were_fd.h"
 #include "were_deadline_timer.h"
 #include <unistd.h>
+#include <array>
 
 
 static const int MAX_EVENTS = 16;
