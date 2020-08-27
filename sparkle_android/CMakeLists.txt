@@ -23,6 +23,7 @@ add_library(sparkle SHARED
 target_include_directories(sparkle PUBLIC
     #${CMAKE_CURRENT_SOURCE_DIR}
     ${SPARKLE_ROOT}/were
+    ${SPARKLE_ROOT}/were/math
     ${SPARKLE_ROOT}/sparkle_common
     #${SPARKLE_ROOT}
     ${SPARKLE_ROOT}/foreign/install/${ANDROID_ABI}/usr/include

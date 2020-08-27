@@ -61,6 +61,7 @@ add_executable(sparkle
 target_include_directories(sparkle PUBLIC
     #${CMAKE_CURRENT_SOURCE_DIR}
     ${SPARKLE_ROOT}/were
+    ${SPARKLE_ROOT}/were/math
     ${SPARKLE_ROOT}/sparkle_common
 )
 

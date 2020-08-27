@@ -19,6 +19,7 @@ add_executable(test
 
 target_include_directories(test PUBLIC
     ${WERE_ROOT}
+    ${WERE_ROOT}/math
 )
 
 set_target_properties(test PROPERTIES COMPILE_FLAGS "-Wall -Wextra -Wno-unused-parameter -O2")

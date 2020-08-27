@@ -19,6 +19,7 @@ add_library(sparkle_common STATIC
 target_include_directories(sparkle_common PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${SPARKLE_ROOT}/were
+    ${SPARKLE_ROOT}/were/math
 )
 
 set_target_properties(sparkle_common PROPERTIES COMPILE_FLAGS "-Wall -Wextra -Wno-unused-parameter -O2")
