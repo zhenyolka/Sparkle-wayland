@@ -5,26 +5,27 @@
 #include <optional>
 #include <mutex>
 
+
 template <typename T>
 class were_slot
 {
 public:
 
-    static void set(const T &value)
+    void set(const T &value)
     {
         mutex_.lock();
         value_ = value;
         mutex_.unlock();
     }
 
-    static void clear()
+    void clear()
     {
         mutex_.lock();
         value_.reset();
         mutex_.unlock();
     }
 
-    static T &get()
+    T &get()
     {
         if (!value_.has_value())
             throw were_exception(WE_SIMPLE);
@@ -32,7 +33,7 @@ public:
         return value_.value();
     }
 
-    static bool lock()
+    bool lock()
     {
         mutex_.lock();
 
@@ -45,47 +46,15 @@ public:
         return true;
     }
 
-    static void unlock()
+    void unlock()
     {
         mutex_.unlock();
     }
 
 private:
-    static std::optional<T> value_;
-    static std::mutex mutex_;
+    std::optional<T> value_;
+    std::mutex mutex_;
 };
 
-template <typename T>
-std::optional<T> were_slot<T>::value_;
-
-template <typename T>
-std::mutex were_slot<T>::mutex_;
-
-template <typename T>
-class were_t_l_slot
-{
-public:
-
-    static void set(const T &value)
-    {
-        value_ = value;
-    }
-
-    static void clear()
-    {
-        value_.reset();
-    }
-
-    static T &get()
-    {
-        return value_.value();
-    }
-
-private:
-    static thread_local std::optional<T> value_;
-};
-
-template <typename T>
-thread_local std::optional<T> were_t_l_slot<T>::value_;
 
 #endif // WERE_SLOT_H

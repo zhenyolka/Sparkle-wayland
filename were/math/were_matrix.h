@@ -12,7 +12,7 @@ class were_matrix
 public:
     ~were_matrix() {}
     were_matrix() : data_({}) {}
-    were_matrix(const std::array<std::array<T, COLUMNS>, ROWS> &data) : data_(data) {}
+    explicit were_matrix(const std::array<std::array<T, COLUMNS>, ROWS> &data) : data_(data) {}
 
     const T &value(std::size_t column, std::size_t row) const { return data_.at(row).at(column); }
     T &value(std::size_t column, std::size_t row) { return data_.at(row).at(column); }
@@ -63,23 +63,23 @@ public:
                                                {0, 1, 0, 0},
                                                {0, 0, 1, 0},
                                                {0, 0, 0, 1}}}) {}
-    were_matrix_4x4(const std::array<std::array<T, 4>, 4> &data) : were_matrix<T, 4, 4>(data) {}
-    were_matrix_4x4(const were_matrix<T, 4, 4> &other) : were_matrix<T, 4, 4>(other) {}
+    explicit were_matrix_4x4(const std::array<std::array<T, 4>, 4> &data) : were_matrix<T, 4, 4>(data) {}
+    were_matrix_4x4(const were_matrix<T, 4, 4> &other) : were_matrix<T, 4, 4>(other) {} // NOLINT(hicpp-explicit-conversions)
 };
 
 inline float to_radian(float x)
 {
-    return x * M_PI / 180.0f;
+    return x * static_cast<float>(M_PI) / 180.0f;
 }
 
 inline float to_degree(float x)
 {
-    return x * 180.0f / M_PI;
+    return x * 180.0f / static_cast<float>(M_PI);
 }
 
 inline void gluPerspective(float angle_of_view, float image_aspect_ratio, float n, float f, float &b, float &t, float &l, float &r)
 {
-    float scale = tan(angle_of_view * 0.5 * M_PI / 180) * n;
+    float scale = static_cast<float>(tan(angle_of_view * 0.5 * M_PI / 180)) * n;
     r = image_aspect_ratio * scale;
     l = -r;
     t = scale;

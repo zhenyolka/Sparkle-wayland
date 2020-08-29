@@ -9,7 +9,7 @@ class were_point
 public:
     ~were_point() {}
     were_point() : data_({}) {}
-    were_point(const std::array<T, N> &data) : data_(data) {}
+    explicit were_point(const std::array<T, N> &data) : data_(data) {}
 
     const T &value(std::size_t n) const { return data_.at(n); }
     T &value(std::size_t n) { return data_.at(n); }
@@ -45,7 +45,7 @@ public:
     ~were_point_2() {}
     were_point_2() {}
     were_point_2(T x, T y) : were_point<T, 2>({x, y}) {}
-    were_point_2(const were_point<T, 2> &other) : were_point<T, 2>(other) {}
+    explicit were_point_2(const were_point<T, 2> &other) : were_point<T, 2>(other) {}
 
     T &x() { return this->value(0); }
     T &y() { return this->value(1); }

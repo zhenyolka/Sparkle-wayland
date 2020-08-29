@@ -19,14 +19,20 @@
 #define STDOUT_CAP
 
 
+were_slot<were_pointer<were_settings>> s_settings;
+thread_local were_slot<were_pointer<were_thread>> s_current_thread;
+were_slot<were_log *> s_log;
+were_slot<were_debug *> s_debug;
+
+
 class sparkle_x11 : virtual public were_object
 {
 public:
 
     ~sparkle_x11() override
     {
-        were_slot<were_pointer<were_settings>>::get().collapse();
-        were_slot<were_pointer<were_settings>>::clear();
+        s_settings.get().collapse();
+        s_settings.clear();
     }
 
     sparkle_x11()
@@ -38,7 +44,7 @@ public:
             were_pointer<were_settings> settings = were_new<were_settings>("./sparkle.config");
             //were::link(settings, this_wop);
             settings->load();
-            were_slot<were_pointer<were_settings>>::set(settings);
+            s_settings.set(settings);
 
 
             were_pointer<sparkle> sparkle__ = were_new<sparkle>();
@@ -59,7 +65,7 @@ public:
                 if (number == SIGINT)
                 {
                     //this_wop.collapse();
-                    were_t_l_slot<were_pointer<were_thread>>::get()->exit();
+                    s_current_thread.get()->exit();
                 }
             });
         });
@@ -71,18 +77,18 @@ int main(int argc, char *argv[])
 {
     were_log *logger = new were_log();
     logger->enable_fd(dup(fileno(stdout)));
-    were_slot<were_log *>::set(logger);
+    s_log.set(logger);
 
     were_backtrace backtrace;
     backtrace.enable();
 
     were_debug *debug = new were_debug();
-    were_slot<were_debug *>::set(debug);
+    s_debug.set(debug);
 
 
     {
         were_pointer<were_thread> thread = were_new<were_thread>();
-        were_t_l_slot<were_pointer<were_thread>>::set(thread);
+        s_current_thread.set(thread);
 
         were_pointer<were_handler> handler = were_new<were_handler>();
         thread->set_handler(handler);
@@ -121,14 +127,14 @@ int main(int argc, char *argv[])
 
         thread->run_for(1000);
 
-        were_t_l_slot<were_pointer<were_thread>>::clear();
+        s_current_thread.clear();
     }
 
     debug->stop();
-    were_slot<were_debug *>::clear();
+    s_debug.clear();
     delete debug;
 
-    were_slot<were_log *>::clear();
+    s_log.clear();
     delete logger;
 
 

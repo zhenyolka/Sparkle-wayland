@@ -10,6 +10,7 @@ static int original_stdout_ = -1;
 static int original_stderr_ = -1;
 static bool captured_ = false;
 
+extern were_slot<were_log *> s_log;
 
 were_log::~were_log()
 {
@@ -74,14 +75,14 @@ void were_log::message(const char *format, ...)
 
 void log(const std::vector<char> &data)
 {
-    were_slot<were_log *>::get()->message(data);
+    s_log.get()->message(data);
 }
 
 void log(const char *format, ...)
 {
     va_list ap;
     va_start(ap, format);
-    were_slot<were_log *>::get()->message(format, ap);
+    s_log.get()->message(format, ap);
     va_end(ap);
 }
 

@@ -8,6 +8,9 @@
 #include <cstdlib> // system()
 
 
+extern were_slot<were_pointer<were_android_application>> s_application;
+extern were_slot<were_pointer<were_settings>> s_settings;
+
 
 sparkle_main_activity::~sparkle_main_activity()
 {
@@ -25,9 +28,9 @@ sparkle_main_activity::sparkle_main_activity(JNIEnv *env, jobject instance) :
 
 void sparkle_main_activity::user()
 {
-    chdir(were_slot<were_pointer<were_android_application>>::get()->files_dir().c_str());
+    chdir(s_application.get()->files_dir().c_str());
 
-    std::string command = were_slot<were_pointer<were_settings>>::get()->get<std::string>("on_start", "");
+    std::string command = s_settings.get()->get<std::string>("on_start", "");
 
     std::system(command.c_str());
 
@@ -36,7 +39,7 @@ void sparkle_main_activity::user()
 
 void sparkle_main_activity::start()
 {
-    were_slot<were_pointer<were_settings>>::get()->load(); // XXX2 Auto reload based on timestamp?
+    s_settings.get()->load(); // XXX2 Auto reload based on timestamp?
 
     if (!user_busy_)
     {

@@ -9,7 +9,7 @@ class were_vector
 public:
     ~were_vector() {}
     were_vector() : data_({}) {}
-    were_vector(const std::array<T, N> &data) : data_(data) {}
+    explicit were_vector(const std::array<T, N> &data) : data_(data) {}
 
     const T &value(std::size_t n) const { return data_.at(n); }
     T &value(std::size_t n) { return data_.at(n); }
@@ -45,7 +45,7 @@ public:
     ~were_vector_2() {}
     were_vector_2() {}
     were_vector_2(T x, T y) : were_vector<T, 2>({x, y}) {}
-    were_vector_2(const were_vector<T, 2> &other) : were_vector<T, 2>(other) {}
+    explicit were_vector_2(const were_vector<T, 2> &other) : were_vector<T, 2>(other) {}
 
     T &x() { return this->value(0); }
     T &y() { return this->value(1); }

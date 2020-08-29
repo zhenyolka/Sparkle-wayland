@@ -9,6 +9,8 @@
 
 static const int button_map[7] = {0, BTN_LEFT, BTN_RIGHT, 0, BTN_MIDDLE, BTN_GEAR_UP, BTN_GEAR_DOWN};
 
+extern were_slot<were_pointer<were_settings>> s_settings;
+
 sparkle_view::~sparkle_view()
 {
     if (window_ != nullptr)
@@ -23,13 +25,13 @@ sparkle_view::sparkle_view(JNIEnv *env, were_pointer<sparkle_service> service, w
     width_ = 100;
     height_ = 100;
 
-    bool fast = were_slot<were_pointer<were_settings>>::get()->get<bool>("fast", false);
+    bool fast = s_settings.get()->get<bool>("fast", false);
     if (fast)
         format_ = 5;
     else
         format_ = WINDOW_FORMAT_RGBX_8888;
 
-    no_damage_ = were_slot<were_pointer<were_settings>>::get()->get<bool>("no_damage", false);
+    no_damage_ = s_settings.get()->get<bool>("no_damage", false);
 
     add_integrator([this]()
     {

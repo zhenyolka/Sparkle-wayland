@@ -17,6 +17,8 @@
 
 #include <cstdio>
 
+extern were_slot<were_pointer<were_settings>> s_settings;
+
 
 sparkle::~sparkle()
 {
@@ -92,7 +94,7 @@ sparkle::sparkle(const std::string &home_dir) :
         {
             int width = this_wop->width_;
             int height = this_wop->height_;
-            int dpi = were_slot<were_pointer<were_settings>>::get()->get<int>("DPI", 96);
+            int dpi = s_settings.get()->get<int>("DPI", 96);
             int mm_width = width * 254 / (dpi * 10);
             int mm_height = height * 254 / (dpi * 10);
 
