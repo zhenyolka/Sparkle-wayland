@@ -2,6 +2,7 @@
 #define WERE_CAPABILITY_RC_SIMPLE_H
 
 #include "were_capability_rc.h"
+#include <atomic>
 
 class were_capability_rc_simple : virtual public were_capability_rc
 {
@@ -16,7 +17,7 @@ private:
     void unreference() override;
 
 private:
-    int reference_count_;
+    std::atomic<int> reference_count_;
 };
 
 #endif // WERE_CAPABILITY_RC_SIMPLE_H

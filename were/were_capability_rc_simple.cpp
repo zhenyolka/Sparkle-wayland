@@ -1,5 +1,5 @@
 #include "were_capability_rc_simple.h"
-#include <cstdio>
+
 
 were_capability_rc_simple::were_capability_rc_simple() :
     reference_count_(0)
